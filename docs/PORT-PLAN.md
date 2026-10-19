@@ -250,7 +250,12 @@ Linux не пройдут.
    `FILE_APPEND_DATA`), чтобы запись садилась в конец файла атомарно. На Linux
    это `DllNotFoundException` при первой строке журнала. Здесь то же свойство
    даёт `O_APPEND`, то есть ровно то, что было в macOS-оригинале: нужна вторая
-   реализация через `open(2)` из libc.
+   реализация через `open(2)` из libc. **Проверено 19 октября: на деле не
+   падение, а зависание.** `DllNotFoundException` в фоновой очереди
+   `LogFile.RunQueue` никто не ловит (ловятся только `IOException` и
+   `UnauthorizedAccessException`), очередь умирает, а `Flush` ждёт
+   `done.Task.Wait()` вечно. В продукте это значило бы приложение, которое
+   висит на выходе или на сборке архива поддержки.
 2. **`AdminAccess/ProtectedSecret`** — DPAPI (`SupportedOSPlatform("windows")`).
    На нём лежат пароль SIP, ключ машины и ключ канала. Решение для Linux — в
    W-L4.
@@ -279,6 +284,40 @@ Linux не пройдут.
   NVorbis работает и так.
 
 ---
+
+## Точка отсчёта на Linux (19 октября 2026)
+
+Общие проекты `net10.0` из подмодуля на v0.1.78, собраны и проверены на
+машине разработки (Mint 22.3, .NET SDK 10.0.402 в `~/.dotnet`, без root).
+
+**Сборка** `dotnet build EliteSIP.Linux.slnx -c Release` — чистая: 0 ошибок,
+0 предупреждений.
+
+**Проверки:**
+
+| Проект | Итог |
+|---|---|
+| SipCore.Tests | 337 из 337 |
+| MediaCore.Tests | 199 из 199 |
+| PanelLink.Tests | 79 из 79 |
+| CallHistory.Tests | 31 из 31 |
+| CallGuard.Tests | 25 из 25 |
+| AdminAccess.Tests | 17 из 17 |
+| Diagnostics.Tests | **виснет** на `LogFileTests.Два_экземпляра_на_одном_файле_не_затирают_друг_друга` (19 проверок прошли до неё), причина — `AppendOnlyFile`, см. выше |
+
+**Зелёное, но ничего не доказывающее.** Четыре проверки на Linux проходят
+только потому, что сразу выходят, если ОС не Windows:
+`ProtectedSecretTests` (три) и `CallHistoryPrivacyTests` (одна). То есть
+защита секретов и права файла истории на Linux сейчас не проверяются вовсе.
+Их Linux-половина — правами `0600` — пишется в W-L1 вместе с самим кодом.
+Пятая такая же (`RtpSessionTests`, сброс ICMP) законная: на Linux нужного
+поведения нет по построению.
+
+**Сеть.** `api.nuget.org` с этой машины без VPN не открывается (таймаут,
+в том числе по IPv4), а `www.nuget.org`, GitHub и
+`builds.dotnet.microsoft.com` открываются. Восстановление пакетов — только
+через VPN или прокси. На CI это не влияет, но для рабочих машин стоит
+помнить: выпуск самодостаточный, NuGet и сервер Microsoft им не нужны.
 
 ## Сквозные правила
 
@@ -724,8 +763,10 @@ W-L1 можно вести параллельно с W-L0: работа идёт
 
 ## Окружение разработки
 
-На этой машине (Linux Mint 22.3, Cinnamon, X11) пока **нет .NET SDK**. Нужен
-`10.0.400` или новее в линейке 10.0.4xx (`global.json`, `rollForward:
-latestFeature`). Для W-L0 ещё нужны `libpulse-dev` (заголовки для сверки
+На этой машине (Linux Mint 22.3, Cinnamon, X11) стоит .NET SDK **10.0.402**
+в `~/.dotnet`, без root (`dotnet-install.sh --channel 10.0.4xx`; адрес
+`dot.net` отсюда не открывался, скрипт взят с
+`builds.dotnet.microsoft.com`). В оболочке нужны
+`DOTNET_ROOT=$HOME/.dotnet` и `PATH=$HOME/.dotnet:$PATH`. Для W-L0 ещё нужны `libpulse-dev` (заголовки для сверки
 структур), `xdotool`, `ydotool`, `pavucontrol`, `pw-top` и стенд Asterisk из
 `../../FreePBXLab`.
