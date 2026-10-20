@@ -441,21 +441,43 @@ GNOME может не дать окну стать поверх, а XTest-при
   `BitmapSource`;
 - CI: задание `ubuntu-latest` на все проекты `net10.0` и их проверки.
 
-**Сделано 20 октября 2026** — ветка `linux/w-l1-storage` в Win-EliteSIP,
-коммит `f50efd7`, не отправлен и не выпущен:
+**Сделано 20 октября 2026** — ветка `linux/w-l1-storage` в Win-EliteSIP
+(клон `projects/Win-EliteSIP-W-L1`), шесть коммитов поверх 0.1.78, **не
+отправлена и не выпущена**:
 
-- журнал на `O_APPEND` с правами `0600` (`AppendOnlyFile.Unix.cs`);
-- `ProtectedSecret` на AES-GCM с ключом в профиле (`ProtectedSecret.Unix.cs`);
-- база истории создаётся сразу с `0600`, спутники получают `0600`;
-- `WindowsFact` и `UnixFact` вместо раннего `return`: проверка чужой ОС
-  «пропущена», а не «пройдена» вхолостую;
-- на Linux: решение целиком собирается с `EnableWindowsTargeting=true`
-  (включая WPF и WASAPI) без ошибок и предупреждений; проверки `net10.0` —
-  721 пройдено, 2 пропущено. **На Windows не запускалось** — это нужно до
-  слияния.
+| Коммит | Что |
+|---|---|
+| `f50efd7` | журнал на `O_APPEND` с `0600`; `ProtectedSecret` на AES-GCM с ключом в профиле; история под `0600`; `WindowsFact` и `UnixFact` вместо раннего `return` |
+| `97c03af` | `.gitattributes`; задание `ubuntu-latest` в CI: всё решение с `EnableWindowsTargeting`, проверки `net10.0` |
+| `da8bc91` | DSCP вне Windows: голос EF 46, SIP CS3 24 прямо на сокете |
+| `d1e373d` | `EliteSIP.Audio` → `net10.0`, WASAPI → `EliteSIP.Audio.Wasapi`; общие `AudioDeviceRules`, `ReceiveTuning`, `AudioDeviceChange`; `IVoiceAudioEngine.LevelSummary`; движок для `MediaSession` — фабрикой; `EliteSIP.Lines` → `net10.0` |
+| `2c3768a` | `EliteSIP.App.Core` (`net10.0`): настройки, линия Spark, модели окон, `PhoneService`, подписи; интерфейсы `IUiThread`, `IAudioPlatform`, `IIncomingCallView`, `IUpdateHandoff`, `IAutoStart` с Windows-реализациями в `EliteSIP.App/Platform` |
+| `4ad9803` | `EliteSIP.Updates` (`net10.0`): согласие, аварийный путь, журнал, заводская настройка, HTTP-клиент обновляльщика |
 
-Осталось из W-L1: DSCP, разделение `Audio`, `Lines`, `App.Core`,
-`EliteSIP.Updates`, `.gitattributes`, задание `ubuntu-latest` в CI.
+Проверено на Linux: всё решение собирается без ошибок и предупреждений;
+проверки `net10.0` — 1063 пройдено, 2 пропущено как «только Windows», в том
+числе WebRTC APM `linux-x64` (`EliteSIP.Audio.Tests`, 240) и подписи на
+русском после переезда ресурсов (`StringsTests`).
+
+**Не проверено — на Windows не запускалось ничего.** До слияния нужно на
+Windows-машине: `dotnet test` всего решения (включая `App.Tests`,
+`Audio.Wasapi.Tests`, `Updater.Tests`), запуск приложения, звонок, мастер с
+QR, окно настроек со шкалами, такт обновлений; затем обычный пилот выпуска.
+
+Что сознательно осталось на Windows и почему:
+
+- `tools/SipCheck` и `tools/AudioProbe` — стенды, которые сами создают
+  WASAPI-движок. Linux-стенды появятся в этом репозитории (W-L0А, W-L3).
+- Сценарий обновляльщика (`tools/Updater/Program.cs`) — локальные функции
+  вокруг Windows-установки, код работает от SYSTEM; разбирать его вслепую
+  нельзя. Общие правила уже в `EliteSIP.Updates`, сценарий — на W-L7.
+- `AppSettings` по-прежнему кладёт настройки в `LocalApplicationData`
+  (`~/.local/share` на Linux). Перенос в `~/.config` решается вместе с
+  оболочкой Linux на W-L4.
+
+После слияния и метки `v<версия>` в Linux-репозитории: сдвинуть указатель
+`shared/` и добавить в `EliteSIP.Linux.slnx` новые общие проекты —
+`Audio`, `Lines`, `App.Core`, `Updates` и их проверки.
 
 **Приёмка:** все проверки библиотек зелёные на обеих ОС, в том числе из
 Linux-репозитория через подмодуль; Windows-выпуск после разделения прошёл
