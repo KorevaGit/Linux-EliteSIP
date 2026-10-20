@@ -31,7 +31,11 @@
   <Folder Name="/shared/tools/">
     <Project Path="shared/tools/ReleaseKit/ReleaseKit.csproj" />
   </Folder>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <Project Path="src/EliteSIP.Audio.Pulse/EliteSIP.Audio.Pulse.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
-  <Folder Name="/tools/" />
+  <Folder Name="/tools/">
+    <Project Path="tools/PulseProbe/PulseProbe.csproj" />
+  </Folder>
 </Solution>

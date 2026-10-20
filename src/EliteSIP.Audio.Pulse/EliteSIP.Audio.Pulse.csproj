@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Звук Linux-версии на PulseAudio API (libpulse). Работает и с PulseAudio, и
+    с PipeWire через pipewire-pulse — это и решило выбор (docs/PORT-PLAN.md,
+    «Почему PulseAudio API»).
+
+    Пока здесь только привязки к libpulse — стенд W-L0А ходит через них, чтобы
+    продукт на W-L2 стоял на тех же объявлениях, которыми мерили. Движок
+    тракта (PulseVoiceAudioEngine) появится, когда в подмодуле shared/ будет
+    общий EliteSIP.Audio под net10.0 (ветка linux/w-l1-storage).
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!--
+      Буферы libpulse приходят сырыми указателями, а обратные вызовы — с
+      потока цикла libpulse: указатели на функции и UnmanagedCallersOnly.
+    -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PulseProbe" />
+  </ItemGroup>
+
+</Project>

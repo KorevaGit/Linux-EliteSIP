@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Стенд W-L0А: звук Linux на PulseAudio API без продукта. Та же роль, что у
+    tools/AudioProbe Windows-версии на этапе W0: замерить такт, задержку,
+    уход часов и эхоподавление до того, как на это ляжет тракт.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EliteSIP.Audio.Pulse\EliteSIP.Audio.Pulse.csproj" />
+  </ItemGroup>
+
+</Project>
