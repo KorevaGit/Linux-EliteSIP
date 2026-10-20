@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Стенд W-L0Б и W-L0В: окно входящего на X11 и признаки живого человека.
+    Окно — на Avalonia, как будет в продукте: вопрос не «умеет ли X11», а
+    «что получится у того окна, которое мы будем показывать».
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.3" />
+  </ItemGroup>
+
+</Project>
