@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Проверки звука Linux-версии без звукового сервера: правила устройств,
+    сравнение снимков, стык с общими правилами подмены. Живой тракт —
+    стенд tools/PulseProbe (режим engine): тест, который на CI без сервера
+    молча выходит, был бы тем самым «зелёным, но ничего не доказывающим».
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+
+    <!-- Подчёркивание разделяет «что проверяем» и «чего ждём» — то же, что в shared/tests. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EliteSIP.Audio.Pulse\EliteSIP.Audio.Pulse.csproj" />
+  </ItemGroup>
+
+</Project>

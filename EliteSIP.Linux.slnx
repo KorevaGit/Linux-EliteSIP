@@ -5,12 +5,14 @@
     сдвигом указателя подмодуля (docs/PORT-PLAN.md, «Правила работы с
     подмодулем»).
 
-    В решение входят только проекты net10.0. Audio, Lines, App и Updater пока
-    собираются под net10.0-windows и попадут сюда после разделения на этапе
-    W-L1.
+    В решение входят только проекты net10.0. Audio — с ветки W-L1
+    (linux/w-l1-storage): на ней подмодуль стоит, пока эта ветка не выпущена
+    меткой в Windows-репозитории. Lines, App.Core и Updates добавятся после
+    выпуска W-L1, вместе со сдвигом указателя на метку.
   -->
   <Folder Name="/shared/src/">
     <Project Path="shared/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj" />
+    <Project Path="shared/src/EliteSIP.Audio/EliteSIP.Audio.csproj" />
     <Project Path="shared/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj" />
     <Project Path="shared/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj" />
     <Project Path="shared/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj" />
@@ -21,6 +23,7 @@
   </Folder>
   <Folder Name="/shared/tests/">
     <Project Path="shared/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj" />
+    <Project Path="shared/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj" />
@@ -34,7 +37,9 @@
   <Folder Name="/src/">
     <Project Path="src/EliteSIP.Audio.Pulse/EliteSIP.Audio.Pulse.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/EliteSIP.Audio.Pulse.Tests/EliteSIP.Audio.Pulse.Tests.csproj" />
+  </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/PulseProbe/PulseProbe.csproj" />
     <Project Path="tools/WindowProbe/WindowProbe.csproj" />

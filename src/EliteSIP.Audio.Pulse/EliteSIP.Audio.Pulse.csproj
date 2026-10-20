@@ -5,10 +5,11 @@
     с PipeWire через pipewire-pulse — это и решило выбор (docs/PORT-PLAN.md,
     «Почему PulseAudio API»).
 
-    Пока здесь только привязки к libpulse — стенд W-L0А ходит через них, чтобы
-    продукт на W-L2 стоял на тех же объявлениях, которыми мерили. Движок
-    тракта (PulseVoiceAudioEngine) появится, когда в подмодуле shared/ будет
-    общий EliteSIP.Audio под net10.0 (ветка linux/w-l1-storage).
+    Здесь движок тракта (PulseVoiceAudioEngine), каталог и слежение за
+    устройствами. Всё, что не про устройства, — общий EliteSIP.Audio из
+    подмодуля: обработка голоса, пересчёт частоты, регулятор темпа, шина.
+    Стенд W-L0А (tools/PulseProbe) ходит через те же привязки, чтобы продукт
+    стоял на тех же объявлениях, которыми мерили.
   -->
 
   <PropertyGroup>
@@ -25,6 +26,11 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="PulseProbe" />
+    <InternalsVisibleTo Include="EliteSIP.Audio.Pulse.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\src\EliteSIP.Audio\EliteSIP.Audio.csproj" />
   </ItemGroup>
 
 </Project>

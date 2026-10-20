@@ -204,4 +204,143 @@ internal static unsafe partial class LibPulse
 
     [LibraryImport(Library, EntryPoint = "pa_stream_unref")]
     internal static partial void StreamUnref(nint stream);
+
+    // --- раскладка каналов ----------------------------------------------------
+
+    /// <summary>Вместимость <c>pa_channel_map</c> и <c>pa_cvolume</c> (<c>PA_CHANNELS_MAX</c>).</summary>
+    internal const int ChannelsMax = 32;
+
+    // pa_channel_position_t (channelmap.h).
+    internal const int PositionMono = 0;
+    internal const int PositionFrontLeft = 1;
+    internal const int PositionFrontRight = 2;
+
+    /// <summary><c>pa_channel_map</c>: 132 байта, сверено <c>sizeof</c>.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ChannelMap
+    {
+        public byte Channels;
+        public fixed int Map[ChannelsMax];
+    }
+
+    /// <summary><c>pa_cvolume</c>: 132 байта, сверено <c>sizeof</c>.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct CVolume
+    {
+        public byte Channels;
+        public fixed uint Values[ChannelsMax];
+    }
+
+    /// <summary>Громкость 100 % без усиления (<c>PA_VOLUME_NORM</c>).</summary>
+    internal const uint VolumeNorm = 0x10000;
+
+    // --- опрос сервера --------------------------------------------------------
+
+    /// <summary>
+    /// Общее начало <c>pa_source_info</c> и <c>pa_sink_info</c>.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Смещения сняты <c>offsetof</c> с заголовков 16.1 на x86_64, а не
+    /// посчитаны руками: у двух структур они совпадают до <c>active_port</c>
+    /// включительно, поэтому одна раскладка служит обеим. Поле 308 у входа —
+    /// <c>monitor_of_sink</c>, у выхода — <c>monitor_source</c>; читается только
+    /// у входа. Остальное в структуре (форматы, число портов) тракту не нужно,
+    /// и объявлять его незачем: раскладку с явными смещениями хвост не трогает.
+    /// </remarks>
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct DeviceInfo
+    {
+        [FieldOffset(0)] public nint Name;
+        [FieldOffset(8)] public uint Index;
+        [FieldOffset(16)] public nint Description;
+        [FieldOffset(24)] public SampleSpec SampleSpec;
+        [FieldOffset(36)] public ChannelMap ChannelMap;
+        [FieldOffset(172)] public CVolume Volume;
+        [FieldOffset(304)] public int Mute;
+        [FieldOffset(308)] public uint MonitorOfSink;
+        [FieldOffset(336)] public int Flags;
+        [FieldOffset(344)] public nint Proplist;
+        [FieldOffset(360)] public uint BaseVolume;
+        [FieldOffset(364)] public int State;
+        [FieldOffset(392)] public PortInfo* ActivePort;
+    }
+
+    /// <summary>Начало <c>pa_source_port_info</c> / <c>pa_sink_port_info</c>.</summary>
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct PortInfo
+    {
+        [FieldOffset(0)] public nint Name;
+        [FieldOffset(8)] public nint Description;
+        [FieldOffset(16)] public uint Priority;
+        [FieldOffset(20)] public int Available;
+    }
+
+    // pa_port_available_t.
+    internal const int PortAvailableNo = 1;
+
+    /// <summary><c>PA_INVALID_INDEX</c>: у входа — «не монитор».</summary>
+    internal const uint InvalidIndex = uint.MaxValue;
+
+    /// <summary>Начало <c>pa_server_info</c>: нужны только имена устройств по умолчанию.</summary>
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct ServerInfo
+    {
+        [FieldOffset(48)] public nint DefaultSinkName;
+        [FieldOffset(56)] public nint DefaultSourceName;
+    }
+
+    // pa_operation_state_t.
+    internal const int OperationRunning = 0;
+
+    [LibraryImport(Library, EntryPoint = "pa_operation_get_state")]
+    internal static partial int OperationGetState(nint operation);
+
+    [LibraryImport(Library, EntryPoint = "pa_operation_cancel")]
+    internal static partial void OperationCancel(nint operation);
+
+    [LibraryImport(Library, EntryPoint = "pa_operation_unref")]
+    internal static partial void OperationUnref(nint operation);
+
+    [LibraryImport(Library, EntryPoint = "pa_context_get_server_info")]
+    internal static partial nint ContextGetServerInfo(nint context, delegate* unmanaged[Cdecl]<nint, ServerInfo*, nint, void> callback, nint userdata);
+
+    [LibraryImport(Library, EntryPoint = "pa_context_get_source_info_list")]
+    internal static partial nint ContextGetSourceInfoList(nint context, delegate* unmanaged[Cdecl]<nint, DeviceInfo*, int, nint, void> callback, nint userdata);
+
+    [LibraryImport(Library, EntryPoint = "pa_context_get_sink_info_list")]
+    internal static partial nint ContextGetSinkInfoList(nint context, delegate* unmanaged[Cdecl]<nint, DeviceInfo*, int, nint, void> callback, nint userdata);
+
+    [LibraryImport(Library, EntryPoint = "pa_proplist_gets", StringMarshalling = StringMarshalling.Utf8)]
+    internal static partial nint ProplistGetsRaw(nint list, string key);
+
+    [LibraryImport(Library, EntryPoint = "pa_proplist_iterate")]
+    internal static partial nint ProplistIterate(nint list, nint* state);
+
+    // --- подписка -------------------------------------------------------------
+
+    // pa_subscription_mask_t.
+    internal const int SubscriptionMaskSink = 0x1;
+    internal const int SubscriptionMaskSource = 0x2;
+    internal const int SubscriptionMaskServer = 0x80;
+    internal const int SubscriptionMaskCard = 0x200;
+
+    // pa_subscription_event_type_t.
+    internal const int EventFacilityMask = 0x0F;
+    internal const int EventSink = 0x0;
+    internal const int EventSource = 0x1;
+    internal const int EventServer = 0x7;
+    internal const int EventCard = 0x9;
+    internal const int EventTypeMask = 0x30;
+    internal const int EventNew = 0x00;
+    internal const int EventChange = 0x10;
+    internal const int EventRemove = 0x20;
+
+    [LibraryImport(Library, EntryPoint = "pa_context_subscribe")]
+    internal static partial nint ContextSubscribe(nint context, int mask, nint callback, nint userdata);
+
+    [LibraryImport(Library, EntryPoint = "pa_context_set_subscribe_callback")]
+    internal static partial void ContextSetSubscribeCallback(nint context, delegate* unmanaged[Cdecl]<nint, int, uint, nint, void> callback, nint userdata);
+
+    internal static string? Utf8(nint text) => text == 0 ? null : Marshal.PtrToStringUTF8(text);
 }
