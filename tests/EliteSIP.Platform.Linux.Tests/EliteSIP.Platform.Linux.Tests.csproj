@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Проверки оболочки Linux без рабочего стола: одна копия, автозапуск по
+    XDG, разбор ответов портала, ключи ping и сам ping на петлю. Сигналы
+    logind, портал и трей живого сеанса — стенд tools/ShellProbe: на CI их
+    нет, и проверка, которая там молча выходит, ничего бы не доказала.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+
+    <!-- Подчёркивание разделяет «что проверяем» и «чего ждём» — то же, что в shared/tests. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EliteSIP.Platform.Linux\EliteSIP.Platform.Linux.csproj" />
+  </ItemGroup>
+
+</Project>

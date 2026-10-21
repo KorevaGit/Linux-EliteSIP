@@ -1,0 +1,27 @@
+# Софтфон EliteSIP как пользовательская служба: перезапуск после падения —
+# то, что на Windows делал RegisterApplicationRestart. Почему так и почему без
+# graphical-session.target — src/EliteSIP.Platform.Linux/UserService.cs.
+#
+# Ставится пакетом в /usr/lib/systemd/user/. Запускает её не systemd при
+# входе, а сам софтфон: ярлык и автозапуск XDG стартуют исполняемый файл, и
+# тот передаёт запуск сюда.
+
+[Unit]
+Description=EliteSIP — софтфон
+# Три падения за пять минут — и больше не поднимать: падение на запуске
+# в круг не уходит, как и на Windows.
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=exec
+ExecStart=/opt/elitesip/EliteSIP
+Restart=on-failure
+RestartSec=5
+
+# Код 1 — обрыв X-сервера (exit(1) из Xlib) на выходе из сеанса. Поднимать
+# софтфон в сеанс, которого уже нет, незачем.
+RestartPreventExitStatus=1
+
+# На SIGTERM софтфон снимает регистрацию (не дольше 4 с) и выходит сам.
+TimeoutStopSec=10

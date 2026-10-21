@@ -35,7 +35,7 @@ Linux:
 | Привязка к железу (`MachineGuid`) | её нет вовсе, идентификатор выдаёт панель (W10) | `/etc/machine-id` не нужен |
 | Код восстановления в AdminAccess | его нет (W7) | — |
 | Один номер на машину | несколько номеров, профили (0.1.58) | переносится как есть |
-| Стук через `IcmpSendEcho2` | через `System.Net.NetworkInformation.Ping` | на Linux тот же класс работает иначе, см. W-L4 |
+| Стук через `IcmpSendEcho2` | через `System.Net.NetworkInformation.Ping` | на Linux этот класс стучать не может вовсе — отправка вынесена за `IIcmpEcho`, Linux стучит системным `ping`, см. W-L4 |
 | 7 тестовых проектов | 11 проектов, 920 проверок, 20 700 строк | библиотечные проверки должны пройти на Linux без правок |
 | Структура без `Lines`, `Updater`, `ReleaseKit` | есть `EliteSIP.Lines` (зависит от `Audio`, поэтому `net10.0-windows`), `tools/Updater`, `tools/ReleaseKit`, `tools/IconGen` | `Lines` после разделения `Audio` станет кроссплатформенным |
 
@@ -669,15 +669,15 @@ Windows сквозного SRTP с Asterisk не было вовсе (W11 при
 | значок в области уведомлений (`TrayIcon`, `TaskbarCreated`) | StatusNotifierItem по D-Bus (трей Avalonia). Перерегистрация при перезапуске `StatusNotifierWatcher` — аналог `TaskbarCreated`. **В чистом GNOME трея нет без расширения AppIndicator**, а панель прячется именно в значок. Без трея закрытие панели должно сворачивать её, а не прятать |
 | одна копия (`Mutex` + `EventWaitHandle`) | `flock` на файл в `$XDG_RUNTIME_DIR` + Unix-сокет, через который вторая копия будит первую |
 | автозапуск (`HKCU\…\Run`) | общий `/etc/xdg/autostart/elitesip.desktop` из пакета; выключение для одного пользователя — `~/.config/autostart/elitesip.desktop` с `Hidden=true` (W-L7). Переключатель в «Обслуживании» сохраняется |
-| перезапуск после падения (`RegisterApplicationRestart`) | приложение — пользовательская служба systemd (`elitesip.service`, `Restart=on-failure`, `PartOf=graphical-session.target`), автозапуск XDG её стартует. Её же поднимает обновляльщик, см. W-L7 |
-| снятие регистрации на `SessionEnding` | `SIGTERM` от сеанса и задерживающий замок logind (`Inhibit` с `delay`) на время REGISTER `expires=0` |
+| перезапуск после падения (`RegisterApplicationRestart`) | приложение — пользовательская служба systemd (`elitesip.service`, `Restart=on-failure`, `RestartPreventExitStatus=1`); ярлык и автозапуск XDG запускают исполняемый файл, а тот передаёт запуск службе. ~~`PartOf=graphical-session.target`~~ — Cinnamon эту цель не поднимает (см. ход ниже). Её же поднимает обновляльщик, см. W-L7 |
+| снятие регистрации на `SessionEnding` | клиент менеджера сеанса (`org.gnome.SessionManager`, `EndSession`), задерживающий замок logind (`Inhibit` с `delay`) на выключение и `SIGTERM` — на время REGISTER `expires=0` |
 | сон и пробуждение (`SystemEvents.PowerModeChanged`) | сигнал logind `PrepareForSleep` по D-Bus. `NetworkChange` работает и так |
 | секреты под DPAPI | см. ниже |
-| мигание кнопки (`FlashWindowEx`) и уведомление | `_NET_WM_STATE_DEMANDS_ATTENTION` и `org.freedesktop.Notifications` |
+| мигание кнопки (`FlashWindowEx`) | `_NET_WM_STATE_DEMANDS_ATTENTION`. Уведомлений у Windows-версии нет, и `org.freedesktop.Notifications` для паритета не нужен |
 | тема и акцент из реестра (`AppearanceService`, `SystemAccent`) | портал `org.freedesktop.appearance` (`color-scheme`, `accent-color`). Нет портала — светлая тема и акцент продукта |
 | тёмная полоса заголовка (DWM) | не нужна: окна без системной рамки |
 | заставка до WPF | не нужна, если Avalonia поднимает окно быстрее секунды. Замерить в W-L5 по этапам запуска, как в 0.1.62–0.1.63 |
-| стук через `Ping` (`IcmpSendEcho2`) | .NET на Linux шлёт ICMP одним из трёх путей: raw-сокет (нужен `CAP_NET_RAW`), ICMP-сокет без прав (только если пользователь входит в `net.ipv4.ping_group_range`) или запуск `/bin/ping -s <длина>`. **На машине разработки `ping_group_range = 1 0`**, то есть сработает третий путь. Длина данных при этом совпадает, а содержимое заполняет `ping` своим шаблоном. Правилу MikroTik, которое смотрит на длину, этого хватает, но проверить надо на живом шлюзе, как и на Windows. Запасной вариант — правило `sysctl` в пакете |
+| стук через `Ping` (`IcmpSendEcho2`) | .NET на Linux шлёт ICMP одним из трёх путей: raw-сокет (нужен `CAP_NET_RAW`), ICMP-сокет без прав (только если пользователь входит в `net.ipv4.ping_group_range`) или запуск `/bin/ping`. **На машине разработки `ping_group_range = 1 0`**, остаётся третий путь — а на нём `Ping` данные своего содержимого **не принимает**: `PlatformNotSupportedException` (см. ход ниже). Поэтому стук на Linux сам запускает `/usr/bin/ping -s <длина>` (у него `cap_net_raw` от iputils-ping). Длина данных совпадает, а содержимое заполняет `ping` своим шаблоном. Правилу MikroTik, которое смотрит на длину, этого хватает, но проверить надо на живом шлюзе, как и на Windows |
 
 **Секреты.** На macOS пароль лежал в файле с правами `0600` — сознательно не в
 Keychain (`docs/profiles.md` оригинала). На Windows права файла такой защиты не
@@ -697,6 +697,74 @@ Keychain (`docs/profiles.md` оригинала). На Windows права фай
 **Приёмка:** пункты аудита `AUDIT-WINDOWS.md` 1–4 и 7–9, перепроверенные на
 Linux: вторая копия, перезапуск трея, выход и выключение снимают регистрацию,
 сон и смена сети поднимают связь и переигрывают стук.
+
+**Ход на 21 октября 2026** — ветка `linux/w-l4-shell` (поверх W-L3). Окон в
+этапе нет — окна W-L5. Сделан проект `EliteSIP.Platform.Linux`, его проверки
+и стенд `tools/ShellProbe`, который задаёт вопросы живому сеансу Cinnamon.
+Правка общего кода — коммит `dfb8aee` на ветке `linux/w-l1-storage`
+Win-EliteSIP (восьмой поверх 0.1.78, не отправлен); подмодуль `shared/` стоит
+на нём. В решение добавлены `App.Core` и его проверки (64, все зелёные).
+
+Три допущения плана на живой машине не подтвердились:
+
+- **`Ping` на Linux стучать не может.** Без `CAP_NET_RAW` и без
+  `ping_group_range` .NET 10 запускает `/bin/ping`, но с данными своего
+  содержимого бросает `PlatformNotSupportedException` «Unable to send custom
+  ping payload» — с любым содержимым, нулями тоже. Пустые данные проходят,
+  но стук — это и есть длина. Мало того, `PortKnocker` это исключение не
+  ловил, и оно вылетало бы из `OpenPathAsync` в регистрацию. Исправлено в
+  общем коде: отправка за интерфейсом `IIcmpEcho` (по умолчанию прежний
+  `Ping` — Windows не меняется), `PhoneService` принимает фабрику
+  необязательным параметром, `PlatformNotSupportedException` кончает стук,
+  а не регистрацию. Linux-отправитель `PingUtilityEcho` запускает
+  `/usr/bin/ping -c 1 -n -q -W <пауза> -s <длина> -- <адрес>`: правило
+  `sysctl` на всю машину не понадобилось.
+- **`graphical-session.target` в Cinnamon не поднимается** (`inactive` в
+  живом сеансе), так что `PartOf=` к ней ничего бы не значил. Окружение
+  сеанса (`DISPLAY`, `XAUTHORITY`, шина) Cinnamon в менеджер пользователя
+  передаёт — службе его хватает (проверено временной службой).
+- **На выходе из сеанса `SIGTERM` приходит слишком поздно.** Первым умирает
+  X-сервер, а Avalonia своего обработчика ошибок Xlib не ставит: Xlib зовёт
+  `exit(1)` прямо из потока окна, без `ProcessExit` (замер на Xephyr).
+  Снять регистрацию в этот момент некому. Поэтому выход из сеанса берётся у
+  менеджера сеанса: `cinnamon-session` держит `org.gnome.SessionManager`,
+  софтфон регистрируется клиентом (`RegisterClient`), получает `EndSession`,
+  пока X ещё жив, и отвечает `EndSessionResponse`, когда регистрация снята.
+  Это точный аналог `SessionEnding`. А код 1 служба считает «сеанс кончился»
+  и не перезапускает (`RestartPreventExitStatus=1`).
+
+| Часть | Файл | Проверено |
+|---|---|---|
+| стук | `PingUtilityEcho` | ключи запуска, ping на петлю 228 байт без прав, неразрешимое имя и отсутствие `ping` — `PingException`; стенд: стук на шлюз `10.171.0.1` ушёл. Длину на проводе (`tcpdump`) без root не смотрели — `ping` сам пишет «228(256) bytes» |
+| одна копия | `SingleInstance` | `flock` в `$XDG_RUNTIME_DIR/elitesip` (`0700`) + Unix-сокет; две копии в проверках и два процесса на стенде; после `kill -9` первой следующая встаёт; молчащая первая держит вторую не дольше 2 с; то же с `DOTNET_SYSTEM_IO_DISABLEFILELOCKING=1`. Нашлось: .NET на Unix сам берёт `flock` при открытии, и занятый замок приходит `IOException` с `HResult = 11` (`EWOULDBLOCK`), а не отказом нашего вызова |
+| автозапуск | `XdgAutoStart : IAutoStart` | системная запись пакета, своя копия с `Hidden=true`, возврат удалением копии, своя запись без пакета (путь с пробелом в кавычках), выключение из настроек Cinnamon (`X-GNOME-Autostart-enabled=false`) |
+| конец сеанса и сон | `SessionLifetime` | на стенде: замок logind `shutdown`/`delay` виден в `systemd-inhibit --list` и отпускается после «снятия регистрации»; `SIGTERM` → снятие → выход; клиент `elitesip` виден у `cinnamon-session` и исчезает с процессом. Нашлось: `MessageWriter` у Tmds.DBus — структура, и тело, записанное через делегат, терялось — шина рвала соединение |
+| сеть | `NetworkWatch` | перенос Windows-версии на `IUiThread`; пробуждение — от `SessionLifetime` |
+| тема | `DesktopAppearance` | портал xapp отдаёт `color-scheme = 0` (светлая) и акцент `(0.12, 0.62, 0.87)` → `#1F9EDE`; разбор `ReadOne` с откатом на старый `Read` |
+| значок | `TrayAvailability` | `IsStatusNotifierHostRegistered = true` у `xapp-sn-watcher`; смена владельца наблюдателя отслеживается. Перерегистрацию самого значка Avalonia 12.1 делает сама (следит за `NameOwnerChanged` наблюдателя) |
+| внимание | `WindowAttention` | на окне Nemo Muffin ставит и снимает `_NET_WM_STATE_DEMANDS_ATTENTION` (`xprop`) |
+| служба | `UserService`, `packaging/systemd/elitesip.service` | временные службы `systemd-run --user`: падение .NET (`SIGABRT`) — перезапуск до предела, `exit 1` — без перезапуска, `exit 3` — перезапуск; `SYSTEMD_EXEC_PID` отличает службу от запуска руками |
+
+Проверки: `EliteSIP.Platform.Linux.Tests` — 27, всё решение — 1082 пройдено,
+2 пропущено как «только Windows».
+
+Файлы пакета для W-L7 — в `packaging/`: служба, автозапуск, ярлык меню.
+
+Осталось:
+
+- **На слух и руками человека:** выход из сеанса и выключение с живой
+  регистрацией (на АТС видно `expires=0`), сон крышкой и пробуждение,
+  перезапуск `xapp-sn-watcher` с живым значком. Всё это — вместе с панелью
+  W-L5: без окон и телефона проверять нечего, кроме сигналов, а они
+  проверены.
+- **Стук на живом шлюзе MikroTik** — как и на Windows.
+- **Где лежат настройки** (`~/.local/share` или `~/.config`) — W-L1 оставил
+  это на W-L4, но это правка `AppSettings.DefaultPath` в общем коде, и
+  делать её стоит вместе с первым запуском приложения в W-L5: до него
+  переезжать нечему.
+- Связка в приложении (W-L5): порядок запуска — одна копия → передача
+  службе → `SessionLifetime` → `NetworkWatch`; `TrayAvailability` решает
+  `AllowsClosing` панели; `PingUtilityEcho` уходит фабрикой в `PhoneService`.
 
 ### W-L5 — Интерфейс на Avalonia
 
@@ -745,7 +813,7 @@ Windows 0.1.63+.
 — `apt`, а не `dpkg -i`, чтобы подтянулись зависимости (`libpulse0`, `libx11-6`,
 `libxi6`, `libxss1`, `libicu74`, `libssl3t64`, `iputils-ping`). Программа
 ставится в `/opt/elitesip` (владелец root, оператор не пишет), ярлык
-`.desktop` в `/usr/share/applications`, схема `elitesip://` для QR,
+`.desktop` в `/usr/share/applications` (схема `elitesip://` не нужна: её открывает телефон с EliteSIP Connect, а софтфон только показывает QR),
 системные `elitesip-updater.service`, `.timer`, `.path` и шаблон
 пользовательской службы в `/usr/lib/systemd/user/elitesip.service`.
 Автозапуск — `/etc/xdg/autostart/elitesip.desktop` из пакета: софтфон

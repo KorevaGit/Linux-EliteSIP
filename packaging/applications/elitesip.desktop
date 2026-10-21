@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=EliteSIP
+GenericName=Софтфон
+Comment=Звонки через АТС компании
+Exec=/opt/elitesip/EliteSIP
+Icon=elitesip
+Terminal=false
+Categories=Network;Telephony;
+StartupNotify=false

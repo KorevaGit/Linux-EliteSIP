@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=EliteSIP
+Comment=Софтфон EliteSIP
+Exec=/opt/elitesip/EliteSIP --autostart
+Icon=elitesip
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-AutoRestart=false
