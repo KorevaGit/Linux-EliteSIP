@@ -1,0 +1,14 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EliteSIP.App.App"
+             RequestedThemeVariant="Light">
+  <!--
+      Тема продукта поверх простой темы Avalonia. Светлая или тёмная — решает
+      Theme/Appearance при запуске, до первого окна: иначе панель мигнула бы
+      не той темой, как на Windows до палитры в OnStartup.
+  -->
+  <Application.Styles>
+    <SimpleTheme />
+    <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/Controls.axaml" />
+  </Application.Styles>
+</Application>

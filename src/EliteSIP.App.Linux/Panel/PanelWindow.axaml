@@ -1,0 +1,450 @@
+<!--
+    Панель софтфона — перевод shared/src/EliteSIP.App/Panel/PanelWindow.xaml.
+    Строки, отступы и кегли те же: шапка 22, поле 52, клавиши управления 2 × 2
+    по 32 и больше, макросы, нижний ряд 46 («Позвонить» и «История» 64).
+    Почему так — в комментариях WPF-разметки; здесь их не повторяем.
+
+    Высоты строк, зависящие от макросов (WPF делал их MultiDataTrigger на
+    RowDefinition), выставляет код окна: у RowDefinition в Avalonia нет стилей.
+-->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme"
+        xmlns:panel="using:EliteSIP.App.Panel"
+        xmlns:res="using:EliteSIP.App.Resources"
+        x:Class="EliteSIP.App.Panel.PanelWindow"
+        x:DataType="panel:PanelViewModel"
+        Title="{res:Loc PanelWindowTitle}"
+        Width="324"
+        MinWidth="270"
+        SizeToContent="Height"
+        CanResize="True"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://EliteSIP.App.Linux/Assets/elitesip.png">
+
+  <Border Name="Frame">
+    <Grid Name="Root" Margin="8" RowDefinitions="22,4,*,10,Auto">
+
+      <!-- MARK: Шапка: капсула профиля, состояние, настройки -->
+      <Grid Grid.Row="0" Name="StatusRow" ColumnDefinitions="Auto,*,Auto">
+        <Button Name="ProfilePill"
+                Grid.Column="0"
+                Classes="surface pill"
+                IsEnabled="{Binding CanOpenProfileMenu}"
+                Click="OnProfileClick"
+                AutomationProperties.Name="{Binding StatusTitle, StringFormat='Профиль {0}'}">
+          <Button.ContextMenu>
+            <ContextMenu Name="ProfileMenu" Placement="BottomEdgeAlignedLeft">
+              <MenuItem Name="SingleProfile"
+                        Header="{Binding ProfileMenuTitle}"
+                        ToggleType="CheckBox"
+                        IsChecked="{Binding IsOnline, Mode=OneWay}"
+                        Command="{Binding GoOnline}" />
+              <Separator />
+              <MenuItem Header="{res:Loc PanelOffline}"
+                        ToggleType="CheckBox"
+                        IsChecked="{Binding IsOfflineByChoice, Mode=OneWay}"
+                        Command="{Binding GoOffline}" />
+            </ContextMenu>
+          </Button.ContextMenu>
+          <Grid VerticalAlignment="Center" ColumnDefinitions="Auto,Auto,*,Auto">
+            <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center"
+                     Classes.registering="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registering}"
+                     Classes.registered="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registered}"
+                     Classes.failed="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Failed}"
+                     Classes.offline="{Binding IsOfflineByChoice}" />
+            <TextBlock Grid.Column="1"
+                       Text="{Binding StatusTitle}"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="4,0,0,0"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock Grid.Column="2"
+                       Text="{Binding StatusLabel}"
+                       Margin="4,0,0,0"
+                       FontSize="12"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource TextTertiaryBrush}"
+                       IsVisible="{Binding StatusLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            <theme:Icon Grid.Column="3"
+                        Glyph="chevron.down"
+                        Size="10"
+                        Margin="5,1,0,0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource TextTertiaryBrush}"
+                        IsVisible="{Binding CanOpenProfileMenu}" />
+          </Grid>
+        </Button>
+
+        <!-- Беда связи: «нет сети», «отказ сервера» — поверх всего остального. -->
+        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    Margin="6,0,6,0"
+                    VerticalAlignment="Center"
+                    IsVisible="{Binding Trouble, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <theme:Icon Glyph="{Binding Trouble.Glyph}"
+                      Size="10"
+                      VerticalAlignment="Center"
+                      Foreground="{DynamicResource CautionBrush}"
+                      IsVisible="{Binding Trouble.Glyph, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Text="{Binding Trouble.Text}"
+                     Margin="4,0,0,0"
+                     FontSize="12"
+                     VerticalAlignment="Center"
+                     TextTrimming="CharacterEllipsis"
+                     Foreground="{DynamicResource CautionBrush}" />
+        </StackPanel>
+
+        <!-- Короткий статус: «подключаюсь», «исправляю сеть», «микрофон молчит». -->
+        <Grid Grid.Column="1"
+              Margin="6,0,6,0"
+              VerticalAlignment="Center"
+              ColumnDefinitions="Auto,*"
+              IsVisible="{Binding ShowsActivity}">
+          <theme:Icon Glyph="{Binding Activity.Glyph}"
+                      Size="10"
+                      VerticalAlignment="Center"
+                      Classes="activity"
+                      Classes.warning="{Binding Activity.IsWarning, FallbackValue=False}" />
+          <TextBlock Grid.Column="1"
+                     Text="{Binding Activity.Text}"
+                     Margin="4,0,0,0"
+                     FontSize="12"
+                     VerticalAlignment="Center"
+                     TextTrimming="CharacterEllipsis"
+                     Classes="activity"
+                     Classes.warning="{Binding Activity.IsWarning, FallbackValue=False}" />
+        </Grid>
+
+        <Button Grid.Column="1"
+                Margin="6,0,6,0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Left"
+                Classes="surface chrome"
+                Command="{Binding DismissNotice}"
+                IsVisible="{Binding ShowsNotice}">
+          <TextBlock Text="{Binding Notice}"
+                     FontSize="12"
+                     TextTrimming="CharacterEllipsis"
+                     Foreground="{DynamicResource TextSecondaryBrush}" />
+        </Button>
+
+        <Button Grid.Column="2"
+                Classes="surface chrome"
+                Command="{Binding ShowSettings}"
+                ToolTip.Tip="{res:Loc PanelSettings}">
+          <theme:Icon Glyph="gearshape" Size="12" />
+        </Button>
+      </Grid>
+
+      <!-- MARK: Середина: номер или разговор, клавиши, макросы, перевод -->
+      <Grid Grid.Row="2" Name="Middle" RowDefinitions="Auto,Auto,*,Auto,Auto,Auto">
+
+        <Grid Grid.Row="0" Height="52">
+          <Border CornerRadius="{StaticResource ControlCornerRadius}"
+                  Padding="12,0"
+                  Background="{DynamicResource ControlBackgroundBrush}"
+                  IsVisible="{Binding !HasSecondLine}">
+            <Grid>
+              <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !IsInCall}">
+                <TextBox Name="DialedField"
+                         Grid.Column="0"
+                         Classes="panel"
+                         Text="{Binding DialedNumber}"
+                         PlaceholderText="{res:Loc PanelNumberPlaceholder}"
+                         FontSize="20"
+                         IsEnabled="{Binding CanPlaceCall}"
+                         KeyDown="OnDialedNumberKeyDown"
+                         TextInput="OnDialedNumberTextInput" />
+                <Button Grid.Column="1"
+                        Classes="surface chrome"
+                        ToolTip.Tip="{res:Loc PanelClearNumber}"
+                        Click="OnClearNumberClick"
+                        IsVisible="{Binding HasDialedNumber}">
+                  <theme:Icon Glyph="xmark.circle.fill" Size="12" />
+                </Button>
+              </Grid>
+
+              <StackPanel VerticalAlignment="Center" IsVisible="{Binding IsInCall}">
+                <TextBlock Text="{Binding CallTitle}"
+                           FontSize="18"
+                           FontWeight="Medium"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                  <TextBlock Text="{Binding ActiveLine.SecondaryNumber}"
+                             FontSize="12"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
+                             IsVisible="{Binding ActiveLine.SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}" />
+                  <TextBlock Text=" · "
+                             FontSize="12"
+                             Foreground="{DynamicResource TextTertiaryBrush}"
+                             IsVisible="{Binding ActiveLine.SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}" />
+                  <TextBlock Text="{Binding ActiveLine.Duration}"
+                             FontSize="12"
+                             FontWeight="Medium"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             IsVisible="{Binding ActiveLine.Duration, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}" />
+                  <TextBlock Text="{Binding CallStatus}"
+                             Margin="4,0,0,0"
+                             FontSize="12"
+                             Foreground="{DynamicResource TextSecondaryBrush}" />
+                </StackPanel>
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <!-- Две линии и больше — строкой на линию вместо поля. -->
+          <ItemsControl ItemsSource="{Binding Lines}"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasSecondLine}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="panel:CallLineViewModel">
+                <Border Height="22"
+                        Margin="0,0,0,4"
+                        CornerRadius="{StaticResource ControlCornerRadius}"
+                        Padding="8,0"
+                        Background="{DynamicResource ControlBackgroundBrush}">
+                  <Grid ColumnDefinitions="8,*,Auto">
+                    <Ellipse Grid.Column="0"
+                             Width="6"
+                             Height="6"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Classes="line"
+                             Classes.active="{Binding IsActive}" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Title}"
+                               Margin="6,0,4,0"
+                               FontSize="13"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Status}"
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Grid>
+
+        <Border Grid.Row="1" Height="4" />
+
+        <!-- Клавиши управления 2 × 2. -->
+        <Grid Grid.Row="2" Name="ControlKeys" MinHeight="68" RowDefinitions="*,4,*" ColumnDefinitions="*,4,*">
+          <Grid.Styles>
+            <Style Selector="Grid#ControlKeys > ToggleButton">
+              <Setter Property="MinHeight" Value="32" />
+            </Style>
+          </Grid.Styles>
+
+          <ToggleButton Grid.Row="0" Grid.Column="0"
+                        Classes="key"
+                        IsChecked="{Binding IsOnHold, Mode=OneWay}"
+                        IsEnabled="{Binding CanHold}"
+                        Command="{Binding ToggleHold}">
+            <StackPanel Orientation="Horizontal">
+              <Panel VerticalAlignment="Center">
+                <theme:Icon Glyph="pause.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsOnHold}" />
+                <theme:Icon Glyph="play.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsOnHold}" />
+              </Panel>
+              <Panel Margin="4,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="{res:Loc PanelHold}" FontSize="12" IsVisible="{Binding !IsOnHold}" />
+                <TextBlock Text="{res:Loc PanelResume}" FontSize="12" IsVisible="{Binding IsOnHold}" />
+              </Panel>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Grid.Row="0" Grid.Column="2"
+                        Classes="key warning"
+                        IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}"
+                        IsEnabled="{Binding CanMuteMicrophone}"
+                        Command="{Binding ToggleMicrophone}">
+            <StackPanel Orientation="Horizontal">
+              <Panel VerticalAlignment="Center">
+                <theme:Icon Glyph="mic.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}" />
+                <theme:Icon Glyph="mic.slash.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsMicrophoneMuted}" />
+              </Panel>
+              <Panel Margin="4,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="{res:Loc PanelMicrophone}" FontSize="12" IsVisible="{Binding !IsMicrophoneMuted}" />
+                <TextBlock Text="{res:Loc PanelMicrophoneOff}" FontSize="12" IsVisible="{Binding IsMicrophoneMuted}" />
+              </Panel>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Grid.Row="2" Grid.Column="0"
+                        Name="TransferKey"
+                        Classes="key"
+                        AutomationProperties.AutomationId="TransferKey"
+                        AutomationProperties.Name="Перевести"
+                        IsChecked="{Binding IsTransferEntryVisible, Mode=OneWay}"
+                        IsEnabled="{Binding CanTransfer}"
+                        Click="OnTransferClick">
+            <StackPanel Orientation="Horizontal">
+              <theme:Icon Glyph="phone.arrow.right" Size="10" VerticalAlignment="Center"
+                          Foreground="{Binding $parent[ToggleButton].Foreground}" />
+              <TextBlock Text="{res:Loc PanelTransfer}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Grid.Row="2" Grid.Column="2"
+                        Classes="key"
+                        IsChecked="{Binding IsConferenceStarted, Mode=OneWay}"
+                        IsEnabled="{Binding CanStartConference}"
+                        Command="{Binding StartConference}">
+            <StackPanel Orientation="Horizontal">
+              <theme:Icon Glyph="person.3.fill" Size="10" VerticalAlignment="Center"
+                          Foreground="{Binding $parent[ToggleButton].Foreground}" />
+              <TextBlock Text="{res:Loc PanelConference}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </ToggleButton>
+        </Grid>
+
+        <!-- Зазор под макросами или вводом перевода; без них его нет. -->
+        <Border Grid.Row="3" Name="MacroGap" Height="10" />
+
+        <!-- Макросы DTMF: сетка по числу столбцов из настроек. -->
+        <ItemsControl Grid.Row="4" Name="Macros" ItemsSource="{Binding Macros}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="{Binding MacroColumns}" Margin="0,0,-4,-4" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="panel:MacroViewModel">
+              <Button Classes="surface"
+                      Margin="0,0,4,4"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      MinHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).EffectiveMacroHeight}"
+                      IsEnabled="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).CanSendDtmf}"
+                      Command="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).SendMacro}"
+                      CommandParameter="{Binding}">
+                <theme:ShrinkBox BaseFontSize="16" Margin="4,0" GrowsWithHeight="True"
+                                 FallbackHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).MacroLabelMaxHeight}">
+                  <TextBlock Text="{Binding Title}"
+                             FontWeight="Medium"
+                             TextAlignment="Center"
+                             TextWrapping="Wrap" />
+                </theme:ShrinkBox>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Ввод номера перевода. -->
+        <StackPanel Grid.Row="5" IsVisible="{Binding IsTransferEntryVisible}">
+          <Border Height="34"
+                  CornerRadius="{StaticResource ControlCornerRadius}"
+                  Padding="12,0"
+                  Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Name="TransferField"
+                     Classes="panel"
+                     Text="{Binding TransferNumber}"
+                     PlaceholderText="{res:Loc PanelTransferNumber}"
+                     FontSize="18"
+                     IsEnabled="{Binding !IsTransferring}" />
+          </Border>
+          <Grid Margin="0,4,0,0" ColumnDefinitions="*,4,*">
+            <Button Grid.Column="0"
+                    Classes="surface"
+                    Height="30"
+                    HorizontalAlignment="Stretch"
+                    Content="{res:Loc PanelCancel}"
+                    FontSize="14"
+                    Click="OnCancelTransferClick" />
+            <Button Grid.Column="2"
+                    Classes="surface call"
+                    Height="30"
+                    HorizontalAlignment="Stretch"
+                    Content="{res:Loc PanelTransfer}"
+                    FontSize="14"
+                    IsEnabled="{Binding HasTransferNumber}"
+                    Command="{Binding Transfer}" />
+          </Grid>
+        </StackPanel>
+      </Grid>
+
+      <!-- MARK: Нижний ряд: позвонить или положить трубку, история -->
+      <Grid Grid.Row="4" MinHeight="46" ColumnDefinitions="*,4,64">
+        <Button Grid.Column="0"
+                Classes="surface call"
+                Classes.hangup="{Binding IsInCall}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding CallOrHangUp}"
+                IsEnabled="{Binding IsCallButtonEnabled}">
+          <StackPanel Orientation="Horizontal">
+            <Panel VerticalAlignment="Center">
+              <theme:Icon Glyph="phone.fill" Size="14" Foreground="White" IsVisible="{Binding !IsInCall}" />
+              <theme:Icon Glyph="phone.down.fill" Size="14" Foreground="White" IsVisible="{Binding IsInCall}" />
+            </Panel>
+            <Panel Margin="6,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{res:Loc PanelCall}" FontSize="14" FontWeight="Medium" Foreground="White" IsVisible="{Binding !IsInCall}" />
+              <TextBlock Text="{res:Loc PanelHangUp}" FontSize="14" FontWeight="Medium" Foreground="White" IsVisible="{Binding IsInCall}" />
+            </Panel>
+          </StackPanel>
+        </Button>
+
+        <Button Grid.Column="2"
+                Classes="surface"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Command="{Binding ShowHistory}">
+          <StackPanel>
+            <theme:Icon Glyph="clock" Size="14" HorizontalAlignment="Center" />
+            <TextBlock Text="{res:Loc PanelHistory}"
+                       Margin="0,2,0,0"
+                       FontSize="11"
+                       HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Grid>
+  </Border>
+
+  <Window.Styles>
+    <!-- Точка состояния регистрации: четыре цвета, «нет сети» и «отказ» разные. -->
+    <Style Selector="Ellipse">
+      <Setter Property="Fill" Value="{DynamicResource StatusOfflineBrush}" />
+    </Style>
+    <Style Selector="Ellipse.registering">
+      <Setter Property="Fill" Value="{DynamicResource StatusConnectingBrush}" />
+    </Style>
+    <Style Selector="Ellipse.registered">
+      <Setter Property="Fill" Value="{DynamicResource StatusRegisteredBrush}" />
+    </Style>
+    <Style Selector="Ellipse.failed">
+      <Setter Property="Fill" Value="{DynamicResource StatusFailureBrush}" />
+    </Style>
+    <Style Selector="Ellipse.offline">
+      <Setter Property="Fill" Value="{DynamicResource StatusOfflineBrush}" />
+    </Style>
+    <Style Selector="Ellipse.line">
+      <Setter Property="Fill" Value="{DynamicResource TextTertiaryBrush}" />
+    </Style>
+    <Style Selector="Ellipse.line.active">
+      <Setter Property="Fill" Value="{DynamicResource StatusRegisteredBrush}" />
+    </Style>
+
+    <Style Selector="theme|Icon.activity">
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="theme|Icon.activity.warning">
+      <Setter Property="Foreground" Value="{DynamicResource CautionBrush}" />
+    </Style>
+    <Style Selector="TextBlock.activity">
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.activity.warning">
+      <Setter Property="Foreground" Value="{DynamicResource CautionBrush}" />
+    </Style>
+  </Window.Styles>
+</Window>

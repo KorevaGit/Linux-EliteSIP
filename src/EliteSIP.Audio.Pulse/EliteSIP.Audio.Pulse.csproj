@@ -30,7 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      Управляемый декодер MP3 для рингтона: у NAudio он системный (ACM), и на
+      Linux его нет. Версия — под NAudio.Core 3.0.1 общего Audio.Signals.
+    -->
+    <PackageReference Include="NLayer.NAudioSupport" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\shared\src\EliteSIP.Audio\EliteSIP.Audio.csproj" />
+    <ProjectReference Include="..\..\shared\src\EliteSIP.Audio.Signals\EliteSIP.Audio.Signals.csproj" />
   </ItemGroup>
 
 </Project>

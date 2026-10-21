@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using EliteSIP.Audio.Pulse;
 using PulseProbe;
 
 // Стенд W-L0А. Режимы:
@@ -18,6 +19,35 @@ double Number(string name, double fallback) =>
 
 switch (mode)
 {
+    case "signals":
+    {
+        // Служебные звуки через общий проигрыватель на выводе Pulse: тихие
+        // гудки, тон клавиши, рингтон из файла (если передан — WAV или MP3).
+        List<string> log = [];
+        using var player = PulseSignalSounds.Create(log.Add);
+        Console.WriteLine("гудки 1,5 с");
+        player.StartRingback(null, 0.1);
+        Thread.Sleep(1500);
+        player.StopRingback();
+        Console.WriteLine("клавиша 5");
+        player.PlayKeyTone('5', null);
+        Thread.Sleep(400);
+        if (args.Length > 1)
+        {
+            Console.WriteLine($"рингтон {args[1]}: {(player.PreviewRingtone(args[1], 0.15, null) ? "свой" : "стандартный")}");
+            Thread.Sleep(2000);
+            player.StopPreview();
+        }
+
+        foreach (var line in log)
+        {
+            Console.WriteLine("журнал: " + line);
+        }
+
+        Console.WriteLine($"играет после снятия: {player.IsPlaying}");
+        return 0;
+    }
+
     case "devices":
         return DeviceList.Print();
 

@@ -15,6 +15,7 @@
     <Project Path="shared/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj" />
     <Project Path="shared/src/EliteSIP.App.Core/EliteSIP.App.Core.csproj" />
     <Project Path="shared/src/EliteSIP.Audio/EliteSIP.Audio.csproj" />
+    <Project Path="shared/src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj" />
     <Project Path="shared/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj" />
     <Project Path="shared/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj" />
     <Project Path="shared/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj" />
@@ -27,6 +28,7 @@
   <Folder Name="/shared/tests/">
     <Project Path="shared/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj" />
+    <Project Path="shared/tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj" />
     <Project Path="shared/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj" />
@@ -39,10 +41,12 @@
     <Project Path="shared/tools/ReleaseKit/ReleaseKit.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/EliteSIP.App.Linux/EliteSIP.App.Linux.csproj" />
     <Project Path="src/EliteSIP.Audio.Pulse/EliteSIP.Audio.Pulse.csproj" />
     <Project Path="src/EliteSIP.Platform.Linux/EliteSIP.Platform.Linux.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/EliteSIP.App.Linux.Tests/EliteSIP.App.Linux.Tests.csproj" />
     <Project Path="tests/EliteSIP.Audio.Pulse.Tests/EliteSIP.Audio.Pulse.Tests.csproj" />
     <Project Path="tests/EliteSIP.Platform.Linux.Tests/EliteSIP.Platform.Linux.Tests.csproj" />
   </Folder>

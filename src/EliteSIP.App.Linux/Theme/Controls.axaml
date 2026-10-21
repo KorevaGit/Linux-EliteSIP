@@ -1,0 +1,250 @@
+<!--
+    Стили элементов — перевод shared/src/EliteSIP.App/Theme/Controls.xaml.
+    Почему каждое число такое, сказано там; здесь только как оно выражено в
+    Avalonia: стиль с ключом стал классом (SurfaceButtonStyle → Button.surface),
+    триггер — псевдоклассом (:pointerover, :pressed, :checked, :disabled).
+
+    Основа — SimpleTheme: её шаблоны для полей, списков и меню годятся, если
+    перекрасить кисти темы в палитру продукта (ниже, Resources). Свои шаблоны —
+    только у кнопок панели: у них своя форма, и простая тема её не даёт.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme">
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://EliteSIP.App.Linux/Theme/Palette.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <x:Double x:Key="DisabledOpacity">0.57</x:Double>
+      <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+      <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- Текст окна: кисть и кегль по умолчанию — те же, что у WPF-окон. -->
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="theme|Icon">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+  </Style>
+
+  <!-- MARK: Кнопки -->
+
+  <!-- SurfaceButtonStyle: плашка цвета поверхности управления. -->
+  <Style Selector="Button.surface">
+    <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Surface"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Button.surface:pointerover /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+  </Style>
+  <Style Selector="Button.surface:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlPressedBrush}" />
+  </Style>
+  <Style Selector="Button.surface:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Opacity" Value="0.75" />
+  </Style>
+  <Style Selector="Button.surface:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+  <Style Selector="Button.surface:disabled /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+  </Style>
+
+  <!-- ChromeButtonStyle: значок на прозрачном фоне, 22 × 22. -->
+  <Style Selector="Button.surface.chrome">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="MinWidth" Value="22" />
+    <Setter Property="Height" Value="22" />
+  </Style>
+
+  <!-- ProfilePillStyle: капсула профиля — 22 в высоту, скругление 11. -->
+  <Style Selector="Button.surface.pill">
+    <Setter Property="Height" Value="22" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="CornerRadius" Value="11" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Button.surface.pill:disabled">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+
+  <!-- AccentButtonStyle: синяя кнопка под белой надписью. -->
+  <Style Selector="Button.surface.accent">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.surface.accent:pointerover /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Opacity" Value="0.88" />
+  </Style>
+  <Style Selector="Button.surface.accent:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Opacity" Value="0.75" />
+  </Style>
+  <Style Selector="Button.surface.accent:disabled /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+  </Style>
+
+  <!--
+      CallButtonStyle: «Позвонить» зелёная, «Положить трубку» (.hangup)
+      красная. Наведение и нажатие — прозрачностью, а не другой заливкой: цвет
+      здесь и есть смысл кнопки.
+  -->
+  <Style Selector="Button.surface.call">
+    <Setter Property="Background" Value="{DynamicResource AnswerFillBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.surface.call.hangup">
+    <Setter Property="Background" Value="{DynamicResource DeclineFillBrush}" />
+  </Style>
+  <Style Selector="Button.surface.call:pointerover /template/ Border#Surface">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="Opacity" Value="0.88" />
+  </Style>
+  <Style Selector="Button.surface.call:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+    <Setter Property="Opacity" Value="0.75" />
+  </Style>
+  <Style Selector="Button.surface.call:disabled">
+    <Setter Property="Opacity" Value="0.4" />
+  </Style>
+  <Style Selector="Button.surface.call:disabled /template/ Border#Surface">
+    <Setter Property="Background" Value="{Binding $parent[Button].Background}" />
+  </Style>
+
+  <!--
+      ControlKeyStyle: клавиши «Удержание», «Микрофон», «Перевести»,
+      «Конференция». Нажатая — оранжевая; «Микрофон выкл.» (.warning) — красная.
+  -->
+  <Style Selector="ToggleButton.key">
+    <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Surface"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{StaticResource ControlCornerRadius}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="ToggleButton.key:pointerover /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.key:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlPressedBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.key:checked">
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="ToggleButton.key:checked /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource StatusConnectingBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="ToggleButton.key.warning:checked /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource DeclineFillBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.key:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+  <!-- MARK: Поле набора -->
+
+  <!--
+      PanelTextBoxStyle: поле без своей рамки — рамка у плашки вокруг него, а
+      подсказка третьестепенным цветом.
+  -->
+  <Style Selector="TextBox.panel">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextTertiaryBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="2,0,0,0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="TextBox.panel:pointerover /template/ Border#border, TextBox.panel:focus /template/ Border#border">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="TextBox.panel:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+  <!-- MARK: Меню -->
+
+  <!-- Меню капсулы и значка: поверхность со скруглением 8, строки по 32. -->
+  <Style Selector="ContextMenu">
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SeparatorBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource OverlayCornerRadius}" />
+    <Setter Property="Padding" Value="4" />
+  </Style>
+  <Style Selector="MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinWidth" Value="160" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+  </Style>
+  <Style Selector="MenuItem:pointerover /template/ Border#root, MenuItem:selected /template/ Border#root">
+    <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+  </Style>
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="{DynamicResource SeparatorBrush}" />
+    <Setter Property="Margin" Value="8,4" />
+  </Style>
+
+</Styles>

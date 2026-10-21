@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Проверки разметки Linux-версии на Avalonia Headless — то, что в
+    Windows-версии делали LayoutTests на WpfHost: окна поднимаются без
+    экрана, раскладка меряется по-настоящему, а снимки рисует Skia.
+
+    xunit v3, а не 2.9 как в остальных проектах: Avalonia.Headless.XUnit 12
+    построен на нём, и тест должен идти на потоке окна Avalonia.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless.XUnit" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EliteSIP.App.Linux\EliteSIP.App.Linux.csproj" />
+  </ItemGroup>
+
+</Project>

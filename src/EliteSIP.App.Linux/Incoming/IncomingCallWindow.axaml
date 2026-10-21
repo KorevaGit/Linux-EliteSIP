@@ -1,0 +1,155 @@
+<!--
+    Окно входящего — перевод shared/src/EliteSIP.App/Incoming/IncomingCallWindow.xaml:
+    320 в ширину, высота по содержимому, без рамки, поверх всех, без
+    активации и без кнопки в панели задач. Проверка цифрой (W9) — те же
+    кнопки, что на Windows.
+-->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme"
+        xmlns:incoming="using:EliteSIP.App.Incoming"
+        xmlns:res="using:EliteSIP.App.Resources"
+        x:Class="EliteSIP.App.Incoming.IncomingCallWindow"
+        x:DataType="incoming:IncomingCallViewModel"
+        Title="{res:Loc IncomingWindowTitle}"
+        Width="320"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        WindowDecorations="None"
+        WindowStartupLocation="Manual">
+
+  <Border BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
+    <StackPanel Margin="8,6,8,8">
+      <DockPanel LastChildFill="False">
+        <theme:Icon DockPanel.Dock="Left"
+                    Glyph="phone.arrow.down.left.fill"
+                    Size="16"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource OutcomeAnsweredBrush}" />
+        <TextBlock DockPanel.Dock="Left"
+                   Margin="6,0,0,0"
+                   VerticalAlignment="Center"
+                   FontSize="14"
+                   Text="{Binding Caption}"
+                   Classes="caption"
+                   Classes.refused="{Binding IsRefused}" />
+        <theme:Icon DockPanel.Dock="Right"
+                    Glyph="lock.shield.fill"
+                    Size="14"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextTertiaryBrush}"
+                    AutomationProperties.Name="{res:Loc IncomingGuardOn}"
+                    IsVisible="{Binding IsGuarded}" />
+      </DockPanel>
+
+      <StackPanel Margin="0,4,0,0" HorizontalAlignment="Stretch">
+        <TextBlock Text="{Binding Headline}"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   TextTrimming="CharacterEllipsis"
+                   FontSize="23"
+                   FontWeight="SemiBold" />
+        <TextBlock Text="{Binding SecondaryNumber}"
+                   HorizontalAlignment="Center"
+                   TextAlignment="Center"
+                   FontSize="16"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   IsVisible="{Binding SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
+
+      <StackPanel Margin="0,8,0,0">
+        <TextBlock Text="{res:Loc IncomingDealPrompt}"
+                   Margin="0,0,0,6"
+                   FontSize="15"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   IsVisible="{Binding IsSelfCall}" />
+
+        <!-- С выбором: «нажмите N» и ряд цифр, отбой ниже. -->
+        <StackPanel IsVisible="{Binding HasChoice}">
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+            <TextBlock Text="{res:Loc IncomingDigitPrompt}"
+                       FontSize="15"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+            <TextBlock Text="{Binding Answer}"
+                       Margin="4,0,0,0"
+                       FontSize="15"
+                       FontWeight="SemiBold" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding Targets}" Margin="-3,0,-3,6">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Rows="1" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <Button Classes="surface"
+                        Margin="3,0"
+                        Height="42"
+                        HorizontalAlignment="Stretch"
+                        FontSize="20"
+                        Content="{Binding}"
+                        Command="{Binding $parent[Window].((incoming:IncomingCallViewModel)DataContext).AttemptCommand}"
+                        CommandParameter="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="surface"
+                  Height="42"
+                  HorizontalAlignment="Stretch"
+                  Command="{Binding DeclineCommand}"
+                  AutomationProperties.Name="{res:Loc IncomingDecline}">
+            <StackPanel Orientation="Horizontal">
+              <theme:Icon Glyph="phone.down.fill" Size="14"
+                          Foreground="{DynamicResource DeclineBrush}"
+                          VerticalAlignment="Center" />
+              <TextBlock Text="{res:Loc IncomingDecline}"
+                         Margin="6,0,0,0"
+                         FontSize="16"
+                         Foreground="{DynamicResource DeclineBrush}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <!-- Без выбора: «Ответить» и «Отклонить» рядом. -->
+        <Grid ColumnDefinitions="*,6,*" IsVisible="{Binding !HasChoice}">
+          <Button Grid.Column="0"
+                  Classes="surface call"
+                  Height="42"
+                  HorizontalAlignment="Stretch"
+                  Command="{Binding AttemptCommand}"
+                  CommandParameter="{Binding Answer}">
+            <StackPanel Orientation="Horizontal">
+              <theme:Icon Glyph="phone.fill" Size="14" Foreground="White" VerticalAlignment="Center" />
+              <TextBlock Text="{res:Loc IncomingAnswer}" Margin="6,0,0,0" FontSize="16" Foreground="White" />
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="2"
+                  Classes="surface call hangup"
+                  Height="42"
+                  HorizontalAlignment="Stretch"
+                  Command="{Binding DeclineCommand}"
+                  AutomationProperties.Name="{res:Loc IncomingDecline}">
+            <StackPanel Orientation="Horizontal">
+              <theme:Icon Glyph="phone.down.fill" Size="14" Foreground="White" VerticalAlignment="Center" />
+              <TextBlock Text="{res:Loc IncomingDecline}" Margin="6,0,0,0" FontSize="16" Foreground="White" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+
+  <Window.Styles>
+    <Style Selector="TextBlock.caption">
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.caption.refused">
+      <Setter Property="Foreground" Value="{DynamicResource DeclineBrush}" />
+    </Style>
+  </Window.Styles>
+</Window>

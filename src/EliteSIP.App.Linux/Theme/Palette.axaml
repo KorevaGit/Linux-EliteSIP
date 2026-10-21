@@ -1,0 +1,115 @@
+<!--
+    Палитра — числа обеих тем Windows-версии (shared/src/EliteSIP.App/Theme/
+    Palette.Light.xaml и Palette.Dark.xaml), сведённые в одну с вариантами тем
+    Avalonia. Там словарь подменялся целиком при смене темы, здесь тему меняет
+    RequestedThemeVariant приложения, и кисти, взятые через DynamicResource,
+    перекрашиваются сами.
+
+    Не править руками: файл собирает palette.py рядом. Почему цвета именно
+    такие — в комментариях WPF-файлов.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E4000000" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9E000000" />
+      <SolidColorBrush x:Key="TextTertiaryBrush" Color="#72000000" />
+      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="SidebarBrush" Color="#FFF2F2F2" />
+      <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF2F2F2" />
+      <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FFCCCCCC" />
+      <SolidColorBrush x:Key="ControlHoverBrush" Color="#FFBDBDBD" />
+      <SolidColorBrush x:Key="ControlPressedBrush" Color="#FF999999" />
+      <SolidColorBrush x:Key="SeparatorBrush" Color="#14000000" />
+      <SolidColorBrush x:Key="ControlBorderBrush" Color="#00000000" />
+      <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="#FF7A7A7A" />
+      <SolidColorBrush x:Key="ScrollThumbBrush" Color="#6B000000" />
+      <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#8A000000" />
+      <SolidColorBrush x:Key="ScrollTrackBrush" Color="#0A000000" />
+      <SolidColorBrush x:Key="AccentBrush" Color="#FF0078D4" />
+      <SolidColorBrush x:Key="SelectionBrush" Color="#330078D4" />
+      <SolidColorBrush x:Key="AccentFillBrush" Color="#FF0078D7" />
+      <SolidColorBrush x:Key="NavHoverBrush" Color="#FFE5E5E5" />
+      <SolidColorBrush x:Key="StatusRegisteredBrush" Color="#FF0F7B0F" />
+      <SolidColorBrush x:Key="StatusConnectingBrush" Color="#FFC4600C" />
+      <SolidColorBrush x:Key="StatusOfflineBrush" Color="#9E000000" />
+      <SolidColorBrush x:Key="StatusFailureBrush" Color="#FFC42B1C" />
+      <SolidColorBrush x:Key="StatusInCallBrush" Color="#FF0078D4" />
+      <SolidColorBrush x:Key="AnswerBrush" Color="#FF0F7B0F" />
+      <SolidColorBrush x:Key="DeclineBrush" Color="#FFC42B1C" />
+      <SolidColorBrush x:Key="AnswerFillBrush" Color="#FF0F7B0F" />
+      <SolidColorBrush x:Key="DeclineFillBrush" Color="#FFC42B1C" />
+      <SolidColorBrush x:Key="OutcomeCompletedBrush" Color="#9E000000" />
+      <SolidColorBrush x:Key="OutcomeAnsweredBrush" Color="#FF0F7B0F" />
+      <SolidColorBrush x:Key="OutcomeUnreachableBrush" Color="#FFC4600C" />
+      <SolidColorBrush x:Key="OutcomeMissedBrush" Color="#FFC42B1C" />
+      <SolidColorBrush x:Key="CautionBrush" Color="#FFC4600C" />
+      <SolidColorBrush x:Key="UnsavedBrush" Color="#FFC4600C" />
+      <!-- SimpleTheme -->
+      <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="ThemeForegroundBrush" Color="#E4000000" />
+      <SolidColorBrush x:Key="ThemeForegroundLowBrush" Color="#72000000" />
+      <SolidColorBrush x:Key="ThemeControlLowBrush" Color="#FFCCCCCC" />
+      <SolidColorBrush x:Key="ThemeControlMidBrush" Color="#FFBDBDBD" />
+      <SolidColorBrush x:Key="ThemeControlHighBrush" Color="#FF999999" />
+      <SolidColorBrush x:Key="ThemeControlHighlightLowBrush" Color="#FFBDBDBD" />
+      <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#FF999999" />
+      <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="#00000000" />
+      <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="#FF7A7A7A" />
+      <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#FF7A7A7A" />
+      <SolidColorBrush x:Key="ThemeAccentBrush" Color="#FF0078D4" />
+      <SolidColorBrush x:Key="HighlightBrush" Color="#330078D4" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#C5FFFFFF" />
+      <SolidColorBrush x:Key="TextTertiaryBrush" Color="#87FFFFFF" />
+      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="SidebarBrush" Color="#FF1F1F1F" />
+      <SolidColorBrush x:Key="SurfaceBrush" Color="#FF1F1F1F" />
+      <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FF333333" />
+      <SolidColorBrush x:Key="ControlHoverBrush" Color="#FF454545" />
+      <SolidColorBrush x:Key="ControlPressedBrush" Color="#FF666666" />
+      <SolidColorBrush x:Key="SeparatorBrush" Color="#18FFFFFF" />
+      <SolidColorBrush x:Key="ControlBorderBrush" Color="#00000000" />
+      <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="#FF858585" />
+      <SolidColorBrush x:Key="ScrollThumbBrush" Color="#8AFFFFFF" />
+      <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#B3FFFFFF" />
+      <SolidColorBrush x:Key="ScrollTrackBrush" Color="#0FFFFFFF" />
+      <SolidColorBrush x:Key="AccentBrush" Color="#FF4CC2FF" />
+      <SolidColorBrush x:Key="SelectionBrush" Color="#4C4CC2FF" />
+      <SolidColorBrush x:Key="AccentFillBrush" Color="#FF0078D7" />
+      <SolidColorBrush x:Key="NavHoverBrush" Color="#FF2B2B2B" />
+      <SolidColorBrush x:Key="StatusRegisteredBrush" Color="#FF6CCB5F" />
+      <SolidColorBrush x:Key="StatusConnectingBrush" Color="#FFFCA02E" />
+      <SolidColorBrush x:Key="StatusOfflineBrush" Color="#C5FFFFFF" />
+      <SolidColorBrush x:Key="StatusFailureBrush" Color="#FFFF99A4" />
+      <SolidColorBrush x:Key="StatusInCallBrush" Color="#FF4CC2FF" />
+      <SolidColorBrush x:Key="AnswerBrush" Color="#FF6CCB5F" />
+      <SolidColorBrush x:Key="DeclineBrush" Color="#FFFF99A4" />
+      <SolidColorBrush x:Key="AnswerFillBrush" Color="#FF107C10" />
+      <SolidColorBrush x:Key="DeclineFillBrush" Color="#FFC42B1C" />
+      <SolidColorBrush x:Key="OutcomeCompletedBrush" Color="#C5FFFFFF" />
+      <SolidColorBrush x:Key="OutcomeAnsweredBrush" Color="#FF6CCB5F" />
+      <SolidColorBrush x:Key="OutcomeUnreachableBrush" Color="#FFFCA02E" />
+      <SolidColorBrush x:Key="OutcomeMissedBrush" Color="#FFFF99A4" />
+      <SolidColorBrush x:Key="CautionBrush" Color="#FFFCA02E" />
+      <SolidColorBrush x:Key="UnsavedBrush" Color="#FFFCA02E" />
+      <!-- SimpleTheme -->
+      <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="ThemeForegroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="ThemeForegroundLowBrush" Color="#87FFFFFF" />
+      <SolidColorBrush x:Key="ThemeControlLowBrush" Color="#FF333333" />
+      <SolidColorBrush x:Key="ThemeControlMidBrush" Color="#FF454545" />
+      <SolidColorBrush x:Key="ThemeControlHighBrush" Color="#FF666666" />
+      <SolidColorBrush x:Key="ThemeControlHighlightLowBrush" Color="#FF454545" />
+      <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#FF666666" />
+      <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="#00000000" />
+      <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="#FF858585" />
+      <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#FF858585" />
+      <SolidColorBrush x:Key="ThemeAccentBrush" Color="#FF4CC2FF" />
+      <SolidColorBrush x:Key="HighlightBrush" Color="#4C4CC2FF" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>
