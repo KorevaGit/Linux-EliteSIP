@@ -46,7 +46,7 @@
       </DockPanel>
 
       <StackPanel Margin="0,4,0,0" HorizontalAlignment="Stretch">
-        <TextBlock Text="{Binding Headline}"
+        <TextBlock theme:Emoji.Text="{Binding Headline}"
                    HorizontalAlignment="Center"
                    TextAlignment="Center"
                    TextTrimming="CharacterEllipsis"

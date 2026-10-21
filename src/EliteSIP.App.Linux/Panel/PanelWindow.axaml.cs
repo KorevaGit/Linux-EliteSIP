@@ -209,6 +209,9 @@ public partial class PanelWindow : Window
         }
     }
 
+    /// <summary>Строки середины по модели — для проверок раскладки без показа окна.</summary>
+    internal void RelayoutForTests() => UpdateRows();
+
     private void Relayout()
     {
         UpdateRows();
@@ -416,7 +419,7 @@ public partial class PanelWindow : Window
             var choice = choices[i];
             MenuItem item = new()
             {
-                Header = choice.Title,
+                Header = EliteSIP.App.Theme.Emoji.Block(choice.Title),
                 ToggleType = MenuItemToggleType.CheckBox,
                 IsChecked = choice.IsActive,
                 Tag = "profile",

@@ -40,10 +40,11 @@
   <ItemGroup>
     <!--
       Значки — тот же файл, что у Windows-версии (Theme/IconLibrary.cs), и
-      стандартный рингтон — тот же WAV.
+      стандартный рингтон — тот же WAV, смайлики — тот же emoji.pak.
     -->
     <EmbeddedResource Include="..\..\shared\src\EliteSIP.App\Theme\Icons.xaml" LogicalName="EliteSIP.App.Theme.Icons.xaml" />
     <Content Include="..\..\shared\src\EliteSIP.App\Assets\ringtone.wav" Link="ringtone.wav" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\shared\src\EliteSIP.App\Assets\emoji.pak" Link="emoji.pak" CopyToOutputDirectory="PreserveNewest" />
     <AvaloniaResource Include="..\..\shared\src\EliteSIP.App\Assets\AppIcon\icon_256x256.png" Link="Assets/elitesip.png" />
   </ItemGroup>
 

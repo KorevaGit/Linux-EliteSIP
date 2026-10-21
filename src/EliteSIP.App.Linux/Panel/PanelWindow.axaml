@@ -62,7 +62,7 @@
                        VerticalAlignment="Center"
                        Foreground="{DynamicResource TextPrimaryBrush}" />
             <TextBlock Grid.Column="2"
-                       Text="{Binding StatusLabel}"
+                       theme:Emoji.Text="{Binding StatusLabel}"
                        Margin="4,0,0,0"
                        FontSize="12"
                        VerticalAlignment="Center"
@@ -126,7 +126,7 @@
                 Classes="surface chrome"
                 Command="{Binding DismissNotice}"
                 IsVisible="{Binding ShowsNotice}">
-          <TextBlock Text="{Binding Notice}"
+          <TextBlock theme:Emoji.Text="{Binding Notice}"
                      FontSize="12"
                      TextTrimming="CharacterEllipsis"
                      Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -169,7 +169,7 @@
               </Grid>
 
               <StackPanel VerticalAlignment="Center" IsVisible="{Binding IsInCall}">
-                <TextBlock Text="{Binding CallTitle}"
+                <TextBlock theme:Emoji.Text="{Binding CallTitle}"
                            FontSize="18"
                            FontWeight="Medium"
                            TextTrimming="CharacterEllipsis"
@@ -217,7 +217,7 @@
                              Classes="line"
                              Classes.active="{Binding IsActive}" />
                     <TextBlock Grid.Column="1"
-                               Text="{Binding Title}"
+                               theme:Emoji.Text="{Binding Title}"
                                Margin="6,0,4,0"
                                FontSize="13"
                                FontWeight="Medium"
@@ -329,7 +329,7 @@
                       CommandParameter="{Binding}">
                 <theme:ShrinkBox BaseFontSize="16" Margin="4,0" GrowsWithHeight="True"
                                  FallbackHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).MacroLabelMaxHeight}">
-                  <TextBlock Text="{Binding Title}"
+                  <TextBlock theme:Emoji.Text="{Binding Title}"
                              FontWeight="Medium"
                              TextAlignment="Center"
                              TextWrapping="Wrap" />

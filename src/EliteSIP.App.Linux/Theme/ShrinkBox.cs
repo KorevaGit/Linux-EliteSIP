@@ -40,6 +40,7 @@ public sealed class ShrinkBox : Decorator
 
     static ShrinkBox()
     {
+        ClipToBoundsProperty.OverrideDefaultValue<ShrinkBox>(true);
         AffectsMeasure<ShrinkBox>(
             MinimumScaleProperty, BaseFontSizeProperty, GrowsWithHeightProperty, MaximumScaleProperty, FallbackHeightProperty);
     }
@@ -108,8 +109,12 @@ public sealed class ShrinkBox : Decorator
             child.Measure(new Size(availableSize.Width, double.PositiveInfinity));
         }
 
-        child.Measure(new Size(availableSize.Width, Math.Min(availableSize.Height, height)));
-        return child.DesiredSize;
+        // Не влезло и на нижнем пределе — срезается, а не раздувает клавишу:
+        // WPF отдавал желаемое не больше доступного сам, Avalonia — нет, и
+        // клавиша росла бы за предел, под которым окно влезает в экран.
+        var limit = Math.Min(availableSize.Height, height);
+        child.Measure(new Size(availableSize.Width, limit));
+        return new Size(child.DesiredSize.Width, Math.Min(child.DesiredSize.Height, limit));
     }
 
     private double ScaledSize(Control child, double available, double start)
