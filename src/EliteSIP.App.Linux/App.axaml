@@ -10,5 +10,7 @@
   <Application.Styles>
     <SimpleTheme />
     <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/Controls.axaml" />
+    <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/SettingsKit.axaml" />
+    <StyleInclude Source="avares://EliteSIP.App.Linux/History/History.axaml" />
   </Application.Styles>
 </Application>

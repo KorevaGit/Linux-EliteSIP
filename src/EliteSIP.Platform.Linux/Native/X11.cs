@@ -55,6 +55,12 @@ internal static unsafe partial class X11
     [LibraryImport(Library, EntryPoint = "XSendEvent")]
     internal static partial int XSendEvent(nint display, nuint window, int propagate, nint eventMask, XEvent* sent);
 
+    /// <summary>Основная клавиатура для вызовов XKB (<c>XkbUseCoreKbd</c>).</summary>
+    internal const uint XkbUseCoreKbd = 0x0100;
+
+    [LibraryImport(Library, EntryPoint = "XkbGetIndicatorState")]
+    internal static partial int XkbGetIndicatorState(nint display, uint device, uint* state);
+
     [LibraryImport(Library, EntryPoint = "XFlush")]
     internal static partial int XFlush(nint display);
 }

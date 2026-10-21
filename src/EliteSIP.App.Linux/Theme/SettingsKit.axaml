@@ -1,0 +1,348 @@
+<!--
+    Шаблоны кирпичей настроек — перевод shared/src/EliteSIP.App/Theme/SettingsKit.xaml.
+    Числа те же: заголовок раздела 18, строки через 12, поле 240…360,
+    пояснение 12 до 420 в ширину, переключатель 40 × 20, плитка темы 104 × 68.
+
+    Стили с ключом стали классами: SettingsSwitchStyle → CheckBox.switch,
+    SettingsButtonStyle → Button.settings, ThemeTileStyle → RadioButton.tile,
+    SegmentStyle → RadioButton.segment.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme"
+        xmlns:res="using:EliteSIP.App.Resources">
+
+  <Style Selector="theme|SettingsSection">
+    <Setter Property="Margin" Value="0,0,0,32" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel>
+          <ContentPresenter Content="{TemplateBinding Header}"
+                            Margin="0,0,0,12"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="{DynamicResource TextPrimaryBrush}" />
+          <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="theme|SettingsRow">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Margin" Value="0,0,0,12" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel>
+          <ContentPresenter Name="Header"
+                            Content="{TemplateBinding Header}"
+                            Margin="0,0,0,6"
+                            TextWrapping="Wrap"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
+                            IsVisible="{TemplateBinding Header, Converter={x:Static theme:Converters.Present}}" />
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            MaxWidth="360"
+                            MinWidth="240"
+                            HorizontalAlignment="Left" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <!-- Поле строки тянется до её ширины, как ComboBox и TextBox в WPF. -->
+  <Style Selector="theme|SettingsRow ComboBox, theme|SettingsRow TextBox">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="theme|SettingsIndented">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Margin" Value="0,0,0,12" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Content="{TemplateBinding Content}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="theme|SettingsNote">
+    <Setter Property="Margin" Value="0,-6,0,12" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock Name="Body"
+                   Text="{TemplateBinding Text}"
+                   FontSize="12"
+                   MaxWidth="420"
+                   HorizontalAlignment="Left"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="theme|SettingsNote[IsAlarming=True] /template/ TextBlock#Body">
+    <Setter Property="Foreground" Value="{DynamicResource StatusFailureBrush}" />
+  </Style>
+
+  <Style Selector="theme|SettingsDivider">
+    <Setter Property="Margin" Value="0,0,0,12" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Height="1" Background="{DynamicResource SeparatorBrush}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <!-- MARK: Переключатель: подпись над дорожкой, «Вкл.»/«Выкл.» справа. -->
+  <Style Selector="CheckBox.switch">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Margin" Value="0,0,0,12" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Background="Transparent">
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            Margin="0,0,0,6"
+                            IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <StackPanel Orientation="Horizontal">
+            <Border Name="Track"
+                    Width="40"
+                    Height="20"
+                    CornerRadius="10"
+                    VerticalAlignment="Center"
+                    BorderThickness="2"
+                    BorderBrush="{DynamicResource TextPrimaryBrush}"
+                    Background="Transparent">
+              <Ellipse Name="Knob"
+                       Width="10"
+                       Height="10"
+                       Margin="3,0,0,0"
+                       HorizontalAlignment="Left"
+                       Fill="{DynamicResource TextPrimaryBrush}" />
+            </Border>
+            <Panel Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Name="Off" Text="{res:Loc SwitchOff}" />
+              <TextBlock Name="On" Text="{res:Loc SwitchOn}" IsVisible="False" />
+            </Panel>
+          </StackPanel>
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="CheckBox.switch:checked /template/ Border#Track">
+    <Setter Property="Background" Value="{DynamicResource AccentFillBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentFillBrush}" />
+  </Style>
+  <Style Selector="CheckBox.switch:checked /template/ Ellipse#Knob">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="Margin" Value="0,0,3,0" />
+    <Setter Property="Fill" Value="White" />
+  </Style>
+  <Style Selector="CheckBox.switch:checked /template/ TextBlock#Off">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="CheckBox.switch:checked /template/ TextBlock#On">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <Style Selector="CheckBox.switch:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+  <!-- MARK: Кнопка настроек: плашка с обводкой под курсором. -->
+  <Style Selector="Button.settings">
+    <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Padding" Value="14,5" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Surface"
+                Background="{TemplateBinding Background}"
+                BorderBrush="Transparent"
+                CornerRadius="{StaticResource ControlCornerRadius}"
+                BorderThickness="2"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Button.settings:pointerover /template/ Border#Surface">
+    <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderHoverBrush}" />
+  </Style>
+  <Style Selector="Button.settings:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource ControlPressedBrush}" />
+  </Style>
+  <Style Selector="Button.settings:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+  <Style Selector="Button.settings.accent">
+    <Setter Property="Background" Value="{DynamicResource AccentFillBrush}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.settings.accent:pressed /template/ Border#Surface">
+    <Setter Property="Background" Value="{DynamicResource AccentFillBrush}" />
+    <Setter Property="Opacity" Value="0.75" />
+  </Style>
+
+  <!--
+      MARK: Плитка темы: миниатюра окна 104 × 68. Tag — Light, Dark или
+      System (половина светлая, половина тёмная).
+  -->
+  <Style Selector="RadioButton.tile">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Margin" Value="0,0,12,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Background="Transparent">
+          <Border Name="Frame"
+                  Width="104" Height="68"
+                  CornerRadius="6"
+                  BorderThickness="2"
+                  BorderBrush="{DynamicResource ControlBorderHoverBrush}"
+                  Padding="2">
+            <Grid ClipToBounds="True" ColumnDefinitions="*,*">
+              <Border Name="Left" Grid.ColumnSpan="2" Background="#FFF3F3F3" CornerRadius="3">
+                <StackPanel Margin="8,8,8,0">
+                  <Border Name="LeftBar" Height="6" CornerRadius="2" Background="#FFD0D0D0" />
+                  <Border Height="12" Width="36" Margin="0,8,0,0" CornerRadius="2"
+                          HorizontalAlignment="Left" Background="{DynamicResource AccentFillBrush}" />
+                </StackPanel>
+              </Border>
+              <Border Name="Right" Grid.Column="1" Background="#FF202020" CornerRadius="0,3,3,0" IsVisible="False">
+                <StackPanel Margin="8,8,8,0">
+                  <Border Height="6" CornerRadius="2" Background="#FF454545" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Border>
+          <ContentPresenter Content="{TemplateBinding Content}" Margin="0,6,0,0" HorizontalAlignment="Center" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.tile.dark /template/ Border#Left">
+    <Setter Property="Background" Value="#FF202020" />
+  </Style>
+  <Style Selector="RadioButton.tile.dark /template/ Border#LeftBar">
+    <Setter Property="Background" Value="#FF454545" />
+  </Style>
+  <Style Selector="RadioButton.tile.system /template/ Border#Left">
+    <Setter Property="CornerRadius" Value="3,0,0,3" />
+    <Setter Property="Grid.ColumnSpan" Value="1" />
+  </Style>
+  <Style Selector="RadioButton.tile.system /template/ Border#Right">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <Style Selector="RadioButton.tile:pointerover /template/ Border#Frame">
+    <Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+  <Style Selector="RadioButton.tile:checked /template/ Border#Frame">
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentFillBrush}" />
+  </Style>
+  <Style Selector="RadioButton.tile:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+  <!-- MARK: Сегмент: кружок 18 и подпись; выбранный — заливка акцентом и белая точка. -->
+  <Style Selector="RadioButton.segment">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Margin" Value="0,0,18,0" />
+    <Setter Property="Padding" Value="8,0,0,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent" MinHeight="24" ColumnDefinitions="Auto,*">
+          <Grid Width="18" Height="18" VerticalAlignment="Center">
+            <Ellipse Name="Ring"
+                     Stroke="{DynamicResource TextSecondaryBrush}"
+                     StrokeThickness="1"
+                     Fill="Transparent" />
+            <Ellipse Name="Dot" Width="8" Height="8" Fill="White" IsVisible="False" />
+          </Grid>
+          <ContentPresenter Grid.Column="1"
+                            Content="{TemplateBinding Content}"
+                            Margin="{TemplateBinding Padding}"
+                            VerticalAlignment="Center" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.segment:pointerover /template/ Ellipse#Ring">
+    <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+  </Style>
+  <Style Selector="RadioButton.segment:checked /template/ Ellipse#Ring">
+    <Setter Property="Fill" Value="{DynamicResource AccentFillBrush}" />
+    <Setter Property="Stroke" Value="{DynamicResource AccentFillBrush}" />
+  </Style>
+  <Style Selector="RadioButton.segment:checked /template/ Ellipse#Dot">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <Style Selector="RadioButton.segment:focus-visible /template/ Ellipse#Ring">
+    <Setter Property="StrokeThickness" Value="2" />
+  </Style>
+  <Style Selector="RadioButton.segment:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+  <!--
+      MARK: Ползунок: тонкая дорожка 2, заполненная часть акцентом, бегунок
+      8 × 24. Щелчок по дорожке ставит бегунок в точку щелчка — так
+      Avalonia делает сама, как IsMoveToPointEnabled у WPF (0.1.77).
+  -->
+  <!-- :horizontal — точнее стиля простой темы, который ставит свой шаблон так же. -->
+  <Style Selector="Slider:horizontal">
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Name="grid">
+          <Track Name="PART_Track"
+                 Minimum="{TemplateBinding Minimum}"
+                 Maximum="{TemplateBinding Maximum}"
+                 Value="{TemplateBinding Value, Mode=TwoWay}"
+                 Orientation="Horizontal">
+            <Track.DecreaseButton>
+              <RepeatButton Name="PART_DecreaseButton" Focusable="False" Background="Transparent">
+                <RepeatButton.Template>
+                  <ControlTemplate>
+                    <Grid Background="Transparent">
+                      <Border Height="2" Background="{DynamicResource AccentFillBrush}" />
+                    </Grid>
+                  </ControlTemplate>
+                </RepeatButton.Template>
+              </RepeatButton>
+            </Track.DecreaseButton>
+            <Track.IncreaseButton>
+              <RepeatButton Name="PART_IncreaseButton" Focusable="False" Background="Transparent">
+                <RepeatButton.Template>
+                  <ControlTemplate>
+                    <Grid Background="Transparent">
+                      <Border Height="2" Background="{DynamicResource ControlPressedBrush}" />
+                    </Grid>
+                  </ControlTemplate>
+                </RepeatButton.Template>
+              </RepeatButton>
+            </Track.IncreaseButton>
+            <Thumb Name="thumb">
+              <Thumb.Template>
+                <ControlTemplate>
+                  <Border Name="Knob" Width="8" Height="24" CornerRadius="2" Background="{DynamicResource AccentFillBrush}" />
+                </ControlTemplate>
+              </Thumb.Template>
+            </Thumb>
+          </Track>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="Slider /template/ Thumb#thumb:pointerover /template/ Border#Knob">
+    <Setter Property="Background" Value="{DynamicResource TextPrimaryBrush}" />
+  </Style>
+  <Style Selector="Slider:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+
+</Styles>

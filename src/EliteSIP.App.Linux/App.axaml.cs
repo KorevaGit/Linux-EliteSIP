@@ -44,7 +44,7 @@ namespace EliteSIP.App;
 /// <item>стук — системным <c>ping</c> (<see cref="PingUtilityEcho"/>).</item>
 /// </list>
 /// </remarks>
-public partial class App : Application, IDisposable
+public sealed partial class App : Application, IDisposable
 {
     private readonly Stopwatch _startup = Stopwatch.StartNew();
     private readonly List<string> _marks = [];
@@ -156,10 +156,11 @@ public partial class App : Application, IDisposable
 
         if (!_settings.Setup.IsCompleted || args.Contains("--first-run"))
         {
-            // Мастер — следующий шаг W-L5. Пока машину настраивают файлом
-            // настроек, а панель встаёт и без него: регистрация скажет «нет
-            // учётной записи» статусом, а не пустым экраном.
-            Log("запуск: машина не настроена — мастера на Linux пока нет (W-L5, шаг 2)");
+            if (!RunFirstRun())
+            {
+                _ = QuitAsync(TimeSpan.Zero);
+                return;
+            }
         }
 
         _history = new CallHistoryStore(new CallHistoryStore.Settings(
@@ -236,6 +237,30 @@ public partial class App : Application, IDisposable
         var beforeConnect = _startup.ElapsedMilliseconds;
         _ = _phone.ConnectAsync();
         var afterConnect = _startup.ElapsedMilliseconds;
+
+        // Те же ключи, что у Windows: снимки окон сверяют скриптом, а
+        // дотянуться до окна, которое открывается из панели, иначе нечем.
+        if (args.Contains("--open-history"))
+        {
+            ShowHistory();
+        }
+
+        if (args.Contains("--open-admin"))
+        {
+            ShowAdministration();
+        }
+
+        var opened = Array.IndexOf(args, "--open-settings");
+        if (opened >= 0)
+        {
+            ShowSettings();
+            if (opened + 1 < args.Length
+                && Enum.TryParse<SettingsSectionKind>(args[opened + 1], ignoreCase: true, out var section)
+                && _settingsWindow?.Model is { } settingsModel)
+            {
+                settingsModel.Section = section;
+            }
+        }
 
         var sinceProcess = (int)(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds;
         Log($"запуск: панель готова через {sinceProcess} мс от старта процесса "
@@ -365,9 +390,7 @@ public partial class App : Application, IDisposable
             handoff: _updateHandoff,
             log: Log)
         {
-            // Спросить оператора нечем до окон шага 2: установка всё равно
-            // не случится без обновляльщика (W-L7), и согласие ему некуда отдать.
-            AskToInstall = _ => false,
+            AskToInstall = AskToInstallUpdate,
             PrepareForRestart = () =>
             {
                 ClientEventLog.Shared.NoteShutdown("установка обновления");
@@ -501,10 +524,6 @@ public partial class App : Application, IDisposable
         _ => null,
     };
 
-    private void ShowSettings() => Log("настройки: окно — W-L5, шаг 2");
-
-    private void ShowHistory() => Log("история: окно — W-L5, шаг 2");
-
     private void Reconnect(string reason)
     {
         if (_phone is null || _panel is null)
@@ -618,9 +637,9 @@ public partial class App : Application, IDisposable
 
         // Новый экземпляр поднимет служба: выход с кодом, отличным от 0 и 1,
         // она считает падением и перезапускает. Без службы — запускаем сами.
-        if (!UserService.IsCurrentProcess && Environment.ProcessPath is { } executable)
+        if (!UserService.IsCurrentProcess)
         {
-            using var restarted = Process.Start(executable);
+            StartNewCopy();
         }
 
         _ = QuitAsync(TimeSpan.FromSeconds(2), exitCode: UserService.IsCurrentProcess ? 3 : 0);

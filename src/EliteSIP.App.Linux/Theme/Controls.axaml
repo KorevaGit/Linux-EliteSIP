@@ -223,6 +223,42 @@
     <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
   </Style>
 
+  <!--
+      MARK: Боковой список разделов (настройки, «Управление»): выбранный —
+      текст и значок акцентом без заливки, как в Параметрах Windows 10; под
+      курсором строка чуть светлеет.
+  -->
+  <Style Selector="ListBox.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem">
+    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource NavHoverBrush}" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:selected">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+  </Style>
+  <!-- «Управление»: строки плотнее и скруглены, над группой — её заголовок. -->
+  <Style Selector="ListBox.nav.grouped ListBoxItem">
+    <Setter Property="Padding" Value="8,5" />
+    <Setter Property="Margin" Value="0,1" />
+  </Style>
+  <Style Selector="ListBox.nav.grouped ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+  </Style>
+  <Style Selector="ListBox.nav ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource NavHoverBrush}" />
+  </Style>
+
   <!-- MARK: Меню -->
 
   <!-- Меню капсулы и значка: поверхность со скруглением 8, строки по 32. -->

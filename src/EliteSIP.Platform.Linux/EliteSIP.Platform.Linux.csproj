@@ -25,6 +25,7 @@
     <InternalsVisibleTo Include="EliteSIP.Platform.Linux.Tests" />
     <InternalsVisibleTo Include="ShellProbe" />
     <InternalsVisibleTo Include="EliteSIP.App.Linux" />
+    <InternalsVisibleTo Include="EliteSIP.App.Linux.Tests" />
   </ItemGroup>
 
   <ItemGroup>

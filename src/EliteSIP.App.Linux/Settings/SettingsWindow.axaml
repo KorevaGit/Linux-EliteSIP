@@ -1,0 +1,669 @@
+<Window x:Class="EliteSIP.App.Settings.SettingsWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme"
+        xmlns:settings="using:EliteSIP.App.Settings"
+        xmlns:res="using:EliteSIP.App.Resources"
+        xmlns:admin="using:EliteSIP.App.Admin"
+        x:DataType="settings:SettingsViewModel"
+        Title="{res:Loc SettingsWindowTitle}"
+        Width="660"
+        Height="480"
+        MinWidth="660"
+        MinHeight="420"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True">
+
+  <!--
+      Ширина 620 — сайдбар 160 плюс строка во всю свою ширину плюс поля.
+      Высота 420 задаётся содержимым: разделов пять, и они видны на любой
+      высоте, а самый высокий — «Звук» с двумя устройствами и самопроверкой.
+
+      Колонка подписей — менеджерские 72, а не административные 132: подписи
+      здесь короткие («Громкость», «Микрофон»), и широкая колонка отодвинула бы
+      управление от левого края на пустое место.
+  -->
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <!-- Сайдбар фиксирован: список не тянется вместе с окном, иначе на
+           широком мониторе пять коротких названий разъезжаются по полосе в
+           треть экрана. -->
+      <ColumnDefinition Width="160" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <!-- Боковой список разделов. -->
+
+    <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}">
+      <ListBox Classes="nav"
+               ItemsSource="{Binding Sections}"
+               SelectedValue="{Binding Section}"
+               SelectedValueBinding="{ReflectionBinding Kind}"
+               Background="Transparent"
+               BorderThickness="0"
+               Margin="0,8,0,8">
+
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="settings:SettingsSectionItem">
+            <StackPanel Orientation="Horizontal">
+              <!-- Значок 15, а не системные 16: наши нарисованы на сетке 20×20
+                   обводкой 1.5 и на шестнадцати читаются грубее соседей. -->
+              <!-- Цвет значка — цвет строки: у выбранной он акцентный. -->
+              <theme:Icon Glyph="{Binding Glyph}" Size="16" VerticalAlignment="Center"
+                          Foreground="{Binding $parent[ListBoxItem].Foreground}" />
+              <TextBlock Text="{Binding Title}" Margin="12,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Border>
+
+    <!-- Открытый раздел и полоса низа. -->
+
+    <Grid Grid.Column="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <ScrollViewer Grid.Row="0"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled"
+                    Padding="24,16,24,0">
+        <!--
+            Потолок ширины строк задан здесь, столбцу разделов, а не каждой
+            строке порознь. Порознь не выходит: строке с ползунком нужно
+            тянуться до потолка, а элемент, который и тянется, и ограничен
+            сверху, WPF ставит по середине оставшегося места — на широком окне
+            раздел уезжал бы от левого края.
+        -->
+        <Grid HorizontalAlignment="Left"
+              Width="420">
+
+          <!-- Раздел «Работа». -->
+          <StackPanel IsVisible="{Binding ShowsWork}">
+            <theme:SettingsSection Header="{res:Loc WorkPlace}">
+              <theme:SettingsRow Header="{res:Loc SectionWork}">
+                <StackPanel Orientation="Horizontal">
+                  <RadioButton Classes="segment"
+                               GroupName="Site"
+                               Content="{res:Loc WorkOffice}"
+                               IsChecked="{Binding Settings.Account.Site, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Office}" />
+                  <RadioButton Classes="segment"
+                               GroupName="Site"
+                               Content="{res:Loc WorkRemote}"
+                               IsChecked="{Binding Settings.Account.Site, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Remote}" />
+                </StackPanel>
+              </theme:SettingsRow>
+
+              <theme:SettingsRow Header="{res:Loc WorkPbxAddress}">
+                <TextBlock Text="{Binding Settings.Account.Domain}"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsRow>
+
+              <theme:SettingsNote Text="{res:Loc WorkSiteNote}" />
+            </theme:SettingsSection>
+
+            <theme:SettingsSection Header="{res:Loc WorkTroubleSection}">
+              <theme:SettingsIndented>
+                <TextBlock Text="{res:Loc WorkRepairNote}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsIndented>
+
+              <theme:SettingsIndented>
+                <Button Classes="settings"
+                        HorizontalAlignment="Left"
+                        Content="{res:Loc WorkRepairNetwork}"
+                        Command="{Binding RepairNetwork}" />
+              </theme:SettingsIndented>
+
+              <!-- Итог — здесь, под своей кнопкой: прежде он уходил на страницу
+                   «Техподдержка», и нажатие на этой странице выглядело ничем. -->
+              <theme:SettingsNote Text="{Binding SupportResult}"
+                                  IsVisible="{Binding HasNetworkResult}" />
+            </theme:SettingsSection>
+          </StackPanel>
+
+          <!-- Раздел «Звук». -->
+          <StackPanel IsVisible="{Binding ShowsAudio}">
+            <!--
+                Четыре группы вместо одной сплошной: микрофон, наушники,
+                обработка и проверка — разные вопросы, и одной стопкой они
+                читались как список без начала и конца.
+            -->
+            <theme:SettingsSection Header="{res:Loc AudioInputSection}">
+              <theme:SettingsRow Header="{res:Loc AudioDevice}">
+                <!--
+                    Шаблон строки, а не `DisplayMemberPath`: закрытый вид
+                    своего списка рисуется тем же `SelectionBoxItemTemplate`,
+                    а `DisplayMemberPath` его не заполняет — в закрытом списке
+                    оказывалось имя типа со всеми полями, что живая проверка и
+                    показала.
+                -->
+                <ComboBox Name="InputDevices"
+                          ItemsSource="{Binding Inputs}"
+                          SelectedValueBinding="{ReflectionBinding Id}"
+                          SelectedValue="{Binding Settings.Audio.InputDeviceId}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="settings:AudioDeviceOption">
+                      <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </theme:SettingsRow>
+
+              <!--
+                  Ползунок стоит под своим устройством, а не отдельным блоком
+                  «Громкость» внизу страницы: отдельным блоком обе подписи
+                  пришлось бы называть «Микрофон» и «Наушники» второй раз.
+              -->
+              <theme:SettingsRow Header="{res:Loc AudioGain}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Slider Grid.Column="0"
+                          Minimum="0" Maximum="2"
+                          SmallChange="0.05" LargeChange="0.1"
+                          IsSnapToTickEnabled="True" TickFrequency="0.05"
+                          VerticalAlignment="Center"
+                          Value="{Binding Settings.Audio.MicrophoneGain}"
+                          IsEnabled="{Binding Settings.Audio.GainIsAdjustable}" />
+                  <TextBlock Grid.Column="1"
+                             Margin="6,0,0,0"
+                             MinWidth="40"
+                             TextAlignment="Right"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
+                             Text="{Binding Settings.Audio.MicrophoneGain, Converter={x:Static theme:Converters.Percent}}" />
+                </Grid>
+              </theme:SettingsRow>
+
+              <!--
+                  Почему ручка серая — здесь, а не подсказкой при наведении:
+                  «управление серое и молчит» — худший вид отказа.
+              -->
+              <theme:SettingsNote Text="{res:Loc AudioGainAutoNote}"
+                                  IsVisible="{Binding Settings.Audio.AutomaticGainControl}" />
+            </theme:SettingsSection>
+
+            <theme:SettingsSection Header="{res:Loc AudioOutputSection}">
+              <theme:SettingsRow Header="{res:Loc AudioDevice}">
+                <ComboBox Name="OutputDevices"
+                          ItemsSource="{Binding Outputs}"
+                          SelectedValueBinding="{ReflectionBinding Id}"
+                          SelectedValue="{Binding Settings.Audio.OutputDeviceId}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="settings:AudioDeviceOption">
+                      <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </theme:SettingsRow>
+
+              <!-- До 200 %: умножение в тракте, после него мягкий ограничитель. -->
+              <theme:SettingsRow Header="{res:Loc AudioVolume}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Slider Grid.Column="0"
+                          Minimum="0" Maximum="2"
+                          SmallChange="0.05" LargeChange="0.1"
+                          IsSnapToTickEnabled="True" TickFrequency="0.05"
+                          VerticalAlignment="Center"
+                          Value="{Binding Settings.Audio.PlaybackVolume}" />
+                  <TextBlock Grid.Column="1"
+                             Margin="6,0,0,0"
+                             MinWidth="40"
+                             TextAlignment="Right"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
+                             Text="{Binding Settings.Audio.PlaybackVolume, Converter={x:Static theme:Converters.Percent}}" />
+                </Grid>
+              </theme:SettingsRow>
+
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AudioReceiveGain}"
+                        IsChecked="{Binding Settings.Audio.ReceiveGainControl}" />
+
+              <theme:SettingsNote Text="{res:Loc AudioReceiveGainNote}" />
+
+              <theme:SettingsNote Text="{res:Loc AudioLevelsNote}" />
+
+              <theme:SettingsNote Text="{res:Loc AudioAggregateNote}"
+                                  IsVisible="{Binding NeedsAggregate}" />
+            </theme:SettingsSection>
+
+            <theme:SettingsSection Header="{res:Loc AudioProcessingSection}">
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AudioAgc}"
+                        IsChecked="{Binding Settings.Audio.AutomaticGainControl}" />
+
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AudioNoiseSuppression}"
+                        IsChecked="{Binding Settings.Audio.NoiseSuppression}" />
+
+              <theme:SettingsNote Text="{res:Loc AudioNoiseSuppressionNote}" />
+
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AudioBackgroundVoices}"
+                        IsChecked="{Binding Settings.Audio.BackgroundVoiceSuppression}" />
+
+              <theme:SettingsNote Text="{res:Loc AudioBackgroundVoicesNote}" />
+
+              <!--
+                  «Обработка Windows» (RAW-режим, эффекты драйвера) — на Linux
+                  её нет вовсе: ALSA эффектов захвата не предлагает. Строка
+                  спрятана, а поле настройки остаётся — настройки и
+                  предустановки общие с Windows (план, «Что пришло в 0.1.69–0.1.78»).
+              -->
+              <theme:SettingsRow Header="{res:Loc AudioWindowsProcessing}" IsVisible="False">
+                <StackPanel Orientation="Horizontal">
+                  <RadioButton Classes="segment"
+                               GroupName="WindowsProcessing"
+                               Content="{res:Loc AudioWindowsProcessingAuto}"
+                               IsChecked="{Binding Settings.Audio.WindowsProcessing, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Auto}" />
+                  <RadioButton Classes="segment"
+                               GroupName="WindowsProcessing"
+                               Content="{res:Loc AudioWindowsProcessingOn}"
+                               IsChecked="{Binding Settings.Audio.WindowsProcessing, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=On}" />
+                  <RadioButton Classes="segment"
+                               GroupName="WindowsProcessing"
+                               Content="{res:Loc AudioWindowsProcessingOff}"
+                               IsChecked="{Binding Settings.Audio.WindowsProcessing, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Off}" />
+                </StackPanel>
+              </theme:SettingsRow>
+
+              <theme:SettingsNote Text="{res:Loc AudioWindowsProcessingNote}" IsVisible="False" />
+
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AudioRelease}"
+                        IsChecked="{Binding Settings.Audio.ReleasesDeviceWhenIdle}" />
+            </theme:SettingsSection>
+
+            <!--
+                Самопроверка звука — см. `AudioSelfTest`. Пояснение над кнопкой
+                (что будет), итог — под ней (что вышло).
+            -->
+            <theme:SettingsSection Header="{res:Loc AudioSelfTestSection}">
+              <theme:SettingsIndented>
+                <TextBlock Text="{res:Loc AudioSelfTestNote}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsIndented>
+
+              <!-- Одна кнопка на запуск и остановку: вторая рядом читалась бы
+                   как ещё одна проверка. -->
+              <theme:SettingsIndented>
+                <Button Classes="settings"
+                        HorizontalAlignment="Left"
+                        Content="{Binding SelfTestButtonText}"
+                        IsEnabled="{Binding CanRunSelfTest}"
+                        Command="{Binding RunSelfTest}" />
+              </theme:SettingsIndented>
+
+              <!-- Серая кнопка без объяснения — худший вид отказа. -->
+              <theme:SettingsNote Text="{res:Loc AudioSelfTestBusy}"
+                                  IsVisible="{Binding IsSelfTestBlockedByCall}" />
+
+              <!--
+                  Шкалы — только во время проверки и разговора. В остальное
+                  время подсказка: полоса на нуле читается как сломанный
+                  микрофон, а открывать микрофон ради шкалы нельзя.
+              -->
+              <theme:SettingsRow Header="{res:Loc AudioMeterVoice}"
+                                 IsVisible="{Binding ShowsMeters}">
+                <theme:LevelMeter Level="{Binding VoiceLevel}" VerticalAlignment="Center" />
+              </theme:SettingsRow>
+
+              <theme:SettingsRow Header="{res:Loc AudioMeterSound}"
+                                 IsVisible="{Binding ShowsMeters}">
+                <theme:LevelMeter Level="{Binding SoundLevel}" VerticalAlignment="Center" />
+              </theme:SettingsRow>
+
+              <theme:SettingsNote Text="{res:Loc AudioMeterHint}"
+                                  IsVisible="{Binding !ShowsMeters}" />
+
+              <theme:SettingsNote Text="{Binding SelfTestResult}"
+                                  IsVisible="{Binding HasSelfTestResult}" />
+
+              <!--
+                  Запись проверки — в файл, только по кнопке: то, что ушло бы в
+                  линию, для сравнения настроек и для жалобы.
+              -->
+              <theme:SettingsIndented IsVisible="{Binding CanSaveRecording}">
+                <Button Classes="settings"
+                        HorizontalAlignment="Left"
+                        Content="{res:Loc AudioSelfTestSave}"
+                        Command="{Binding SaveRecording}" />
+              </theme:SettingsIndented>
+            </theme:SettingsSection>
+          </StackPanel>
+
+          <!-- Раздел «Звонок». -->
+          <StackPanel IsVisible="{Binding ShowsRingtone}">
+            <theme:SettingsSection Header="{res:Loc SectionRingtone}">
+              <CheckBox Classes="switch"
+                        Content="{res:Loc RingtoneEnabled}"
+                        IsChecked="{Binding Settings.Ringtone.IsEnabled}" />
+
+              <!--
+                  Гаснет весь раздел, кроме собственного выключателя: он и есть
+                  то, чем раздел возвращают.
+              -->
+              <theme:SettingsRow Header="{res:Loc AudioVolume}"
+                                 IsEnabled="{Binding Settings.Ringtone.IsEnabled}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Slider Grid.Column="0"
+                          Minimum="0" Maximum="1"
+                          SmallChange="0.05" LargeChange="0.1"
+                          IsSnapToTickEnabled="True" TickFrequency="0.05"
+                          VerticalAlignment="Center"
+                          Value="{Binding Settings.Ringtone.Volume}" />
+                  <TextBlock Grid.Column="1"
+                             Margin="6,0,0,0"
+                             MinWidth="40"
+                             TextAlignment="Right"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
+                             Text="{Binding Settings.Ringtone.Volume, Converter={x:Static theme:Converters.Percent}}" />
+                </Grid>
+              </theme:SettingsRow>
+
+              <theme:SettingsRow Header="{res:Loc RingtonePlayIn}"
+                                 IsEnabled="{Binding Settings.Ringtone.IsEnabled}">
+                <StackPanel Orientation="Horizontal">
+                  <RadioButton Classes="segment"
+                               GroupName="RingtoneOutput"
+                               Content="{res:Loc RingtoneSystemOutput}"
+                               IsChecked="{Binding Settings.Ringtone.Output, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=SystemDefault}" />
+                  <RadioButton Classes="segment"
+                               GroupName="RingtoneOutput"
+                               Content="{res:Loc RingtoneCallOutput}"
+                               IsChecked="{Binding Settings.Ringtone.Output, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=CallDevice}" />
+                </StackPanel>
+              </theme:SettingsRow>
+
+              <theme:SettingsNote Text="{res:Loc RingtoneOutputNote}" />
+
+              <theme:SettingsRow Header="{res:Loc RingtoneSound}"
+                                 IsEnabled="{Binding Settings.Ringtone.IsEnabled}">
+                <TextBlock Text="{Binding RingtoneName}"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsRow>
+
+              <theme:SettingsIndented IsEnabled="{Binding Settings.Ringtone.IsEnabled}">
+                <StackPanel Orientation="Horizontal">
+                  <Button Classes="settings"
+                          Content="{res:Loc RingtoneChooseFile}"
+                          Click="OnChooseRingtoneClick" />
+                  <Button Classes="settings"
+                          Margin="12,0,0,0"
+                          Content="{res:Loc RingtoneDefault}"
+                          Click="OnDefaultRingtoneClick"
+                          IsEnabled="{Binding Settings.Ringtone.HasCustomSound}" />
+                  <Button Classes="settings"
+                          Margin="12,0,0,0"
+                          Content="{res:Loc RingtonePreview}"
+                          Click="OnPreviewRingtoneClick" />
+                </StackPanel>
+              </theme:SettingsIndented>
+
+              <theme:SettingsNote x:Name="RingtoneProblem"
+                                  IsAlarming="True"
+                                  IsVisible="False" />
+            </theme:SettingsSection>
+          </StackPanel>
+
+          <!-- Раздел «Оформление». -->
+          <StackPanel IsVisible="{Binding ShowsAppearance}">
+            <!--
+                Раздел был из одной строки, и это не считалось недосмотром:
+                панель висит поверх CRM весь день, и если CRM светлая, а система
+                тёмная, выбор делает тот, кто на это смотрит.
+            -->
+            <theme:SettingsSection Header="{res:Loc SectionAppearance}">
+              <theme:SettingsRow Header="{res:Loc AppearanceTheme}">
+                <StackPanel Orientation="Horizontal">
+                  <RadioButton Classes="tile system"
+                               GroupName="Theme"
+                               Content="{res:Loc AppearanceSystem}"
+                               IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=System}" />
+                  <RadioButton Classes="tile light"
+                               GroupName="Theme"
+                               Content="{res:Loc AppearanceLight}"
+                               IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Light}" />
+                  <RadioButton Classes="tile dark"
+                               GroupName="Theme"
+                               Content="{res:Loc AppearanceDark}"
+                               IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Dark}" />
+                </StackPanel>
+              </theme:SettingsRow>
+
+              <!--
+                  Тема применяется сразу, и это отличие от оригинала не
+                  косметическое: там переключение корпуса требовало перезапуска,
+                  потому что стекло выбиралось при сборке окон. Здесь палитра —
+                  словарь ресурсов, и подменяется он на живых окнах.
+              -->
+              <theme:SettingsNote Text="{res:Loc AppearanceThemeNote}" />
+            </theme:SettingsSection>
+
+            <!--
+                Свой раздел, а не строка рядом с темой. Язык не оформление: тема
+                решает, как приложение выглядит, а язык — на чём оно
+                разговаривает, и меняют его один раз при заведении рабочего
+                места, а не по настроению.
+            -->
+            <theme:SettingsSection Header="{res:Loc AppearanceLanguage}">
+              <theme:SettingsRow Header="">
+                <StackPanel Orientation="Horizontal">
+                  <RadioButton Classes="segment"
+                               GroupName="Language"
+                               Content="{res:Loc AppearanceLanguageSystem}"
+                               IsCheckedChanged="OnLanguageChosen"
+                               Tag="System"
+                               IsChecked="{Binding Settings.Appearance.Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=System, Mode=OneWay}" />
+                  <!-- Названия языков написаны на них самих, как в «Языке и
+                       регионе» самой системы: человек, у которого приложение
+                       говорит на незнакомом ему языке, ищет в списке слово,
+                       которое узнаёт, а не перевод этого слова. -->
+                  <RadioButton Classes="segment"
+                               GroupName="Language"
+                               Content="Русский"
+                               IsCheckedChanged="OnLanguageChosen"
+                               Tag="Russian"
+                               IsChecked="{Binding Settings.Appearance.Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Russian, Mode=OneWay}" />
+                  <RadioButton Classes="segment"
+                               GroupName="Language"
+                               Content="English"
+                               IsCheckedChanged="OnLanguageChosen"
+                               Tag="English"
+                               IsChecked="{Binding Settings.Appearance.Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=English, Mode=OneWay}" />
+                </StackPanel>
+              </theme:SettingsRow>
+
+              <theme:SettingsNote Text="{res:Loc AppearanceLanguageNote}" />
+              <theme:SettingsNote Text="{res:Loc AppearanceLanguageRestartNote}" />
+            </theme:SettingsSection>
+          </StackPanel>
+
+          <!-- Раздел «Техподдержка». -->
+          <StackPanel IsVisible="{Binding ShowsSupport}">
+            <!--
+                Три группы вместо одной с чертой посередине: журнал, версия с
+                обновлениями и предустановки — три разных разговора с
+                поддержкой, и у каждой кнопки свой итог прямо под ней.
+            -->
+            <theme:SettingsSection Header="{res:Loc WorkStartupSection}">
+              <CheckBox Classes="switch"
+                        Content="{res:Loc AdminMaintenanceAutoStart}"
+                        IsChecked="{Binding StartsWithWindows}" />
+
+              <theme:SettingsNote Text="{res:Loc AdminMaintenanceAutoStartNote}" />
+            </theme:SettingsSection>
+
+            <theme:SettingsSection Header="{res:Loc SupportLogsSection}">
+              <theme:SettingsIndented>
+                <TextBlock Text="{res:Loc SupportArchiveNote}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsIndented>
+
+              <theme:SettingsIndented>
+                <Button Classes="settings"
+                        HorizontalAlignment="Left"
+                        Content="{res:Loc SupportCollectLogs}"
+                        Command="{Binding CollectLogs}" />
+              </theme:SettingsIndented>
+
+              <theme:SettingsNote Text="{Binding SupportResult}"
+                                  IsVisible="{Binding HasLogsResult}" />
+            </theme:SettingsSection>
+
+            <!--
+                Версия — прямо над проверкой обновлений: первое, что просит
+                поддержка по телефону, — «какая у вас версия».
+            -->
+            <theme:SettingsSection Header="{res:Loc SupportUpdatesSection}">
+              <theme:SettingsRow Header="{res:Loc SupportVersion}">
+                <TextBlock Text="{Binding Version}"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsRow>
+
+              <!--
+                  Весь блок висит на самом `Updates`, а не на его свойствах:
+                  без заводской настройки линии нет, и привязки к её свойствам
+                  не разрешались бы — «Установить обновление» висело бы всегда.
+              -->
+              <StackPanel DataContext="{Binding Updates}"
+                          x:DataType="admin:UpdatesViewModel"
+                          IsVisible="{Binding Converter={x:Static theme:Converters.Present}}">
+                <theme:SettingsIndented>
+                  <StackPanel Orientation="Horizontal">
+                    <Button Classes="settings"
+                            Content="{res:Loc SupportCheckUpdates}"
+                            Command="{Binding CheckNow}" />
+
+                    <!-- Только когда выпуск скачан и проверен. -->
+                    <Button Classes="settings"
+                            Margin="12,0,0,0"
+                            Content="{res:Loc AdminDiagnosticsInstallUpdate}"
+                            Command="{Binding Install}"
+                            IsVisible="{Binding IsReady}" />
+                  </StackPanel>
+                </theme:SettingsIndented>
+
+                <theme:SettingsNote Text="{Binding Status}"
+                                    IsVisible="{Binding HasStatus}" />
+              </StackPanel>
+            </theme:SettingsSection>
+
+            <!--
+                Предустановки — своя группа: «почему у меня старые клавиши» и
+                «почему у меня старая версия» — два разных вопроса.
+            -->
+            <!--
+                Связь со Spark. Ключей активации больше нет: номер и
+                предустановку меняют в карточке сотрудника в Spark, машина
+                применяет их сама. Здесь остаётся, по чему её найти в Spark, и
+                одна кнопка: проверить сейчас — или, в оффлайне, вернуться в
+                онлайн. Раньше машина вне панели этой группы не видела вовсе.
+            -->
+            <theme:SettingsSection Header="{res:Loc SupportSparkSection}">
+              <theme:SettingsRow Header="{res:Loc AdminSupportMachine}">
+                <TextBlock Text="{Binding MachineID}"
+                           FontFamily="monospace"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsRow>
+
+              <theme:SettingsRow Header="{res:Loc AdminSupportLink}">
+                <TextBlock Text="{Binding LinkState}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+              </theme:SettingsRow>
+
+              <theme:SettingsIndented>
+                <Grid>
+                  <Button Classes="settings"
+                          HorizontalAlignment="Left"
+                          Content="{res:Loc SupportCheckPresets}"
+                          Command="{Binding CheckPresets}"
+                          IsVisible="{Binding !IsPanelOffline}" />
+                  <Button Classes="settings"
+                          HorizontalAlignment="Left"
+                          Content="{res:Loc SupportReturnOnline}"
+                          Command="{Binding ReturnOnline}"
+                          IsVisible="{Binding IsPanelOffline}" />
+                </Grid>
+              </theme:SettingsIndented>
+
+              <theme:SettingsNote Text="{res:Loc SupportReturnOnlineNote}"
+                                  IsVisible="{Binding IsPanelOffline}" />
+
+              <theme:SettingsNote Text="{Binding SupportResult}"
+                                  IsVisible="{Binding HasPresetsResult}" />
+            </theme:SettingsSection>
+          </StackPanel>
+        </Grid>
+      </ScrollViewer>
+
+      <!--
+          Полоса низа — не про сохранение: менеджерские настройки применяются
+          сразу, и кнопок «Сохранить» с «Отменить» тут нет и быть не может.
+          Полосу занимает дверь в «Управление» — единственное в этом окне
+          действие, которое относится к окну целиком, а не к открытому разделу.
+      -->
+      <Border Grid.Row="1" Padding="12,8">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <theme:Icon Grid.Column="0"
+                      Glyph="lock.shield.fill"
+                      Size="14"
+                      VerticalAlignment="Center"
+                      Foreground="{DynamicResource TextSecondaryBrush}" />
+
+          <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="{res:Loc AdminModeTitle}" />
+            <!--
+                Предупреждение, а не объяснение: перечислять, что лежит за
+                дверью, менеджеру незачем — он туда не идёт; а вот знать, что
+                дверь заперта, надо до нажатия, иначе запрос пароля выглядит
+                отказом.
+            -->
+            <TextBlock Text="{res:Loc AdminModeNeedsPassword}"
+                       FontSize="12"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+          </StackPanel>
+
+          <!-- Шеврон — потому что кнопка ведёт в другое окно. Оно и заменяет
+               собой это: «Управление» закрывает настройки, а не встаёт рядом. -->
+          <Button Grid.Column="2"
+                  Classes="settings"
+                  Content="{res:Loc AdminModeOpen}"
+                  Click="OnAdministrationClick" />
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

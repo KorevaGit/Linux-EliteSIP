@@ -1,0 +1,42 @@
+<!--
+    Стили истории — перевод shared/src/EliteSIP.App/History/History.xaml:
+    «чипы» под календарём и фильтры. ChipButtonStyle → Button.chip,
+    FilterChipStyle → RadioButton.chip.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Style Selector="Button.chip, RadioButton.chip">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="Chip"
+                Background="{DynamicResource ControlBackgroundBrush}"
+                CornerRadius="{StaticResource ControlCornerRadius}"
+                Padding="{TemplateBinding Padding}"
+                MinHeight="24">
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            Foreground="{TemplateBinding Foreground}"
+                            FontWeight="{TemplateBinding FontWeight}"
+                            VerticalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.chip">
+    <Setter Property="Margin" Value="0,0,6,0" />
+  </Style>
+  <Style Selector="Button.chip:pointerover /template/ Border#Chip, RadioButton.chip:pointerover /template/ Border#Chip">
+    <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+  </Style>
+  <Style Selector="RadioButton.chip:checked /template/ Border#Chip">
+    <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+  </Style>
+  <Style Selector="RadioButton.chip:checked">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.chip:disabled, RadioButton.chip:disabled">
+    <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
+  </Style>
+</Styles>

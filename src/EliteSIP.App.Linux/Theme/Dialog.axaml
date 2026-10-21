@@ -1,0 +1,37 @@
+<!--
+    Вопрос с кнопками — перевод shared/src/EliteSIP.App/Theme/Dialog.xaml:
+    420 в ширину, заголовок 17, текст 13, сноска 12, кнопки справа.
+-->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EliteSIP.App.Theme.Dialog"
+        Width="420"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+  <StackPanel Margin="16">
+    <TextBlock Name="TitleText"
+               FontSize="17"
+               FontWeight="SemiBold"
+               TextWrapping="Wrap"
+               Foreground="{DynamicResource TextPrimaryBrush}" />
+    <TextBlock Name="BodyText"
+               Margin="0,8,0,0"
+               FontSize="13"
+               TextWrapping="Wrap"
+               LineHeight="19"
+               Foreground="{DynamicResource TextSecondaryBrush}" />
+    <TextBlock Name="FootnoteText"
+               Margin="0,8,0,0"
+               FontSize="12"
+               TextWrapping="Wrap"
+               LineHeight="17"
+               IsVisible="False"
+               Foreground="{DynamicResource TextTertiaryBrush}" />
+    <StackPanel Name="Buttons"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Margin="0,20,0,0" />
+  </StackPanel>
+</Window>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Подписи, которые у Linux свои: в общих Strings (App.Core) они говорят о
+    Windows — автозапуск в диспетчере задач, шифрование средствами Windows,
+    пометка синтетических нажатий. Разметка берёт отсюда раньше, чем из общих
+    (Resources/Loc.cs); ключи — те же.
+-->
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AdminMaintenanceAutoStart" xml:space="preserve">
+    <value>Запускать при входе в систему</value>
+  </data>
+  <data name="AdminMaintenanceAutoStartNote" xml:space="preserve">
+    <value>Софтфон, не поднявшийся после ночной перезагрузки, пропускает первые звонки смены. Автозапуск видно и в «Автоматически запускаемых приложениях» Cinnamon.</value>
+  </data>
+  <data name="AdminAccountPasswordNote" xml:space="preserve">
+    <value>Пароль шифруется ключом из профиля этого пользователя, а сам ключ доступен только ему: файл настроек, унесённый на другую машину, пароля не отдаёт.</value>
+  </data>
+  <data name="AppearanceLanguageNote" xml:space="preserve">
+    <value>«Системный» — как в системе: русский, если язык сеанса русский, английский во всех остальных случаях.</value>
+  </data>
+  <data name="AdminGuardSyntheticNote" xml:space="preserve">
+    <value>Нажатия, сделанные программой через XTest, X-сервер помечает своим устройством, и подделать эту пометку можно только драйвером ввода. По умолчанию она всё равно только пишется в отчёт.</value>
+  </data>
+</root>

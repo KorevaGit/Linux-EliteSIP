@@ -1,0 +1,381 @@
+<Window x:Class="EliteSIP.App.FirstRun.FirstRunWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:theme="using:EliteSIP.App.Theme"
+        xmlns:firstrun="using:EliteSIP.App.FirstRun"
+        xmlns:firstruncore="using:EliteSIP.App.FirstRun"
+        xmlns:res="using:EliteSIP.App.Resources"
+        x:DataType="firstruncore:FirstRunViewModel"
+        Title="{res:Loc FirstRunTitle}"
+        Width="460"
+        Height="440"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True">
+
+  <!--
+      Размер один на все экраны и фиксированный. По «Далее» щёлкают четыре раза
+      подряд, и кнопка, переезжающая между шагами, ловит четвёртый щелчок мимо.
+      Тот же закон, по которому не двигается «Завершить» на панели.
+
+      Высота 440 и шаги по центру. На 500 с шагами у верха (0.1.59) под
+      приветствием и оформлением стояла пустота в полокна. Самый высокий шаг —
+      ручная настройка: шесть строк, разделитель и две сноски; он начинается
+      у верха без отступа, и в 440 помещается. Если текст окажется длиннее
+      (другой язык, будущий шаг), появится прокрутка, а не срезанные поля —
+      `Grid` молча отдаёт содержимому меньше места и ничего не сообщает.
+      Проверяется тестом FirstRunLayoutTests.
+  -->
+
+  <Window.Styles>
+    <!--
+        Строки мастера — подписью слева, а не сверху, как в «Управлении».
+        Сверху шесть полей занимали 360 точек и не влезали ни в 440, ни в
+        прежние 500: шаг ручной настройки уходил под прокрутку, и нижние поля
+        с паролем администратора оказывались за краем. Поле здесь короткое,
+        и места слева под подпись хватает.
+    -->
+    <Style Selector="theme|SettingsRow">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid ColumnDefinitions="140,*">
+            <ContentPresenter Content="{TemplateBinding Header}"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center"
+                              TextWrapping="Wrap"
+                              Foreground="{DynamicResource TextPrimaryBrush}" />
+            <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="TextBlock.pair">
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+    <Style Selector="TextBlock.pair.failed">
+      <Setter Property="Foreground" Value="{DynamicResource CautionBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!--
+        Прокрутка — не про сегодняшний шаг, а про то, чтобы срезать перестало
+        когда-либо. Высоты хватает всем шагам с запасом, и полосы прокрутки в
+        обычной жизни не видно; появится она у того, у кого текст окажется
+        длиннее нашего — на другом языке или на будущем шаге.
+
+        `MinHeight` по высоте окна прокрутки — ради центрирования: внутри
+        прокрутки содержимое получает бесконечную высоту, и `VerticalAlignment`
+        у коротких шагов перестал бы работать, прижав приветствие к верху.
+    -->
+    <ScrollViewer Grid.Row="0"
+                  x:Name="StepScroll"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Focusable="False">
+      <Grid MinHeight="{Binding #StepScroll.Viewport.Height}">
+
+      <!-- 1. Приветствие и язык. -->
+      <StackPanel VerticalAlignment="Center"
+                  IsVisible="{Binding ShowsWelcome}">
+        <theme:Icon Glyph="phone.fill" Size="40" HorizontalAlignment="Center"
+                    Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <TextBlock Text="{res:Loc FirstRunWelcomeTitle}"
+                   Margin="0,12,0,0"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center" />
+
+        <TextBlock Text="{res:Loc FirstRunWelcomeSubtitle}"
+                   Margin="0,6,0,0"
+                   FontSize="13"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+          <RadioButton Classes="segment" GroupName="WizardLanguage"
+                       Content="{res:Loc AppearanceLanguageSystem}"
+                       IsChecked="{Binding Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=System}" />
+          <RadioButton Classes="segment" GroupName="WizardLanguage" Content="Русский"
+                       IsChecked="{Binding Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Russian}" />
+          <RadioButton Classes="segment" GroupName="WizardLanguage" Content="English"
+                       IsChecked="{Binding Language, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=English}" />
+        </StackPanel>
+
+        <TextBlock Text="{res:Loc FirstRunLanguageNote}"
+                   Margin="0,8,0,0"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+      </StackPanel>
+
+      <!--
+          2. Привязка.
+
+          Ключей активации нет: машина показывает код и QR, администратор
+          вводит код в Spark или сканирует QR в EliteSIP Connect. Дальше машина
+          настраивается сама. Код крупно — его диктуют по телефону; QR рядом —
+          его сканируют с метра. «Далее» неактивно до привязки, уводит отсюда
+          без неё только «Настроить вручную».
+      -->
+      <StackPanel VerticalAlignment="Center"
+                  IsVisible="{Binding ShowsPair}">
+        <TextBlock Text="{res:Loc FirstRunPairTitle}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center" />
+
+        <TextBlock Text="{res:Loc FirstRunPairSubtitle}"
+                   Margin="0,4,0,12"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    IsVisible="{Binding HasPairCode}">
+          <!-- Белая подложка при любой теме: сканеры читают тёмное на светлом. -->
+          <Border Background="White" CornerRadius="4" Padding="4">
+            <Image Source="{Binding PairQr, Converter={x:Static firstrun:QrImageConverter.Instance}}"
+                   Width="132" Height="132"
+                   RenderOptions.BitmapInterpolationMode="None" />
+          </Border>
+
+          <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="{res:Loc FirstRunPairCodeLabel}"
+                       FontSize="12"
+                       Foreground="{DynamicResource TextSecondaryBrush}" />
+            <TextBlock Text="{Binding PairCode}"
+                       FontFamily="monospace"
+                       FontSize="34"
+                       FontWeight="SemiBold" />
+            <Button Margin="0,6,0,0"
+                    HorizontalAlignment="Left"
+                    Classes="settings"
+                    Content="{res:Loc FirstRunPairNewCode}"
+                    Click="OnNewCodeClick" />
+          </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="{Binding PairStatus}"
+                   Margin="24,16,24,0"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   IsVisible="{Binding HasPairStatus}"
+                   Classes="pair"
+                   Classes.failed="{Binding PairFailed}" />
+
+        <!--
+            Заводской настройки нет — говорим об этом здесь, а не пропускаем
+            экран. Пропуск был молчаливым, и машина, навсегда отрезанная от
+            Spark, выглядела бы просто заведённой вручную.
+        -->
+        <TextBlock Text="{res:Loc FirstRunKeyNoChannel}"
+                   Margin="24,12,24,0"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource CautionBrush}"
+                   IsVisible="{Binding HasNoChannel}" />
+
+        <!--
+            Кому привязали — до «Далее», а не после: человек обязан увидеть,
+            чьё это рабочее место, прежде чем оно станет его.
+        -->
+        <StackPanel Margin="0,10,0,0"
+                    IsVisible="{Binding IsPaired}">
+          <theme:Icon Glyph="checkmark.circle" Size="28" HorizontalAlignment="Center"
+                      Foreground="{DynamicResource AnswerBrush}" />
+          <TextBlock Text="{Binding PairedEmployee}"
+                     Margin="0,6,0,0"
+                     FontSize="14"
+                     FontWeight="SemiBold"
+                     TextAlignment="Center" />
+          <TextBlock Margin="0,2,0,0"
+                     FontSize="12"
+                     TextAlignment="Center"
+                     Foreground="{DynamicResource TextSecondaryBrush}"
+                     Text="{Binding PairedNumber}" />
+        </StackPanel>
+
+        <Button Margin="0,14,0,0"
+                HorizontalAlignment="Center"
+                Classes="settings"
+                Content="{res:Loc FirstRunKeyManual}"
+                Click="OnManualSetupClick" />
+      </StackPanel>
+
+      <!-- 3. Первый пользователь. -->
+      <StackPanel VerticalAlignment="Top"
+                  IsVisible="{Binding ShowsUser}">
+        <TextBlock Text="{res:Loc FirstRunUserTitle}" FontSize="16" FontWeight="SemiBold" TextAlignment="Center" />
+        <TextBlock Text="{res:Loc FirstRunUserSubtitle}"
+                   Margin="0,4,0,10"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+        <theme:SettingsRow Header="{res:Loc AdminAccountUsername}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel"
+                     Text="{Binding Username}" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsRow Header="{res:Loc AdminAccountPassword}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel" PasswordChar="●" x:Name="SipPasswordField"
+                         VerticalContentAlignment="Center"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         CaretBrush="{DynamicResource TextPrimaryBrush}"
+                         TextChanged="OnSipPasswordChanged" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsRow Header="{res:Loc AdminAccountDisplayName}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel"
+                     Text="{Binding DisplayName}" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsRow Header="{res:Loc WorkPbxAddress}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel"
+                     Text="{Binding OfficeAddress}" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsDivider />
+
+        <theme:SettingsRow Header="{res:Loc AdminAccessNewPassword}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel" PasswordChar="●" x:Name="AdminPasswordField"
+                         VerticalContentAlignment="Center"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         CaretBrush="{DynamicResource TextPrimaryBrush}"
+                         TextChanged="OnAdminPasswordChanged" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsRow Header="{res:Loc AdminAccessRepeatPassword}">
+          <Border Height="26" CornerRadius="{StaticResource ControlCornerRadius}" Padding="6,0" Background="{DynamicResource ControlBackgroundBrush}">
+            <TextBox Classes="panel" PasswordChar="●" x:Name="RepeatedAdminPasswordField"
+                         VerticalContentAlignment="Center"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         CaretBrush="{DynamicResource TextPrimaryBrush}"
+                         TextChanged="OnRepeatedAdminPasswordChanged" />
+          </Border>
+        </theme:SettingsRow>
+
+        <theme:SettingsNote Text="{res:Loc AdminAccessMismatch}"
+                            IsAlarming="True"
+                            IsVisible="{Binding AdminPasswordsDiffer}" />
+
+        <theme:SettingsNote Text="{res:Loc FirstRunAdminNote}" />
+      </StackPanel>
+
+      <!-- 3. Оформление. -->
+      <StackPanel VerticalAlignment="Center"
+                  IsVisible="{Binding ShowsAppearance}">
+        <TextBlock Text="{res:Loc SectionAppearance}" FontSize="16" FontWeight="SemiBold" TextAlignment="Center" />
+        <TextBlock Text="{res:Loc FirstRunAppearanceSubtitle}"
+                   Margin="0,4,0,14"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+          <RadioButton Classes="tile system" GroupName="WizardTheme"
+                       Content="{res:Loc AppearanceSystem}"
+                       IsChecked="{Binding Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=System}" />
+          <RadioButton Classes="tile light" GroupName="WizardTheme"
+                       Content="{res:Loc AppearanceLight}"
+                       IsChecked="{Binding Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Light}" />
+          <RadioButton Classes="tile dark" GroupName="WizardTheme"
+                       Content="{res:Loc AppearanceDark}"
+                       IsChecked="{Binding Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Dark}" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- 4. Готово. -->
+      <StackPanel VerticalAlignment="Center"
+                  IsVisible="{Binding ShowsFinale}">
+        <theme:Icon Glyph="checkmark.circle" Size="40" HorizontalAlignment="Center"
+                    Foreground="{DynamicResource StatusRegisteredBrush}" />
+
+        <TextBlock Text="{res:Loc FirstRunFinaleTitle}"
+                   Margin="0,12,0,0"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center" />
+
+        <!--
+            Сводка коротко и без пароля: она отвечает на «то ли я завёл», а не
+            заменяет собой «Управление».
+        -->
+        <TextBlock Margin="0,10,0,0" FontSize="13" TextAlignment="Center"
+                   Foreground="{DynamicResource TextSecondaryBrush}">
+          <Run Text="{res:Loc AdminAccountUsername}" /><Run Text=": " /><Run Text="{Binding Username}" />
+          <LineBreak />
+          <Run Text="{res:Loc WorkPbxAddress}" /><Run Text=": " /><Run Text="{Binding OfficeAddress}" />
+        </TextBlock>
+
+        <TextBlock Text="{res:Loc FirstRunFinaleNote}"
+                   Margin="0,12,0,0"
+                   FontSize="12"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+
+    <!-- Полоса шагов: отделена линией, как нижняя полоса диалогов Windows. -->
+    <Border Grid.Row="1" Height="1" VerticalAlignment="Top" Margin="-16,0,-16,0"
+            Background="{DynamicResource SeparatorBrush}" />
+    <Grid Grid.Row="1" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <Button Grid.Column="0"
+              Classes="settings"
+              Content="{res:Loc FirstRunBack}"
+              IsEnabled="{Binding CanGoBack}"
+              Click="OnBackClick" />
+
+      <Button Grid.Column="2"
+              Classes="settings"
+              MinWidth="90"
+              IsEnabled="{Binding CanGoForward}"
+              Click="OnForwardClick">
+        <Panel>
+          <TextBlock Text="{res:Loc FirstRunNext}" IsVisible="{Binding !IsLastStep}" />
+          <TextBlock Text="{res:Loc FirstRunFinish}" IsVisible="{Binding IsLastStep}" />
+        </Panel>
+      </Button>
+    </Grid>
+  </Grid>
+</Window>
