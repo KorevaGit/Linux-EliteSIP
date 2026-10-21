@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Стенд W-L3: сквозной звонок на Linux. Не своя копия, а те же исходники
+    shared/tools/SipCheck: на этом этапе проверяется стык (сокеты, адрес RTP,
+    DSCP, ICMP), а не сигнализация, и второй стенд с другой логикой проверял
+    бы сам себя. Отличие одно — движок тракта: файл платформы общего стенда
+    (ProbeAudio.Wasapi.cs) заменён своим, ProbeAudio.Pulse.cs.
+
+    Windows-проект стенда (net10.0-windows) отсюда не собирается: он тянет
+    EliteSIP.Audio.Wasapi.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <RootNamespace>EliteSIP.Tools.SipCheck</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\shared\tools\SipCheck\*.cs" Link="shared\%(Filename)%(Extension)" />
+    <Compile Remove="..\..\shared\tools\SipCheck\ProbeAudio.Wasapi.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\src\EliteSIP.SipCore\EliteSIP.SipCore.csproj" />
+    <ProjectReference Include="..\..\shared\src\EliteSIP.SipCore.Udp\EliteSIP.SipCore.Udp.csproj" />
+    <ProjectReference Include="..\..\shared\src\EliteSIP.MediaCore\EliteSIP.MediaCore.csproj" />
+    <ProjectReference Include="..\..\shared\src\EliteSIP.Lines\EliteSIP.Lines.csproj" />
+    <ProjectReference Include="..\..\src\EliteSIP.Audio.Pulse\EliteSIP.Audio.Pulse.csproj" />
+  </ItemGroup>
+
+</Project>

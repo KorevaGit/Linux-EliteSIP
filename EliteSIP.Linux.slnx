@@ -5,10 +5,11 @@
     сдвигом указателя подмодуля (docs/PORT-PLAN.md, «Правила работы с
     подмодулем»).
 
-    В решение входят только проекты net10.0. Audio — с ветки W-L1
+    В решение входят только проекты net10.0. Audio и Lines — с ветки W-L1
     (linux/w-l1-storage): на ней подмодуль стоит, пока эта ветка не выпущена
-    меткой в Windows-репозитории. Lines, App.Core и Updates добавятся после
-    выпуска W-L1, вместе со сдвигом указателя на метку.
+    меткой в Windows-репозитории. Lines нужен стенду W-L3 (tools/SipCheck).
+    App.Core и Updates добавятся после выпуска W-L1, вместе со сдвигом
+    указателя на метку.
   -->
   <Folder Name="/shared/src/">
     <Project Path="shared/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj" />
@@ -16,6 +17,7 @@
     <Project Path="shared/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj" />
     <Project Path="shared/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj" />
     <Project Path="shared/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj" />
+    <Project Path="shared/src/EliteSIP.Lines/EliteSIP.Lines.csproj" />
     <Project Path="shared/src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj" />
     <Project Path="shared/src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj" />
     <Project Path="shared/src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj" />
@@ -42,6 +44,7 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/PulseProbe/PulseProbe.csproj" />
+    <Project Path="tools/SipCheck/SipCheck.csproj" />
     <Project Path="tools/WindowProbe/WindowProbe.csproj" />
   </Folder>
 </Solution>
