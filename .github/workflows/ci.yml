@@ -117,7 +117,46 @@ jobs:
           # оказался бы чужим каталогом, в который пишет сборщик.
           if grep -v ' root/root ' <<<"$contents"; then echo "в пакете есть файлы не root"; exit 1; fi
 
-      # Службы проверяются тем же systemd, что на рабочих местах: опечатка в
-      # директиве иначе всплыла бы только при установке.
-      - name: Службы systemd
-        run: systemd-analyze verify packaging/systemd/elitesip-updater.service packaging/systemd/elitesip-updater.timer packaging/systemd/elitesip-updater.path
+      # Установка на раннер — тем же apt, что у администратора на Mint 22: у
+      # раннера ubuntu-24.04 есть systemd и sudo. Так проверяется то, что
+      # иначе видно только на чистой машине: зависимости, postinst (каталоги
+      # и их права, таймер и путь включены), службы глазами systemd и один
+      # такт обновляльщика под его изоляцией (ProtectSystem=strict и др.):
+      # отметки согласия нет, канал заглушки — такт обязан кончиться кодом 0.
+      - name: Установка, такт обновляльщика, удаление
+        run: |
+          package="$RUNNER_TEMP/deb/EliteSIP-0.0.0.deb"
+          sudo apt-get update -q
+          sudo apt-get install -y "$package"
+
+          check_mode() {
+            actual=$(stat -c '%a %U' "$2")
+            [ "$actual" = "$1 root" ] || { echo "$2: $actual, а нужно $1 root"; exit 1; }
+          }
+          check_mode 755 /opt/elitesip
+          check_mode 755 /var/lib/elitesip
+          check_mode 1777 /var/lib/elitesip/updates
+          check_mode 700 /var/lib/elitesip/updater
+          test -x /opt/elitesip/EliteSIP && test -x /opt/elitesip/elitesip-updater
+
+          systemctl is-enabled elitesip-updater.timer elitesip-updater.path
+          systemctl is-active elitesip-updater.timer elitesip-updater.path
+          systemd-analyze verify /usr/lib/systemd/system/elitesip-updater.service \
+              /usr/lib/systemd/system/elitesip-updater.timer /usr/lib/systemd/system/elitesip-updater.path
+
+          sudo systemctl start elitesip-updater.service
+          result=$(systemctl show elitesip-updater.service --property=Result --value)
+          sudo journalctl -u elitesip-updater --no-pager
+          [ "$result" = success ] || { echo "такт обновляльщика: $result"; exit 1; }
+
+          # Удаление: будильники выключены, программа ушла, каталог обмена
+          # остался (настройки и журнал обновляльщика уходят только с purge).
+          sudo apt-get remove -y elitesip
+          if systemctl is-enabled elitesip-updater.timer 2>/dev/null; then
+              echo "после remove таймер обновляльщика остался включён"; exit 1
+          fi
+          test ! -e /opt/elitesip/EliteSIP
+          test -d /var/lib/elitesip
+
+          sudo apt-get purge -y elitesip
+          test ! -e /var/lib/elitesip
