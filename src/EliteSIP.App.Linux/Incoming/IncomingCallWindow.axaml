@@ -3,6 +3,13 @@
     320 в ширину, высота по содержимому, без рамки, поверх всех, без
     активации и без кнопки в панели задач. Проверка цифрой (W9) — те же
     кнопки, что на Windows.
+
+    Цели приёма нажимаются только мышью. Focusable="False" — как на Windows;
+    клавиатуры у окна и так нет (WM_HINTS.input = False). GuardedButton — аналог
+    IsOffscreenBehavior: в Avalonia 12 на Linux есть мост AT-SPI, и видимую ему
+    кнопку можно нажать действием «click» вообще без мыши, не пройдя ни одной
+    проверки живого человека. «Отклонить» доступность сохраняет — отказаться
+    от вызова можно и без мыши.
 -->
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -87,14 +94,15 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="x:String">
-                <Button Classes="surface"
+                <incoming:GuardedButton Classes="surface"
                         Margin="3,0"
                         Height="42"
                         HorizontalAlignment="Stretch"
                         FontSize="20"
                         Content="{Binding}"
                         Command="{Binding $parent[Window].((incoming:IncomingCallViewModel)DataContext).AttemptCommand}"
-                        CommandParameter="{Binding}" />
+                        CommandParameter="{Binding}"
+                        Focusable="False" />
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
@@ -117,17 +125,18 @@
 
         <!-- Без выбора: «Ответить» и «Отклонить» рядом. -->
         <Grid ColumnDefinitions="*,6,*" IsVisible="{Binding !HasChoice}">
-          <Button Grid.Column="0"
+          <incoming:GuardedButton Grid.Column="0"
                   Classes="surface call"
                   Height="42"
                   HorizontalAlignment="Stretch"
                   Command="{Binding AttemptCommand}"
-                  CommandParameter="{Binding Answer}">
+                  CommandParameter="{Binding Answer}"
+                  Focusable="False">
             <StackPanel Orientation="Horizontal">
               <theme:Icon Glyph="phone.fill" Size="14" Foreground="White" VerticalAlignment="Center" />
               <TextBlock Text="{res:Loc IncomingAnswer}" Margin="6,0,0,0" FontSize="16" Foreground="White" />
             </StackPanel>
-          </Button>
+          </incoming:GuardedButton>
           <Button Grid.Column="2"
                   Classes="surface call hangup"
                   Height="42"
