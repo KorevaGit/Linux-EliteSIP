@@ -1,0 +1,15 @@
+#!/bin/sh
+# Перед удалением (не обновлением): будильники обновляльщика больше не нужны.
+# Запущенные у операторов софтфоны не трогаем — их закроет выход из сеанса.
+set -e
+
+case "$1" in
+    remove)
+        if [ -d /run/systemd/system ]; then
+            systemctl disable --now elitesip-updater.timer elitesip-updater.path || true
+            systemctl stop elitesip-updater.service || true
+        fi
+        ;;
+esac
+
+exit 0

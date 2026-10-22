@@ -1,0 +1,28 @@
+# Обновляльщик EliteSIP: ставит выпуск, на который согласился оператор, от
+# root. Роль задачи планировщика от SYSTEM на Windows (W12, W-L7). Будят
+# его elitesip-updater.timer раз в десять минут и elitesip-updater.path на
+# отметку о согласии; аргументов у службы нет — выбирать ей нечего.
+#
+# Ставится пакетом в /usr/lib/systemd/system/. Разбор — src/EliteSIP.Updater.Linux.
+
+[Unit]
+Description=EliteSIP — установка обновлений
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/elitesip/elitesip-updater
+
+# Свой каталог: журнал, копии отметок, проверенный пакет. 0700 — оператор
+# сюда не пишет и не смотрит; родитель /var/lib/elitesip — root и 0755.
+StateDirectory=elitesip/updater
+StateDirectoryMode=0700
+UMask=0077
+
+# Такт — секунды, закачка пакета — минуты на плохом канале конторы (у
+# клиента канала тот же срок, четверть часа). Сама установка идёт отдельной
+# временной службой и сюда не входит. Дольше — значит висит.
+TimeoutStartSec=20min
+
+PrivateTmp=yes

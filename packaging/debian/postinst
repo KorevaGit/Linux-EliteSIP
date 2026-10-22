@@ -1,0 +1,25 @@
+#!/bin/sh
+# После установки и обновления: каталоги обмена и будильники обновляльщика.
+#
+# Каталоги — здесь, а не в архиве пакета: права 1777 и 0700 обязаны быть
+# такими на каждой машине, даже если каталог уже был с другими (тогда
+# install -d их поправит). Почему 1777 — src/EliteSIP.Updater.Linux/Layout.cs.
+#
+# Обновляльщика здесь не перезапускаем и не останавливаем: при обновлении с
+# канала этот сценарий выполняется внутри установки, которую начал он сам.
+set -e
+
+case "$1" in
+    configure)
+        install -d -o root -g root -m 0755 /var/lib/elitesip
+        install -d -o root -g root -m 1777 /var/lib/elitesip/updates
+        install -d -o root -g root -m 0700 /var/lib/elitesip/updater
+
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload || true
+            systemctl enable --now elitesip-updater.timer elitesip-updater.path || true
+        fi
+        ;;
+esac
+
+exit 0

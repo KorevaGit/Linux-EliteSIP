@@ -54,7 +54,7 @@ public sealed partial class App : Application, IDisposable
     private readonly AvaloniaUiThread _ui = new();
     private readonly PulseAudioPlatform _audioPlatform = new();
     private readonly XdgAutoStart _autoStart = new();
-    private readonly PendingUpdateHandoff _updateHandoff = new();
+    private readonly UpdateExchange _updateHandoff = new();
 
     private IClassicDesktopStyleApplicationLifetime? _desktop;
     private AppSettings? _settings;
@@ -261,6 +261,17 @@ public sealed partial class App : Application, IDisposable
                 settingsModel.Section = section;
             }
         }
+
+        // «Выпуск жив» — не сразу, а через минуту: падение в первые секунды
+        // после подъёма панели тоже означает выпуск, который не работает.
+        // Отметку ждёт аварийный путь обновляльщика.
+        var alive = _ui.CreateTimer(TimeSpan.FromMinutes(1));
+        alive.Tick += (_, _) =>
+        {
+            alive.Stop();
+            _updateHandoff.MarkStarted(ProductVersion.Current, Log);
+        };
+        alive.Start();
 
         var sinceProcess = (int)(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds;
         Log($"запуск: панель готова через {sinceProcess} мс от старта процесса "

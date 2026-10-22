@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Обновляльщик Linux-версии (W-L7): служба systemd от root, которая ставит
+    выпуск, на который согласился оператор. Роль та же, что у
+    shared/tools/Updater на Windows (задача планировщика от SYSTEM), правила —
+    те же и из того же кода: согласие, аварийный путь, журнал, заводская
+    настройка и HTTP-клиент берутся из общего EliteSIP.Updates, проверка
+    подписи — из EliteSIP.PanelLink. Здесь только Linux: пути, чтение
+    общего каталога без следования ссылкам, apt-get во временной службе и
+    подъём софтфона в сеансах из logind.
+
+    Имя сборки — EliteSIP.Updater.Linux: под ним EliteSIP.Updates открывает
+    этому проекту внутреннее. Исполняемый файл в /opt/elitesip пакет
+    называет elitesip-updater.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>EliteSIP.Updater</RootNamespace>
+
+    <!-- LibraryImport к libc генерирует небезопасный код. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EliteSIP.Updater.Linux.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\src\EliteSIP.Updates\EliteSIP.Updates.csproj" />
+  </ItemGroup>
+
+</Project>

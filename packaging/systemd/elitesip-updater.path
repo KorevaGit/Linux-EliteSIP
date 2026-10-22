@@ -1,0 +1,13 @@
+# Согласие оператора будит обновляльщика сразу, не дожидаясь такта: на
+# Windows то же делал запуск задачи по требованию (schtasks /Run). Файл
+# пишет приложение; что в нём, служба проверяет сама и ничему не верит.
+
+[Unit]
+Description=EliteSIP — согласие на обновление
+
+[Path]
+PathChanged=/var/lib/elitesip/updates/update-requested
+Unit=elitesip-updater.service
+
+[Install]
+WantedBy=paths.target

@@ -44,11 +44,13 @@
     <Project Path="src/EliteSIP.App.Linux/EliteSIP.App.Linux.csproj" />
     <Project Path="src/EliteSIP.Audio.Pulse/EliteSIP.Audio.Pulse.csproj" />
     <Project Path="src/EliteSIP.Platform.Linux/EliteSIP.Platform.Linux.csproj" />
+    <Project Path="src/EliteSIP.Updater.Linux/EliteSIP.Updater.Linux.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EliteSIP.App.Linux.Tests/EliteSIP.App.Linux.Tests.csproj" />
     <Project Path="tests/EliteSIP.Audio.Pulse.Tests/EliteSIP.Audio.Pulse.Tests.csproj" />
     <Project Path="tests/EliteSIP.Platform.Linux.Tests/EliteSIP.Platform.Linux.Tests.csproj" />
+    <Project Path="tests/EliteSIP.Updater.Linux.Tests/EliteSIP.Updater.Linux.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/PulseProbe/PulseProbe.csproj" />

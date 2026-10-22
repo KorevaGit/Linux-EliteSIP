@@ -1,0 +1,12 @@
+Package: elitesip
+Version: @VERSION@
+Section: net
+Priority: optional
+Architecture: amd64
+Maintainer: @MAINTAINER@
+Installed-Size: @SIZE@
+Depends: libc6, libstdc++6, libgcc-s1, zlib1g, libicu74, libssl3t64, libfontconfig1, libfreetype6, libx11-6, libxi6, libxss1, libxrandr2, libxcursor1, libxext6, libxfixes3, libice6, libsm6, libpulse0, iputils-ping, systemd
+Description: EliteSIP — софтфон для звонков через АТС компании
+ Софтфон EliteSIP для Linux Mint 22 и Ubuntu 24.04 (X11). Программа ставится
+ в /opt/elitesip; обновления ставит служба elitesip-updater от root после
+ согласия оператора — оператору права администратора не нужны.

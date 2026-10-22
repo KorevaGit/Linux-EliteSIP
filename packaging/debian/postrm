@@ -1,0 +1,19 @@
+#!/bin/sh
+# После удаления: systemd забывает службы; при purge уходит и каталог обмена
+# с журналом обновляльщика. Настройки и история операторов живут в их
+# профилях — пакет их не трогает, как и установщик Windows.
+set -e
+
+case "$1" in
+    remove|purge)
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload || true
+        fi
+        ;;
+esac
+
+if [ "$1" = purge ]; then
+    rm -rf /var/lib/elitesip
+fi
+
+exit 0

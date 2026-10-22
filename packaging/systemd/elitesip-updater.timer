@@ -1,0 +1,14 @@
+# Такт обновляльщика: раз в десять минут, как задача на Windows. По нему
+# работают аварийный путь (выпуск, который не запускается) и страховочный
+# подъём софтфона; согласие оператора будит службу сразу (elitesip-updater.path).
+
+[Unit]
+Description=EliteSIP — такт обновлений
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=10min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
