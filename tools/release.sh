@@ -8,8 +8,9 @@
 #
 # Шаги идут в этом порядке и не переставляются:
 #
-#   1. дерево чистое, подмодуль shared/ без правок и стоит на метке v<версия>
-#      Windows-репозитория (правила подмодуля 1 и 3), версия растёт;
+#   1. дерево чистое, подмодуль shared/ без правок и стоит на метке
+#      Windows-репозитория — v<версия> или linux-v<версия>, отправленной на
+#      GitHub (правила подмодуля 1 и 3), версия растёт;
 #   2. версия проставляется в Directory.Build.props;
 #   3. сборка и все проверки; провалилась хоть одна — выпуска нет;
 #   4. заводская настройка сверяется с каналом и ключами;
@@ -112,13 +113,32 @@ if [ -n "$(git -C shared status --porcelain)" ]; then
         || fail "в shared/ есть несохранённые правки — общий код правится в Win-EliteSIP"
 fi
 
-# Правило подмодуля 3: указатель стоит на выпущенной метке Windows-
-# репозитория. Иначе выпуск Linux собран из общего кода, который не прошёл
-# пилот Windows.
-shared_tag=$(git -C shared describe --tags --exact-match --match 'v*' 2>/dev/null || true)
+# Правило подмодуля 3: указатель стоит на метке, которая есть в Windows-
+# репозитории на GitHub, — иначе подмодуль на чужой машине коммит не найдёт и
+# выпуск не воспроизвести. Метка — одна из двух:
+#
+#   v<версия>        выпуск Windows: общий код прошёл её пилот;
+#   linux-v<версия>  общий код этого выпуска Linux, раньше выпуска Windows
+#                    (решение 22 октября 2026: Linux-версия не ждёт Windows).
+#                    Ставится в Windows-репозитории на коммит подмодуля и
+#                    отправляется туда же; main Windows она не трогает.
+shared_head=$(git -C shared rev-parse HEAD)
+shared_tag=$(git -C shared describe --tags --exact-match --match 'v*' 2>/dev/null \
+    || git -C shared describe --tags --exact-match --match "linux-v$version" 2>/dev/null || true)
+shared_published=false
+if [ -n "$shared_tag" ]; then
+    # Метка на GitHub обязана указывать на тот же коммит: локальная метка,
+    # которую забыли отправить, — это и есть «подмодуль не найдёт».
+    remote=$(git -C shared ls-remote --tags origin "refs/tags/$shared_tag" "refs/tags/$shared_tag^{}" 2>/dev/null \
+        | awk '{print $1}')
+    grep -qx "$shared_head" <<<"$remote" && shared_published=true
+fi
 if [ -z "$shared_tag" ]; then
-    $dry_run && warn "подмодуль shared/ не на метке v<версия> ($(git -C shared describe --tags 2>/dev/null || git -C shared rev-parse --short HEAD))" \
-        || fail "подмодуль shared/ не стоит на метке v<версия> Windows-репозитория"
+    $dry_run && warn "подмодуль shared/ не на метке v* или linux-v$version ($(git -C shared describe --tags 2>/dev/null || git -C shared rev-parse --short HEAD))" \
+        || fail "подмодуль shared/ не стоит на метке v<версия> или linux-v$version Windows-репозитория"
+elif ! $shared_published; then
+    $dry_run && warn "метки $shared_tag нет на GitHub (или она указывает не на $shared_head)" \
+        || fail "метки $shared_tag нет в Windows-репозитории на GitHub — git -C shared push origin $shared_tag"
 fi
 
 current=$(sed -n 's:.*<Version>\([^<]*\)</Version>.*:\1:p' "$props" | head -1)
