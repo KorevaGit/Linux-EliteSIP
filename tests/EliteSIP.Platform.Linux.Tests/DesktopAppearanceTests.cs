@@ -36,4 +36,62 @@ public sealed class DesktopAppearanceTests
         Assert.Null(DesktopAppearance.ToAccent(VariantValue.Struct(
             VariantValue.Double(-1), VariantValue.Double(-1), VariantValue.Double(-1))));
     }
+
+    [Fact]
+    public async Task Молчащий_портал_не_держит_запуск()
+    {
+        // Автозапуск на входе в сеанс опередил портал, или портал завис:
+        // запуск ждёт предел, а не 25 с D-Bus.
+        var never = new TaskCompletionSource();
+        var log = new List<string>();
+        var started = System.Diagnostics.Stopwatch.StartNew();
+
+        await DesktopAppearance.StartAsync(() => never.Task, TimeSpan.FromMilliseconds(50), () => { }, log.Add);
+
+        Assert.True(started.Elapsed < TimeSpan.FromSeconds(5));
+        Assert.Contains(log, line => line.Contains("не ответил", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Опоздавший_ответ_перекрашивает()
+    {
+        var answer = new TaskCompletionSource();
+        var late = new TaskCompletionSource();
+        var log = new List<string>();
+
+        await DesktopAppearance.StartAsync(() => answer.Task, TimeSpan.FromMilliseconds(20), () => late.TrySetResult(), log.Add);
+        Assert.False(late.Task.IsCompleted);
+
+        answer.SetResult();
+
+        await late.Task.WaitAsync(TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task Ответ_в_срок_без_опоздания()
+    {
+        var lateCalls = 0;
+        var log = new List<string>();
+
+        await DesktopAppearance.StartAsync(() => Task.CompletedTask, TimeSpan.FromSeconds(5), () => lateCalls++, log.Add);
+
+        Assert.Equal(0, lateCalls);
+        Assert.Empty(log);
+    }
+
+    [Fact]
+    public async Task Неожиданное_исключение_не_роняет_запуск()
+    {
+        // Поток окна ждёт этот метод на запуске: исключение отсюда — софтфон,
+        // который не открылся.
+        var log = new List<string>();
+
+        await DesktopAppearance.StartAsync(
+            () => throw new InvalidOperationException("нет адреса сеансовой шины"),
+            TimeSpan.FromSeconds(5),
+            () => { },
+            log.Add);
+
+        Assert.Contains(log, line => line.Contains("нет адреса сеансовой шины", StringComparison.Ordinal));
+    }
 }

@@ -8,6 +8,7 @@ using EliteSIP.App.FirstRun;
 using EliteSIP.App.History;
 using EliteSIP.App.Incoming;
 using EliteSIP.App.PanelLine;
+using EliteSIP.App.Platform;
 using EliteSIP.App.Resources;
 using EliteSIP.App.Settings;
 using EliteSIP.App.Shell;
@@ -308,16 +309,6 @@ public sealed partial class App
         try
         {
             _logFile?.Flush();
-            var lines = new List<string>();
-            foreach (var path in (_logFile?.Files() ?? []).Reverse())
-            {
-                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using var reader = new StreamReader(stream);
-                while (reader.ReadLine() is { } line)
-                {
-                    lines.Add(line);
-                }
-            }
 
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             if (desktop.Length == 0 || !Directory.Exists(desktop))
@@ -325,12 +316,21 @@ public sealed partial class App
                 desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
 
-            var summary = $"EliteSIP {SettingsViewModel.Version} (Linux)"
-                + $"{Environment.NewLine}машина: {_settings?.Panel.InstallationID}"
-                + $"{Environment.NewLine}добавочный: {_settings?.Account.Username}"
-                + $"{Environment.NewLine}система: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}";
+            // Пути файлов, а не их строки: SupportArchive.Make копирует файлы
+            // сам. Перевод Windows-версии передавал строки журнала как пути —
+            // архив уезжал с одним summary.txt, а пустая строка журнала
+            // роняла сборку ArgumentException.
+            var files = SupportFacts.Files(
+                _logFile?.Files() ?? [], Path.GetDirectoryName(AppSettings.DefaultPath)!);
 
-            var made = SupportArchive.Make(lines, summary, Path.Combine(desktop, SupportArchive.SuggestedName()));
+            var summary = SupportFacts.Summary(
+                SettingsViewModel.Version,
+                _settings?.Panel.InstallationID,
+                _settings?.Account.Username,
+                _audioPlatform,
+                Environment.GetEnvironmentVariable);
+
+            var made = SupportArchive.Make(files, summary, Path.Combine(desktop, SupportArchive.SuggestedName()));
             model.ReportSupport(Strings.Format("SupportLogsCollected", Path.GetFileName(made)), SupportArea.Logs);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)

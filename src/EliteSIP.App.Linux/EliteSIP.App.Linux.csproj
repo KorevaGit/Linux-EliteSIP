@@ -60,4 +60,25 @@
     <ProjectReference Include="..\..\shared\src\EliteSIP.App.Core\EliteSIP.App.Core.csproj" />
   </ItemGroup>
 
+  <!--
+    Из какого общего кода собран выпуск: git describe подмодуля shared/
+    вписывается в сборку (AssemblyMetadata «SharedCode») и пишется в журнал при
+    запуске и в архив поддержки (Platform/SupportFacts.cs). Номер Linux-версии
+    этого не говорит: подмодуль двигается отдельно (docs/PORT-PLAN.md, «Версия»).
+    Без git (сборка из архива исходников) — «неизвестен», но не отказ сборки.
+  -->
+  <Target Name="StampSharedCode" BeforeTargets="GetAssemblyAttributes">
+    <Exec Command="git -C &quot;$(MSBuildThisFileDirectory)../../shared&quot; describe --tags --long --always --dirty"
+          ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="SharedCode" />
+      <Output TaskParameter="ExitCode" PropertyName="SharedCodeExit" />
+    </Exec>
+    <ItemGroup Condition="'$(SharedCodeExit)' == '0'">
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>SharedCode</_Parameter1>
+        <_Parameter2>$(SharedCode)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
 </Project>

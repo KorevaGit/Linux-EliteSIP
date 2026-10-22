@@ -17,16 +17,44 @@ namespace EliteSIP.Audio.Pulse;
 /// </remarks>
 public static class PulseSignalSounds
 {
-    public static SignalOutputs Outputs { get; } = new(
-        deviceId => PulseSignalOutput.Open(deviceId),
+    /// <summary>
+    /// Потолок файла рингтона в памяти. Рингтон — секунды, редко минуты:
+    /// MP3 на пять минут весит около 10 МБ. Больше — не рингтон.
+    /// </summary>
+    internal const long MaximumFileBytes = 64L * 1024 * 1024;
+
+    public static SignalOutputs Outputs { get; } = OutputsFor(null);
+
+    public static SignalSoundPlayer Create(Action<string>? log = null) => new(OutputsFor(log), log);
+
+    private static SignalOutputs OutputsFor(Action<string>? log) => new(
+        deviceId => PulseSignalOutput.Open(deviceId, log),
         OpenFile);
 
-    public static SignalSoundPlayer Create(Action<string>? log = null) => new(Outputs, log);
+    /// <summary>Читатель WAV или MP3 над копией файла в памяти.</summary>
+    ///
+    /// <remarks>
+    /// Файл читается целиком сразу, а не по ходу звучания: отсчёты потом берёт
+    /// поток цикла libpulse (<see cref="PulseSignalOutput"/>), и чтение диска
+    /// там — это задержка на звуковом потоке, а файл на отмонтированном
+    /// ресурсе — исключение в нём. Ошибка открытия здесь доходит до общего
+    /// проигрывателя, а он её разбирает: «рингтон не играет», звонок живёт.
+    /// </remarks>
+    internal static WaveStream OpenFile(string path)
+    {
+        var length = new FileInfo(path).Length;
+        if (length > MaximumFileBytes)
+        {
+            throw new IOException(
+                $"файл рингтона {length / (1024 * 1024)} МБ — больше {MaximumFileBytes / (1024 * 1024)} МБ");
+        }
 
-    internal static WaveStream OpenFile(string path) =>
-        string.Equals(Path.GetExtension(path), ".mp3", StringComparison.OrdinalIgnoreCase)
-            ? new Mp3FileReaderBase(path, format => new NLayer.NAudioSupport.Mp3FrameDecompressor(format))
-            : new WaveFileReader(path);
+        var memory = new MemoryStream(File.ReadAllBytes(path), writable: false);
+
+        return string.Equals(Path.GetExtension(path), ".mp3", StringComparison.OrdinalIgnoreCase)
+            ? new Mp3FileReaderBase(memory, format => new NLayer.NAudioSupport.Mp3FrameDecompressor(format))
+            : new WaveFileReader(memory);
+    }
 }
 
 /// <summary>
@@ -57,19 +85,21 @@ internal sealed unsafe class PulseSignalOutput : ISignalOutput
     private ISampleProvider? _source;
     private float[] _buffer = [];
     private readonly string? _device;
+    private readonly Action<string>? _log;
 
-    private PulseSignalOutput(PulseConnection connection, string? device)
+    private PulseSignalOutput(PulseConnection connection, string? device, Action<string>? log)
     {
         _connection = connection;
         _device = device;
+        _log = log;
     }
 
-    internal static PulseSignalOutput Open(string? deviceId)
+    internal static PulseSignalOutput Open(string? deviceId, Action<string>? log = null)
     {
         var connection = PulseConnection.Connect("EliteSIP", out var failure)
             ?? throw new InvalidOperationException($"звуковой сервер недоступен: {failure}");
 
-        return new PulseSignalOutput(connection, deviceId is { Length: > 0 } ? deviceId : null);
+        return new PulseSignalOutput(connection, deviceId is { Length: > 0 } ? deviceId : null, log);
     }
 
     public void Play(ISampleProvider source)
@@ -216,14 +246,64 @@ internal sealed unsafe class PulseSignalOutput : ISignalOutput
             _buffer = new float[samples];
         }
 
-        // Источник кончился (тон клавиши, рингтон без повтора) — дописываем
-        // тишину: поток закроет проигрыватель, а дыра в потоке — это щелчок.
         var span = _buffer.AsSpan(0, samples);
-        int read = source.Read(span);
-        span[Math.Max(0, read)..].Clear();
+        if (!Fill(source, span, out var failure))
+        {
+            // Источник сломался посреди звучания — дальше он молчит, а поток
+            // закроет проигрыватель, как у кончившегося звука.
+            _source = null;
+            Report(failure!);
+        }
 
         span.CopyTo(new Span<float>(data, samples));
         _ = LibPulse.StreamWrite(stream, data, (nuint)(samples * sizeof(float)), 0, 0, LibPulse.SeekRelative);
+    }
+
+    /// <summary>
+    /// Отсчёты источника в <paramref name="target"/>; недостающее — тишина.
+    /// <see langword="false"/> — источник бросил исключение, и вместо него
+    /// тишина целиком.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Зовётся из обратного вызова libpulse (<c>UnmanagedCallersOnly</c>), а
+    /// исключение оттуда .NET не пропускает: процесс кончается сразу, мимо
+    /// <c>CrashGuard</c>. Источник здесь — разбор файла рингтона (NLayer,
+    /// NVorbis, WAV), и испорченный в середине файл ронял бы софтфон на
+    /// каждом входящем, а служба после трёх падений перестаёт его поднимать.
+    /// Поэтому ловится всё: молчащий рингтон лучше мёртвого телефона.
+    /// </remarks>
+    internal static bool Fill(ISampleProvider source, Span<float> target, out Exception? failure)
+    {
+        try
+        {
+            // Источник кончился (тон клавиши, рингтон без повтора) — дописываем
+            // тишину: поток закроет проигрыватель, а дыра в потоке — это щелчок.
+            int read = source.Read(target);
+            target[Math.Clamp(read, 0, target.Length)..].Clear();
+            failure = null;
+            return true;
+        }
+#pragma warning disable CA1031 // см. remarks: здесь ловится всё
+        catch (Exception error)
+#pragma warning restore CA1031
+        {
+            target.Clear();
+            failure = error;
+            return false;
+        }
+    }
+
+    /// <summary>В журнал — не с потока цикла: запись журнала его задержала бы.</summary>
+    private void Report(Exception failure)
+    {
+        if (_log is { } log)
+        {
+            ThreadPool.QueueUserWorkItem(
+                static state => state.log($"служебный звук оборван: источник отказал ({state.failure.GetType().Name}: {state.failure.Message})"),
+                (log, failure),
+                preferLocal: false);
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]

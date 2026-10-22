@@ -137,7 +137,9 @@ public sealed partial class App : Application, IDisposable
         _access = new AdminAccessState(_settings.Admin.ToCredential());
 
         // Тема — до первого окна. Портал отвечает за доли миллисекунды; ждать
-        // его здесь дешевле, чем перекрашивать панель на глазах.
+        // его здесь дешевле, чем перекрашивать панель на глазах. Но не дольше
+        // DesktopAppearance.AnswerLimit: на входе в сеанс портала может ещё не
+        // быть, и тогда тема приходит позже событием.
         //
         // Ждём вне контекста окна (Task.Run): продолжения Tmds.DBus иначе
         // просятся в поток окна, который как раз и ждёт, — взаимная
@@ -148,6 +150,7 @@ public sealed partial class App : Application, IDisposable
         _appearance = new AppearanceService(this, _desktopAppearance) { Appearance = _settings.Appearance.Theme };
         Mark("настройки и палитра");
 
+        Log(SupportFacts.StartupLine(SettingsViewModel.Version, Environment.GetEnvironmentVariable));
         Log($"запуск: настройки {AppSettings.DefaultPath}"
             + $", файл {(File.Exists(AppSettings.DefaultPath) ? "есть" : "НЕТ")}"
             + $", настроена={_settings.Setup.IsCompleted}"
@@ -183,6 +186,14 @@ public sealed partial class App : Application, IDisposable
 
         WireRingtone(_settings, _phone, _incoming);
         WireCommands(_settings, _panel, _phone);
+
+        // Wayland v1 не поддерживает (GraphicsSession): софтфон работает, но
+        // защита окна входящего там слабее — оператор и старший смены должны
+        // это видеть, а не узнать по жалобе.
+        if (GraphicsSession.Current is GraphicsSessionKind.Wayland)
+        {
+            _panel.Notice = LinuxStrings.Get("PanelWaylandNotice");
+        }
 
         PanelDemo.Apply(_panel, _settings, args, _ui);
         if (args.Contains("--demo"))

@@ -25,6 +25,14 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // Каталог профиля — до первой строки журнала: иначе её запись создала
+        // бы каталог открытым (ProfilePrivacy).
+        var narrowed = ProfilePrivacy.Secure(Path.GetDirectoryName(AppSettings.DefaultPath)!);
+        if (narrowed.Count > 0)
+        {
+            EarlyLog($"запуск: профиль закрыт от других пользователей — сужены права: {string.Join(", ", narrowed)}");
+        }
+
         var instance = SingleInstance.Claim(EarlyLog);
         if (instance is null)
         {

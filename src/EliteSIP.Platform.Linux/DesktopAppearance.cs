@@ -48,7 +48,65 @@ internal sealed class DesktopAppearance : IDisposable
     /// <summary>Тема или акцент сменились. Не в потоке интерфейса.</summary>
     internal event Action? Changed;
 
-    internal async Task StartAsync()
+    /// <summary>
+    /// Сколько запуск ждёт портал. Отвечает он за доли миллисекунды, но на
+    /// входе в сеанс автозапуск может опередить сам портал: D-Bus тогда
+    /// поднимает его по требованию и ждёт до 25 с, а зависший портал не
+    /// отвечает вовсе. Панель столько ждать не должна.
+    /// </summary>
+    internal static readonly TimeSpan AnswerLimit = TimeSpan.FromMilliseconds(500);
+
+    /// <summary>
+    /// Прочитать тему и подписаться на её смену — не дольше <see cref="AnswerLimit"/>.
+    /// Опоздавший ответ придёт событием <see cref="Changed"/>.
+    /// </summary>
+    internal Task StartAsync() => StartAsync(ConnectAsync, AnswerLimit, () => Changed?.Invoke(), _log);
+
+    /// <summary>Ожидание портала с пределом — отдельно, чтобы проверить без шины.</summary>
+    ///
+    /// <remarks>
+    /// Не бросает: тема — не повод не запуститься, а ждёт этого метода поток
+    /// окна на запуске. Опоздавший ответ не теряется: когда портал всё-таки
+    /// ответит, зовётся <paramref name="late"/>, и окна перекрашиваются.
+    /// </remarks>
+    internal static async Task StartAsync(Func<Task> connect, TimeSpan limit, Action late, Action<string> log)
+    {
+        var connecting = Task.Run(connect);
+
+        try
+        {
+            await connecting.WaitAsync(limit).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            log($"тема: портал не ответил за {limit.TotalMilliseconds:0} мс — пока светлая тема, перекрашу, когда ответит");
+
+            _ = connecting.ContinueWith(
+                done =>
+                {
+                    if (done.IsCompletedSuccessfully)
+                    {
+                        log("тема: портал ответил с опозданием — тема рабочего стола применена");
+                        late();
+                    }
+                    else
+                    {
+                        log($"тема: портал так и не ответил ({done.Exception?.InnerException?.Message})");
+                    }
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+#pragma warning disable CA1031 // намеренно: см. remarks
+        catch (Exception error)
+#pragma warning restore CA1031
+        {
+            log($"тема: портал недоступен ({error.Message}) — светлая тема и свой акцент");
+        }
+    }
+
+    private async Task ConnectAsync()
     {
         try
         {

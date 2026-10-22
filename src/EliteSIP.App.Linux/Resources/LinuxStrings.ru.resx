@@ -25,4 +25,7 @@
   <data name="AdminGuardSyntheticNote" xml:space="preserve">
     <value>Нажатия, сделанные программой через XTest, X-сервер помечает своим устройством, и подделать эту пометку можно только драйвером ввода. По умолчанию она всё равно только пишется в отчёт.</value>
   </data>
+  <data name="PanelWaylandNotice" xml:space="preserve">
+    <value>Сеанс Wayland не поддерживается: защита приёма слабее. Войдите в сеанс X11</value>
+  </data>
 </root>

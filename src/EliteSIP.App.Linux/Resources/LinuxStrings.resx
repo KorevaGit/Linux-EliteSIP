@@ -25,4 +25,7 @@
   <data name="AdminGuardSyntheticNote" xml:space="preserve">
     <value>The X server marks clicks made by software through XTest with its own device, and only an input driver can forge that mark. By default it is still only written to the report.</value>
   </data>
+  <data name="PanelWaylandNotice" xml:space="preserve">
+    <value>Wayland session is not supported: answer protection is weaker. Sign in to an X11 session</value>
+  </data>
 </root>
