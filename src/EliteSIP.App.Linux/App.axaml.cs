@@ -79,7 +79,11 @@ public sealed partial class App : Application, IDisposable
     /// <summary>Одна копия — её занимает <see cref="Program"/> до Avalonia, а держит приложение.</summary>
     internal SingleInstance? Instance { get; set; }
 
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        DrawnCaption.Register();
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {

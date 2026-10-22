@@ -411,26 +411,30 @@
   </Border>
 
   <Window.Styles>
-    <!-- Точка состояния регистрации: четыре цвета, «нет сети» и «отказ» разные. -->
-    <Style Selector="Ellipse">
+    <!--
+        Точка состояния регистрации: четыре цвета, «нет сети» и «отказ» разные.
+        Только внутри панели (Border#Frame): стили окна достают и до рамки,
+        которую рисует Avalonia, и красили бы круги её кнопок.
+    -->
+    <Style Selector="Border#Frame Ellipse">
       <Setter Property="Fill" Value="{DynamicResource StatusOfflineBrush}" />
     </Style>
-    <Style Selector="Ellipse.registering">
+    <Style Selector="Border#Frame Ellipse.registering">
       <Setter Property="Fill" Value="{DynamicResource StatusConnectingBrush}" />
     </Style>
-    <Style Selector="Ellipse.registered">
+    <Style Selector="Border#Frame Ellipse.registered">
       <Setter Property="Fill" Value="{DynamicResource StatusRegisteredBrush}" />
     </Style>
-    <Style Selector="Ellipse.failed">
+    <Style Selector="Border#Frame Ellipse.failed">
       <Setter Property="Fill" Value="{DynamicResource StatusFailureBrush}" />
     </Style>
-    <Style Selector="Ellipse.offline">
+    <Style Selector="Border#Frame Ellipse.offline">
       <Setter Property="Fill" Value="{DynamicResource StatusOfflineBrush}" />
     </Style>
-    <Style Selector="Ellipse.line">
+    <Style Selector="Border#Frame Ellipse.line">
       <Setter Property="Fill" Value="{DynamicResource TextTertiaryBrush}" />
     </Style>
-    <Style Selector="Ellipse.line.active">
+    <Style Selector="Border#Frame Ellipse.line.active">
       <Setter Property="Fill" Value="{DynamicResource StatusRegisteredBrush}" />
     </Style>
 

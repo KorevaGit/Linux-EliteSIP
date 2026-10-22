@@ -33,12 +33,104 @@
   </Style>
 
   <!--
-      Рамка, которую рисует Avalonia (Program.DrawsOwnFrame): кнопки те же, что
-      у диспетчера окон Cinnamon, — свернуть, развернуть, закрыть. Кнопки «во
-      весь экран» у системной рамки нет, и софтфону она не нужна.
+      MARK: Рамка окна
+
+      Рамку рисует Avalonia (Program.DrawsOwnFrame), а кнопки у неё по
+      умолчанию как в Windows: прямоугольники 45 × 30, красный «закрыть».
+      Здесь они переделаны под тему окон Cinnamon (Mint-Y,
+      /usr/share/themes/Mint-Y/metacity-1): значки 16 × 16 — те же контуры,
+      что в теме; круг 18 точек под значком — у «свернуть» и «развернуть»
+      только при наведении, у «закрыть» всегда, цвета акцента рабочего стола
+      (selected_bg_color темы — тот же цвет, что отдаёт портал), с белым
+      крестом; у неактивного окна круг серый. Классы restore и inactive
+      ставит DrawnCaption.
+
+      Кнопки «во весь экран» у рамки Cinnamon нет, и софтфону она не нужна.
   -->
   <Style Selector=":is(Control)#PART_FullScreenButton">
     <Setter Property="IsVisible" Value="False" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button">
+    <Setter Property="Width" Value="26" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <!--
+            Fill и IsVisible кругов — стилями ниже, а не здесь: значение из
+            шаблона у Avalonia сильнее стиля, и наведение, нажатие и цвет
+            «закрыть» его бы не перекрыли.
+        -->
+        <Panel Background="Transparent">
+          <Ellipse Name="Circle" Width="18" Height="18" />
+          <Ellipse Name="Shade" Width="18" Height="18" />
+          <Path Name="Glyph"
+                Width="16" Height="16"
+                Stretch="None"
+                Fill="{TemplateBinding Foreground}"
+                Data="{TemplateBinding Tag}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button /template/ Ellipse#Circle">
+    <Setter Property="Fill" Value="Transparent" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button /template/ Ellipse#Shade">
+    <Setter Property="Fill" Value="#33000000" />
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button:pointerover /template/ Ellipse#Circle">
+    <Setter Property="Fill" Value="{DynamicResource ControlHoverBrush}" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button:pressed /template/ Ellipse#Circle">
+    <Setter Property="Fill" Value="{DynamicResource ControlPressedBrush}" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_MinimizeButton">
+    <Setter Property="Tag">
+      <StreamGeometry>M4 10v1h8v-1z</StreamGeometry>
+    </Setter>
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_MaximizeButton">
+    <Setter Property="Tag">
+      <StreamGeometry>M4 4v8h8V4zm1 1h6v6H5z</StreamGeometry>
+    </Setter>
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_MaximizeButton.restore">
+    <Setter Property="Tag">
+      <StreamGeometry>M3 5v8h8V5zm1 1h6v6H4zM5 3v1h7v7h1V3z</StreamGeometry>
+    </Setter>
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_CloseButton">
+    <Setter Property="Foreground" Value="#F8F8F8" />
+    <Setter Property="Tag">
+      <StreamGeometry>M4.795 3.912l-.883.883.147.146L7.117 8 4.06 11.059l-.147.146.883.883.146-.147L8 8.883l3.059 3.058.146.147.883-.883-.147-.146L8.883 8l3.058-3.059.147-.146-.883-.883-.146.147L8 7.117 4.941 4.06z</StreamGeometry>
+    </Setter>
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_CloseButton /template/ Ellipse#Circle">
+    <Setter Property="Fill" Value="{DynamicResource AccentFillBrush}" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_CloseButton:pointerover /template/ Ellipse#Circle">
+    <Setter Property="Opacity" Value="0.85" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_CloseButton:pressed /template/ Ellipse#Shade">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <Style Selector="StackPanel#PART_OverlayPanel > Button#PART_CloseButton.inactive /template/ Ellipse#Circle">
+    <Setter Property="Fill" Value="{DynamicResource TextTertiaryBrush}" />
   </Style>
 
   <Style Selector="theme|Icon">

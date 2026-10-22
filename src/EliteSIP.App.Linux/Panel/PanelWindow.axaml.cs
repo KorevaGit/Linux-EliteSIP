@@ -86,10 +86,11 @@ public partial class PanelWindow : Window
     public bool HidesToTray { get; set; }
 
     /// <summary>
-    /// Высота к ширине у панели при первом показе — вытянутая, как экран
-    /// телефона (у них 2,0–2,2), а не по содержимому.
+    /// Высота к ширине у панели при первом показе — вытянутая, а не по
+    /// содержимому: 4 : 3 (324 × 432). Было 2 : 1, как экран телефона, —
+    /// 22 октября 2026 заказчик попросил ниже в полтора раза.
     /// </summary>
-    internal const double PhoneAspect = 2.0;
+    internal const double PhoneAspect = 4.0 / 3.0;
 
     /// <summary>
     /// Высота при первом показе: <see cref="PhoneAspect"/> от ширины, но не

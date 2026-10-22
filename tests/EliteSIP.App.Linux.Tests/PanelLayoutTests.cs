@@ -23,16 +23,16 @@ public sealed class PanelLayoutTests
     }
 
     [Fact]
-    public void Первый_показ_вытянутый_как_телефон()
-        => Assert.Equal(648, PanelWindow.InitialHeight(width: 324, content: 420, room: 1000));
+    public void Первый_показ_вытянутый_четыре_к_трём()
+        => Assert.Equal(432, PanelWindow.InitialHeight(width: 324, content: 220, room: 1000));
 
     [Fact]
     public void Содержимое_выше_телефона_берёт_своё()
-        => Assert.Equal(720, PanelWindow.InitialHeight(width: 324, content: 720, room: 1000));
+        => Assert.Equal(520, PanelWindow.InitialHeight(width: 324, content: 520, room: 1000));
 
     [Fact]
     public void Не_выше_экрана()
-        => Assert.Equal(600, PanelWindow.InitialHeight(width: 324, content: 420, room: 600));
+        => Assert.Equal(400, PanelWindow.InitialHeight(width: 324, content: 220, room: 400));
 
     [AvaloniaFact]
     public void Без_сохранённого_размера_окно_вытянуто()
