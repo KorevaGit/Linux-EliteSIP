@@ -1,0 +1,123 @@
+name: CI
+
+# Сборка и проверки Linux-версии на каждый коммит и каждый pull request.
+#
+# Два задания. build — всё решение (свои проекты и общие из подмодуля
+# shared/) и все проверки. package — пакет .deb тем же tools/build-deb.sh, что
+# и выпуск: сломанная раскладка, служба или права всплывают здесь, а не на
+# чистой машине у администратора.
+#
+# ubuntu-24.04, а не ubuntu-latest: Mint 22 стоит на Ubuntu 24.04 (noble), и
+# пакет обязан собираться и ставиться против той же базы (docs/PORT-PLAN.md,
+# «Что решено»). Переход на следующую Ubuntu — решение, а не побочный эффект
+# обновления раннера.
+#
+# Подмодуль — Windows-репозиторий KorevaGit/Win-EliteSIP. Если он закрытый,
+# стандартного токена задания на него не хватит: нужен секрет SHARED_REPO_TOKEN
+# (fine-grained, Contents: read на Win-EliteSIP). Открытому хватает и без него.
+
+on:
+  push:
+    branches: [main, 'linux/**']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.SHARED_REPO_TOKEN || github.token }}
+
+      # Метки подмодуля нужны сборке: git describe вписывает в приложение,
+      # из какого общего кода оно собрано (SupportFacts.SharedCode), и
+      # проверка это сверяет. Клон подмодуля метки сам не приносит.
+      - name: Метки общего кода
+        run: git -C shared fetch --tags --force origin
+
+      # Версия SDK — из global.json, та же, что на машине разработки: красный
+      # прогон должен воспроизводиться у себя.
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Правило подмодуля 1 (docs/PORT-PLAN.md): в shared/ ничего не правят.
+      # Незакоммиченное там — это код, которого нет ни в одном репозитории.
+      - name: Подмодуль без правок
+        run: test -z "$(git -C shared status --porcelain)"
+
+      - name: Восстановление
+        run: dotnet restore EliteSIP.Linux.slnx
+
+      - name: Сборка
+        run: dotnet build EliteSIP.Linux.slnx --no-restore --configuration Release
+
+      # Проверки звука без сервера, окон — на Avalonia Headless, оболочки — на
+      # временных каталогах; живой сеанс им не нужен. Две проверки помечены
+      # «только Windows» и честно пропускаются.
+      - name: Проверки
+        run: dotnet test EliteSIP.Linux.slnx --no-build --configuration Release --verbosity normal
+
+  package:
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.SHARED_REPO_TOKEN || github.token }}
+
+      - name: Метки общего кода
+        run: git -C shared fetch --tags --force origin
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Пакет собирается с заводской настройкой-заглушкой: настоящая с паролем
+      # канала в CI не попадает (сквозное правило 1, «в Git нельзя пароли»).
+      # Поэтому собранный здесь пакет никуда не выкладывается — только
+      # проверяется.
+      - name: Пакет с заглушкой настройки
+        run: |
+          stub="$RUNNER_TEMP/provisioning.json"
+          cat > "$stub" <<'EOF'
+          {
+            "updates": { "baseURL": "https://update.invalid", "user": "ci", "password": "ci" },
+            "presetsPublicKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            "releasesPublicKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+          }
+          EOF
+          tools/build-deb.sh --version 0.0.0 --provisioning "$stub" --output "$RUNNER_TEMP/deb"
+
+      - name: Содержимое пакета
+        run: |
+          package="$RUNNER_TEMP/deb/EliteSIP-0.0.0.deb"
+          dpkg-deb --info "$package"
+          contents=$(dpkg-deb --contents "$package")
+          for path in \
+              ./opt/elitesip/EliteSIP \
+              ./opt/elitesip/elitesip-updater \
+              ./opt/elitesip/provisioning.json \
+              ./usr/lib/systemd/system/elitesip-updater.service \
+              ./usr/lib/systemd/system/elitesip-updater.timer \
+              ./usr/lib/systemd/system/elitesip-updater.path \
+              ./usr/lib/systemd/user/elitesip.service \
+              ./etc/xdg/autostart/elitesip.desktop \
+              ./usr/share/doc/elitesip/copyright \
+              ./usr/share/doc/elitesip/changelog.gz; do
+            grep -q " $path\$" <<<"$contents" || { echo "в пакете нет $path"; exit 1; }
+          done
+          # Всё в пакете — root: иначе /opt/elitesip у администратора
+          # оказался бы чужим каталогом, в который пишет сборщик.
+          if grep -v ' root/root ' <<<"$contents"; then echo "в пакете есть файлы не root"; exit 1; fi
+
+      # Службы проверяются тем же systemd, что на рабочих местах: опечатка в
+      # директиве иначе всплыла бы только при установке.
+      - name: Службы systemd
+        run: systemd-analyze verify packaging/systemd/elitesip-updater.service packaging/systemd/elitesip-updater.timer packaging/systemd/elitesip-updater.path

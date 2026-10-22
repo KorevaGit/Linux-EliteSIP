@@ -1,0 +1,17 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: EliteSIP
+Comment:
+ Софтфон EliteSIP для Linux. Программа не свободная: распространяется
+ только среди рабочих мест заказчика, ставит её администратор.
+ Сторонние компоненты в /opt/elitesip идут под своими лицензиями:
+ .NET (MIT), Avalonia и MicroCom (MIT), SkiaSharp и HarfBuzzSharp (MIT),
+ NAudio (MIT), NLayer (MIT), NVorbis (MIT), SoundFlow с miniaudio (MIT),
+ WebRTC APM (BSD-3-Clause), SQLite (public domain) и SQLitePCLRaw
+ (Apache-2.0), Tmds.DBus (MIT), BouncyCastle (MIT). Тексты лицензий —
+ в пакетах NuGet этих компонентов.
+
+Files: *
+Copyright: EliteSIP
+License: proprietary
+ Все права защищены. Копирование, распространение и изменение без
+ письменного разрешения правообладателя запрещены.

@@ -25,4 +25,50 @@ UMask=0077
 # временной службой и сюда не входит. Дольше — значит висит.
 TimeoutStartSec=20min
 
+# Замок одной копии (src/EliteSIP.Updater.Linux/Layout.cs). Свой каталог в
+# /run, а не файл в самом /run: при ProtectSystem=strict /run только для
+# чтения, а этот каталог systemd открывает на запись сам.
+RuntimeDirectory=elitesip-updater
+RuntimeDirectoryMode=0700
+
+# --- Изоляция -------------------------------------------------------------------
+#
+# Служба работает от root и разбирает то, что пришло по сети и из каталога,
+# открытого всем на запись. Ошибка в разборе не должна давать root на всю
+# машину, поэтому оставлено ровно то, что нужно такту:
+#
+#   - читать /opt/elitesip (ключ линии) и /var/lib/elitesip/updates (отметки,
+#     скачанный пакет) — ProtectSystem=strict оставляет чтение;
+#   - писать только свой StateDirectory (и RuntimeDirectory) — их systemd
+#     открывает на запись сам;
+#   - сеть (HTTPS к каналу) и сокеты systemd в /run: systemctl, systemd-run и
+#     loginctl ходят к PID 1 и logind по шине. Подключение к сокету
+#     ProtectSystem не мешает;
+#   - подъём софтфона (systemctl --user -M <пользователь>@) идёт через
+#     systemd-run во временной службе от имени пользователя — вне этой
+#     изоляции; домашние каталоги службе нужны разве что для чтения;
+#   - сама установка (apt-get, postinst) — отдельная временная служба
+#     elitesip-install (Machine.cs) и этой изоляции не наследует: пакету нужно
+#     писать в /opt, /etc и /usr.
+#
+# Чего здесь нет и почему: MemoryDenyWriteExecute — JIT .NET пишет
+# исполняемый код; CapabilityBoundingSet — root читает отметки оператора и
+# зовёт systemctl, и урезать возможности без проверки на живой машине значит
+# рисковать единственным путём обновления (план, «Риски»).
 PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK

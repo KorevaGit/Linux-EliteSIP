@@ -17,10 +17,16 @@
 #   5. пакет .deb (tools/build-deb.sh);
 #   6. манифест releases/linux/current.json и подпись Ed25519;
 #   7. проверка манифеста кодом клиента (releasekit verify);
-#   8. что и куда выкладывать — печатается, а не делается.
+#   8. коммит с версией и метка v<версия> в этом репозитории;
+#   9. что и как выкладывать — печатается (выкладывает tools/publish.sh).
 #
-# Шаг 8 не автоматизирован намеренно, как и на Windows: выкладка на канал —
-# место, где ошибка видна всем машинам сразу, и делает её человек глазами.
+# Выкладка не делается отсюда намеренно, как и на Windows: выкладка на канал —
+# место, где ошибка видна всем машинам сразу, и запускает её человек глазами
+# (tools/publish.sh). Метка и коммит ставятся здесь, но не отправляются:
+# отправка — действие наружу, её делает тот, кто выпускает.
+#
+# Провалился любой шаг после второго — версия в Directory.Build.props
+# возвращается: выпуска нет, и дерево остаётся таким, каким было.
 #
 # Ключ подписи — СВОЙ у линии Linux, не ключ Windows (план, W-L7, «Канал»):
 # с общим ключом подписанный манифест Linux, подложенный в
@@ -149,6 +155,13 @@ if [ "$(printf '%s\n%s\n' "$current" "$version" | sort -V | tail -1)" != "$versi
     fail "версия $version не больше текущей $current"
 fi
 
+# Метка выпуска — v<версия> в этом репозитории. Не путать с linux-v<версия> в
+# Windows-репозитории: та помечает общий код выпуска, эта — сам выпуск.
+release_tag="v$version"
+if git rev-parse -q --verify "refs/tags/$release_tag" >/dev/null; then
+    $dry_run && warn "метка $release_tag уже есть" || fail "метка $release_tag уже есть: такой выпуск уже был"
+fi
+
 echo "  версия: $current -> $version"
 echo "  общий код: ${shared_tag:-не на метке} ($(git -C shared rev-parse --short HEAD))"
 
@@ -156,6 +169,9 @@ echo "  общий код: ${shared_tag:-не на метке} ($(git -C shared 
 
 if ! $dry_run; then
     sed -i "s:<Version>[^<]*</Version>:<Version>$version</Version>:" "$props"
+
+    # Провал дальше — версия возвращается. Снимается ловушка после коммита.
+    trap 'git -C "$root" checkout -- Directory.Build.props; echo "  версия в Directory.Build.props возвращена к $current"' EXIT
 fi
 
 # --- 3. Сборка и проверки -----------------------------------------------------
@@ -272,7 +288,29 @@ releasekit sign "$manifest" "$signing_key" "$envelope" || fail "манифест
 # Тем же ReleaseManifest.Verified, которым его прочитает рабочее место.
 releasekit verify "$envelope" "$public_key" || fail "манифест не прошёл проверку кодом клиента"
 
-# --- 8. Что выкладывать -------------------------------------------------------
+# --- 8. Коммит и метка --------------------------------------------------------
+
+if ! $dry_run; then
+    step "коммит и метка"
+
+    # До 0.1.67 у Windows-выпусков не было меток, и сопоставить установщик с
+    # коммитом можно было только по дате. Здесь коммит с версией и метка
+    # появляются вместе с пакетом — из того самого дерева, из которого он собран.
+    git -C "$root" commit -q -m "Выпуск Linux $version
+
+Общий код: ${shared_tag:-не на метке} ($(git -C shared rev-parse --short HEAD)).
+Пакет: EliteSIP-$version.deb, sha256 $digest." -- Directory.Build.props \
+        || fail "коммит с версией не сохранился"
+    trap - EXIT
+
+    git -C "$root" tag -a "$release_tag" -m "EliteSIP Linux $version, общий код ${shared_tag:-$(git -C shared rev-parse --short HEAD)}" \
+        || fail "метка $release_tag не поставилась"
+
+    echo "  коммит: $(git -C "$root" log -1 --format='%h %s')"
+    echo "  метка:  $release_tag"
+fi
+
+# --- 9. Что выкладывать -------------------------------------------------------
 
 step "выпуск собран"
 
@@ -283,12 +321,12 @@ cat <<EOF
   размер:    $size
   манифест:  $envelope ($base_url)
 
-Выложить на канал (PUT /internal/objects/<ключ>, как publish.ps1):
-  releases/linux/EliteSIP-$version.deb  <- $package
-  releases/linux/current.json           <- $envelope
+Выложить на канал — сперва проверить, потом выложить:
+  tools/publish.sh --version $version --dry-run
+  tools/publish.sh --version $version
 
-Порядок значим: сперва пакет, потом манифест. Наоборот — это машины, которые
-пошли за файлом, которого ещё нет.
+Отправить коммит и метку:
+  git push origin HEAD $release_tag
 
 После выкладки: поставить выпуск на одну машину и убедиться, что она
 обновилась сама (журнал /var/lib/elitesip/updater/updater.log и

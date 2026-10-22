@@ -147,6 +147,23 @@ for size in 16 32 128 256 512; do
 done
 
 # Права — явно и на всё дерево: публикация и mkdir оставляют то, что дал
+# Документация пакета: copyright и changelog — то, что dpkg и администратор
+# ищут в /usr/share/doc/<пакет>. В журнале изменений — из какого коммита и
+# какого общего кода собран пакет: по нему же видно, что именно стоит на
+# машине, без доступа к Git.
+doc="$stage/usr/share/doc/elitesip"
+install -D -m 0644 "$root/packaging/debian/copyright" "$doc/copyright"
+{
+    echo "elitesip ($version) noble; urgency=medium"
+    echo
+    echo "  * Выпуск EliteSIP $version для Linux Mint 22 / Ubuntu 24.04."
+    echo "  * Коммит: $(git -C "$root" describe --tags --always --dirty 2>/dev/null || echo неизвестен)."
+    echo "  * Общий код: $(git -C "$root/shared" describe --tags --long --always --dirty 2>/dev/null || echo неизвестен)."
+    echo
+    echo " -- $maintainer  $(LC_ALL=C date -R)"
+} | gzip -9n > "$doc/changelog.gz"
+chmod 0644 "$doc/changelog.gz"
+
 # umask сборщика (0775 на /opt в пакете — это /opt, открытый группе, на
 # машине, где каталога ещё не было). createdump рантайм запускает при падении.
 find "$stage" -type d -exec chmod 0755 {} +

@@ -51,9 +51,22 @@ void log(string message)
 
 // Вторая копия посреди первой — два решения об одной установке. systemd и
 // так не запустит службу, которая уже работает; замок — вторая линия. Он в
-// `/run`, куда пишет только root, — оператор не займёт его заранее, как
-// занимал мьютекс на Windows до 0.1.67.
+// `/run/elitesip-updater`, куда пишет только root, — оператор не займёт его
+// заранее, как занимал мьютекс на Windows до 0.1.67. Каталог создаёт systemd
+// (`RuntimeDirectory=`); создаётся и здесь — для запуска руками.
 FileStream instance;
+try
+{
+    Directory.CreateDirectory(
+        Path.GetDirectoryName(layout.LockFile)!,
+        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+}
+catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+{
+    log($"каталог замка {Path.GetDirectoryName(layout.LockFile)} недоступен: {error.Message}");
+    return 1;
+}
+
 try
 {
     instance = new FileStream(layout.LockFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);

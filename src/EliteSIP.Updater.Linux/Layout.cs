@@ -34,7 +34,7 @@ internal sealed record Layout(string Program, string Shared, string Trusted, str
         AppContext.BaseDirectory,
         "/var/lib/elitesip/updates",
         "/var/lib/elitesip/updater",
-        "/run/elitesip-updater.lock");
+        "/run/elitesip-updater/lock");
 
     /// <summary>Сборка приложения: по её версии видно, какой выпуск стоит.</summary>
     internal string AppAssembly => Path.Combine(Program, "EliteSIP.App.Linux.dll");
