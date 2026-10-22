@@ -31,6 +31,12 @@ SIMPLE = {
     "ThemeBorderHighBrush": "ControlBorderHoverBrush",
     "ThemeAccentBrush": "AccentBrush",
     "HighlightBrush": "SelectionBrush",
+    # Рамка, которую рисует Avalonia (Program.DrawsOwnFrame): полоса заголовка
+    # и кнопки свернуть-развернуть-закрыть — цвета фона окна, без шва.
+    "TitleBarBackgroundBrush": "WindowBackgroundBrush",
+    "CaptionButtonBackground": "WindowBackgroundBrush",
+    "CaptionButtonBorderBrush": "WindowBackgroundBrush",
+    "CaptionButtonForeground": "TextPrimaryBrush",
 }
 
 

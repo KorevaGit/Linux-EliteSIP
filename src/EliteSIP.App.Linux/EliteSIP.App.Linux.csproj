@@ -31,6 +31,12 @@
     -->
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationManifest />
+
+    <!--
+      Рисованная рамка окон на X11 в Avalonia 12.1 помечена экспериментальной;
+      почему она всё равно нужна и как её выключить — Program.DrawsOwnFrame.
+    -->
+    <NoWarn>$(NoWarn);AVALONIA_X11_CSD;AVALONIA_X11_FORCE_CSD</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -60,6 +60,10 @@
       <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#FF7A7A7A" />
       <SolidColorBrush x:Key="ThemeAccentBrush" Color="#FF0078D4" />
       <SolidColorBrush x:Key="HighlightBrush" Color="#330078D4" />
+      <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="CaptionButtonBackground" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="CaptionButtonForeground" Color="#E4000000" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
       <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF" />
@@ -110,6 +114,10 @@
       <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#FF858585" />
       <SolidColorBrush x:Key="ThemeAccentBrush" Color="#FF4CC2FF" />
       <SolidColorBrush x:Key="HighlightBrush" Color="#4C4CC2FF" />
+      <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="CaptionButtonBackground" Color="#FF000000" />
+      <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="CaptionButtonForeground" Color="#FFFFFFFF" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

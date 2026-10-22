@@ -85,6 +85,19 @@ public partial class PanelWindow : Window
     /// </summary>
     public bool HidesToTray { get; set; }
 
+    /// <summary>
+    /// Высота к ширине у панели при первом показе — вытянутая, как экран
+    /// телефона (у них 2,0–2,2), а не по содержимому.
+    /// </summary>
+    internal const double PhoneAspect = 2.0;
+
+    /// <summary>
+    /// Высота при первом показе: <see cref="PhoneAspect"/> от ширины, но не
+    /// ниже содержимого и не выше рабочей области экрана.
+    /// </summary>
+    internal static double InitialHeight(double width, double content, double room) =>
+        Math.Min(Math.Max(Math.Round(width * PhoneAspect), content), room);
+
     /// <summary>Сколько ужать клавиши макросов, чтобы панель влезла; <c>null</c> — не нужно.</summary>
     ///
     /// <remarks>Та же формула, что у Windows: лишнее делится на ряды поровну.</remarks>
@@ -111,6 +124,15 @@ public partial class PanelWindow : Window
                 SizeToContent = SizeToContent.Manual;
                 Width = size.Width;
                 Height = Math.Max(size.Height, MinHeight);
+            }
+            else
+            {
+                // Первый показ — вытянутое окно, как экран телефона, а не
+                // почти квадрат по содержимому: лишнюю высоту забирают клавиши
+                // (растяжение строк). Пределы — содержимое и экран.
+                Relayout();
+                SizeToContent = SizeToContent.Manual;
+                Height = InitialHeight(Width, MinHeight, MaxHeight);
             }
 
             Restore();

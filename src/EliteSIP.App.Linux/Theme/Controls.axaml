@@ -32,6 +32,15 @@
     <Setter Property="FontSize" Value="12" />
   </Style>
 
+  <!--
+      Рамка, которую рисует Avalonia (Program.DrawsOwnFrame): кнопки те же, что
+      у диспетчера окон Cinnamon, — свернуть, развернуть, закрыть. Кнопки «во
+      весь экран» у системной рамки нет, и софтфону она не нужна.
+  -->
+  <Style Selector=":is(Control)#PART_FullScreenButton">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+
   <Style Selector="theme|Icon">
     <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
   </Style>

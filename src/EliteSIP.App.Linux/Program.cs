@@ -64,7 +64,41 @@ internal static class Program
     }
 
     /// <summary>Построитель приложения; его же берёт дизайнер разметки.</summary>
-    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect();
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
+        .UsePlatformDetect()
+        .With(new X11PlatformOptions
+        {
+            EnableDrawnDecorations = DrawsOwnFrame,
+            ForceDrawnDecorations = DrawsOwnFrame,
+        });
+
+    /// <summary>
+    /// Рамку и полосу заголовка рисует само приложение, а не диспетчер окон.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// <para>
+    /// Полосу заголовка Muffin рисует своей темой (Mint-Y — тёмная), и окно с
+    /// палитрой продукта выглядело собранным из двух половин — то, что на
+    /// Windows лечит <c>SystemCaption</c>. Перекрасить чужую полосу на X11
+    /// нечем: свойство <c>_GTK_THEME_VARIANT</c> выбирает только светлый или
+    /// тёмный вариант темы диспетчера, а не цвет. Поэтому рамку рисует
+    /// Avalonia: полоса — цвет фона окна (кисти <c>TitleBarBackgroundBrush</c> и
+    /// <c>CaptionButton*</c> в палитре), кнопки свернуть, развернуть и закрыть —
+    /// её, перетаскивание и изменение размера отдаются диспетчеру
+    /// (<c>_NET_WM_MOVERESIZE</c>), так что прилипание к краям экрана остаётся.
+    /// </para>
+    /// <para>
+    /// <b>В Avalonia 12.1 это помечено экспериментальным</b>
+    /// (<c>AVALONIA_X11_CSD</c>), поэтому есть выключатель: переменная
+    /// <c>ELITESIP_SYSTEM_FRAME=1</c> возвращает рамку диспетчера окон — без
+    /// пересборки, если на каком-то рабочем столе рисованная рамка поведёт себя
+    /// не так. Для службы — <c>systemctl --user set-environment</c> или
+    /// <c>Environment=</c> в <c>elitesip.service.d</c>.
+    /// </para>
+    /// </remarks>
+    internal static bool DrawsOwnFrame { get; } =
+        Environment.GetEnvironmentVariable("ELITESIP_SYSTEM_FRAME") is not "1";
 
     /// <summary>Строка в журнал до настроек — так же, как EarlyLog у Windows.</summary>
     private static void EarlyLog(string message)
