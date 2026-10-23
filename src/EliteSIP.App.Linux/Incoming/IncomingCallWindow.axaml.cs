@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using EliteSIP.CallGuard;
 
@@ -47,6 +48,11 @@ public partial class IncomingCallWindow : Window
 
     private readonly DispatcherTimer _moveSettle;
 
+    /// <summary>Сколько подпись говорит «номер скопирован».</summary>
+    private static readonly TimeSpan CopiedNoticeTime = TimeSpan.FromSeconds(2);
+
+    private readonly DispatcherTimer _copiedNotice;
+
     private PixelPoint _moveStart;
 
     public IncomingCallWindow()
@@ -56,6 +62,17 @@ public partial class IncomingCallWindow : Window
         _moveSettle = new DispatcherTimer { Interval = MoveSettle };
         _moveSettle.Tick += (_, _) => EndUserMove();
         Header.PointerPressed += OnHeaderPressed;
+        NumberBlock.PointerReleased += OnNumberReleased;
+
+        _copiedNotice = new DispatcherTimer { Interval = CopiedNoticeTime };
+        _copiedNotice.Tick += (_, _) =>
+        {
+            _copiedNotice.Stop();
+            if (DataContext is IncomingCallViewModel model)
+            {
+                model.IsNumberCopied = false;
+            }
+        };
         PositionChanged += (_, _) =>
         {
             if (IsUserMoving)
@@ -68,6 +85,7 @@ public partial class IncomingCallWindow : Window
         {
             // Закрытая посреди переноса карточка своё место не сохраняет.
             _moveSettle.Stop();
+            _copiedNotice.Stop();
             IsUserMoving = false;
         };
     }
@@ -89,6 +107,32 @@ public partial class IncomingCallWindow : Window
         _moveStart = Position;
         _moveSettle.Start();
         BeginMoveDrag(e);
+    }
+
+    /// <summary>Номер — в буфер обмена. Фокус окно при этом не берёт.</summary>
+    private async void OnNumberReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton is not MouseButton.Left
+            || DataContext is not IncomingCallViewModel { CopyableNumber: { } number } model
+            || Clipboard is not { } clipboard)
+        {
+            return;
+        }
+
+        try
+        {
+            await clipboard.SetTextAsync(number);
+        }
+        catch (Exception error) when (error is InvalidOperationException or TimeoutException)
+        {
+            // Буфер занят чужим владельцем или X-сервер не ответил: номер
+            // не скопировался, а вызову это не мешает.
+            return;
+        }
+
+        model.IsNumberCopied = true;
+        _copiedNotice.Stop();
+        _copiedNotice.Start();
     }
 
     private void EndUserMove()

@@ -59,7 +59,17 @@
                     IsVisible="{Binding IsGuarded}" />
       </DockPanel>
 
-      <StackPanel Margin="0,4,0,0" HorizontalAlignment="Stretch">
+      <!--
+          Имя и номер — щелчком копируют номер. Только видимый: номер под
+          маской не копируется (IncomingCallSubject.CopyableNumber).
+      -->
+      <StackPanel x:Name="NumberBlock"
+                  Margin="0,4,0,0"
+                  HorizontalAlignment="Stretch"
+                  Background="Transparent"
+                  Classes.copyable="{Binding CanCopyNumber}"
+                  ToolTip.Tip="{res:Loc IncomingCopyNumber}"
+                  ToolTip.IsEnabled="{Binding CanCopyNumber}">
         <TextBlock theme:Emoji.Text="{Binding Headline}"
                    HorizontalAlignment="Center"
                    TextAlignment="Center"
@@ -161,6 +171,9 @@
   </Border>
 
   <Window.Styles>
+    <Style Selector="StackPanel.copyable">
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
     <Style Selector="TextBlock.caption">
       <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
