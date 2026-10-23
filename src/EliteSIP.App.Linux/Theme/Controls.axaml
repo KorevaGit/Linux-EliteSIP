@@ -280,6 +280,15 @@
       </ControlTemplate>
     </Setter>
   </Style>
+  <!--
+      Шаблон клавиши свой, но имя PART_ContentPresenter — то же, что у
+      SimpleTheme, и её стиль нажатого ToggleButton красит этот презентер
+      серым (ThemeControlHighBrush): на красной «Микрофон выкл.» под текстом
+      была серая плашка. Фон клавиши — у Border#Surface, у презентера его нет.
+  -->
+  <Style Selector="ToggleButton.key /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
   <Style Selector="ToggleButton.key:pointerover /template/ Border#Surface">
     <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
   </Style>
