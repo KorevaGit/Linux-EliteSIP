@@ -168,6 +168,15 @@
       </ControlTemplate>
     </Setter>
   </Style>
+  <!--
+      Имя PART_ContentPresenter — то же, что у SimpleTheme, и её стили
+      наведения и нажатия Button красят презентер серым: под «Завершить»
+      после отбоя (курсор так и стоит над кнопкой) оставалась серая плашка.
+      Фон кнопки — у Border#Surface, у презентера его нет.
+  -->
+  <Style Selector="Button.surface /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
   <Style Selector="Button.surface:pointerover /template/ Border#Surface">
     <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
   </Style>

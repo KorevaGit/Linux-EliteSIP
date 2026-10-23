@@ -169,6 +169,10 @@
       </ControlTemplate>
     </Setter>
   </Style>
+  <!-- Без серой плашки SimpleTheme под текстом (см. Button.surface в Controls.axaml). -->
+  <Style Selector="Button.settings /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
   <Style Selector="Button.settings:pointerover /template/ Border#Surface">
     <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderHoverBrush}" />
   </Style>
