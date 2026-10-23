@@ -30,7 +30,14 @@
 
   <Border BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
     <StackPanel Margin="8,6,8,8">
-      <DockPanel LastChildFill="False">
+      <!--
+          Шапка — ручка переноса: за неё карточку можно отодвинуть, не принимая
+          и не отклоняя вызов. Кнопки приёма ниже переноса не начинают.
+      -->
+      <DockPanel x:Name="Header"
+                 LastChildFill="False"
+                 Background="Transparent"
+                 Cursor="SizeAll">
         <theme:Icon DockPanel.Dock="Left"
                     Glyph="phone.arrow.down.left.fill"
                     Size="16"

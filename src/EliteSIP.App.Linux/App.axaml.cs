@@ -182,7 +182,12 @@ public sealed partial class App : Application, IDisposable
             ShowHistory = new RelayCommand(_ => ShowHistory()),
         };
 
-        _incoming = new IncomingCallPresenter(Log, () => _panelWindow);
+        var settings = _settings;
+        _incoming = new IncomingCallPresenter(Log, () => _panelWindow)
+        {
+            RestorePlacement = () => settings.IncomingPlacement.Origin,
+            SavePlacement = origin => settings.IncomingPlacement.Origin = origin,
+        };
 
         _phone = new PhoneService(
             _settings, _panel, _history, _incoming, _ui, _audioPlatform, Log, () => new PingUtilityEcho());

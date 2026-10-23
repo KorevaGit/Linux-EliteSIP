@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
 using EliteSIP.CallGuard;
 
 namespace EliteSIP.App.Incoming;
@@ -32,9 +34,78 @@ namespace EliteSIP.App.Incoming;
 /// </remarks>
 public partial class IncomingCallWindow : Window
 {
+    /// <summary>
+    /// Сколько позиция должна стоять, чтобы перенос считался законченным.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Перенос ведёт диспетчер окон (<c>_NET_WM_MOVERESIZE</c>), и отпускание
+    /// кнопки достаётся ему, а не окну. Конец переноса окно узнаёт по тому,
+    /// что его перестали двигать.
+    /// </remarks>
+    private static readonly TimeSpan MoveSettle = TimeSpan.FromMilliseconds(400);
+
+    private readonly DispatcherTimer _moveSettle;
+
+    private PixelPoint _moveStart;
+
     public IncomingCallWindow()
     {
         InitializeComponent();
+
+        _moveSettle = new DispatcherTimer { Interval = MoveSettle };
+        _moveSettle.Tick += (_, _) => EndUserMove();
+        Header.PointerPressed += OnHeaderPressed;
+        PositionChanged += (_, _) =>
+        {
+            if (IsUserMoving)
+            {
+                _moveSettle.Stop();
+                _moveSettle.Start();
+            }
+        };
+        Closed += (_, _) =>
+        {
+            // Закрытая посреди переноса карточка своё место не сохраняет.
+            _moveSettle.Stop();
+            IsUserMoving = false;
+        };
+    }
+
+    /// <summary>Оператор тащит окно. Программное размещение этого не включает.</summary>
+    internal bool IsUserMoving { get; private set; }
+
+    /// <summary>Оператор закончил перенос.</summary>
+    internal event EventHandler? MovedByUser;
+
+    private void OnHeaderPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        IsUserMoving = true;
+        _moveStart = Position;
+        _moveSettle.Start();
+        BeginMoveDrag(e);
+    }
+
+    private void EndUserMove()
+    {
+        _moveSettle.Stop();
+        if (!IsUserMoving)
+        {
+            return;
+        }
+
+        IsUserMoving = false;
+
+        // Щелчок по шапке без сдвига — не выбор места.
+        if (Position != _moveStart)
+        {
+            MovedByUser?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public IncomingCallWindow(IncomingCallViewModel model)
