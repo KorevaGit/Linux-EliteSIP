@@ -30,6 +30,7 @@ internal sealed class TestAudioPlatform : IAudioPlatform
         public void StopPreview() { }
         public void PlayKeyTone(char key, string? deviceId) { }
         public void PlayHangUp(string? deviceId) { }
+        public void PlayConnected(string? deviceId) { }
         public void Dispose() { }
     }
 }
