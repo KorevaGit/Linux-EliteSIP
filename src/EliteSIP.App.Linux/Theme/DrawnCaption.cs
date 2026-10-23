@@ -39,7 +39,34 @@ internal static class DrawnCaption
         // Рамка собирается при показе окна, а не при создании: до него
         // кнопок ещё нет.
         Window.WindowOpenedEvent.AddClassHandler<Window>(
-            (window, _) => Dispatcher.UIThread.Post(() => Update(window), DispatcherPriority.Loaded));
+            (window, _) => Dispatcher.UIThread.Post(
+                () =>
+                {
+                    Update(window);
+                    TintFrame(window);
+                },
+                DispatcherPriority.Loaded));
+    }
+
+    /// <summary>
+    /// Кромка рамки — кистью разделителя, а не <c>ThemeBorderMidBrush</c>.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Шаблон рамки SimpleTheme красит кромку <c>ThemeBorderMidBrush</c> —
+    /// кистью рамок полей ввода, на чёрном окне тёмной темы она светло-серая
+    /// и смотрится белой обводкой. Значение задано в самом шаблоне, а оно у
+    /// Avalonia сильнее стиля, поэтому кисть ставится привязкой отсюда; она
+    /// динамическая и перекрашивается вместе с темой.
+    /// </remarks>
+    private static void TintFrame(Window window)
+    {
+        foreach (var border in Root(window).GetVisualDescendants()
+                     .OfType<Border>()
+                     .Where(border => border.Name is "PART_WindowBorder"))
+        {
+            border.Bind(Border.BorderBrushProperty, border.GetResourceObservable("SeparatorBrush"));
+        }
     }
 
     /// <summary>Классы кнопкам рамки этого окна по его нынешнему состоянию.</summary>
@@ -55,14 +82,20 @@ internal static class DrawnCaption
     /// <summary>Кнопки «свернуть», «развернуть» и «закрыть» рамки окна.</summary>
     internal static IEnumerable<Button> Buttons(Window window)
     {
+        return Root(window).GetVisualDescendants()
+            .OfType<Button>()
+            .Where(button => button.Name is "PART_MinimizeButton" or "PART_MaximizeButton" or "PART_CloseButton");
+    }
+
+    /// <summary>Корень слоя рамки над окном — <c>TopLevelHost</c>.</summary>
+    private static Visual Root(Window window)
+    {
         Visual root = window;
         while (root.GetVisualParent() is { } parent)
         {
             root = parent;
         }
 
-        return root.GetVisualDescendants()
-            .OfType<Button>()
-            .Where(button => button.Name is "PART_MinimizeButton" or "PART_MaximizeButton" or "PART_CloseButton");
+        return root;
     }
 }
