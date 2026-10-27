@@ -958,7 +958,7 @@ extension 650`), нажатия — стендом на XTest, тем же вы�
 **Пакет.** `.deb` под Mint 22 / Ubuntu 24.04 (`EliteSIP-<версия>.deb`),
 `.rpm` не нужен. Ставит администратор: `sudo apt install ./EliteSIP-<версия>.deb`
 — `apt`, а не `dpkg -i`, чтобы подтянулись зависимости (`libpulse0`, `libx11-6`,
-`libxi6`, `libxss1`, `libicu74`, `libssl3t64`, `iputils-ping`). Программа
+`libxi6`, `libxss1`, `libicu74` или `libicu76` в Debian 13, `libssl3t64`, `iputils-ping`). Программа
 ставится в `/opt/elitesip` (владелец root, оператор не пишет), ярлык
 `.desktop` в `/usr/share/applications` (схема `elitesip://` не нужна: её открывает телефон с EliteSIP Connect, а софтфон только показывает QR),
 системные `elitesip-updater.service`, `.timer`, `.path` и шаблон
