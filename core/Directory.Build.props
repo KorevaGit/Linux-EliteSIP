@@ -1,0 +1,4 @@
+<Project>
+  <!-- Все локальные проекты используют настройки и версию Linux. -->
+  <Import Project="../Directory.Build.props" />
+</Project>

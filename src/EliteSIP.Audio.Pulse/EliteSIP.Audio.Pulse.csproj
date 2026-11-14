@@ -1,16 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    Звук Linux-версии на PulseAudio API (libpulse). Работает и с PulseAudio, и
-    с PipeWire через pipewire-pulse — это и решило выбор (docs/PORT-PLAN.md,
-    «Почему PulseAudio API»).
-
-    Здесь движок тракта (PulseVoiceAudioEngine), каталог и слежение за
-    устройствами. Всё, что не про устройства, — общий EliteSIP.Audio из
-    подмодуля: обработка голоса, пересчёт частоты, регулятор темпа, шина.
-    Стенд W-L0А (tools/PulseProbe) ходит через те же привязки, чтобы продукт
-    стоял на тех же объявлениях, которыми мерили.
-  -->
+  <!-- Локальный проект независимого Linux-клиента. Происхождение: core/ORIGIN.md. -->
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -38,8 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\shared\src\EliteSIP.Audio\EliteSIP.Audio.csproj" />
-    <ProjectReference Include="..\..\shared\src\EliteSIP.Audio.Signals\EliteSIP.Audio.Signals.csproj" />
+    <ProjectReference Include="..\..\core\src\EliteSIP.Audio\EliteSIP.Audio.csproj" />
+    <ProjectReference Include="..\..\core\src\EliteSIP.Audio.Signals\EliteSIP.Audio.Signals.csproj" />
   </ItemGroup>
 
 </Project>

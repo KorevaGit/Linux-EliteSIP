@@ -1,0 +1,541 @@
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Reflection;
+using EliteSIP.App.Panel;
+using EliteSIP.App.Platform;
+using EliteSIP.App.Resources;
+using EliteSIP.Audio;
+
+namespace EliteSIP.App.Settings;
+
+/// <summary>Разделы менеджерских настроек.</summary>
+///
+/// <remarks>
+/// Порядок — по тому, как часто сюда заходят. «Работа» первой: её открывают в
+/// начале смены и по самому важному поводу — телефон не работает вовсе, пока
+/// рабочее место выбрано неверно. «Звук» следом, потому что его правят при
+/// каждой смене наушников; «Техподдержка» последней, потому что туда идут,
+/// когда уже сломалось.
+/// </remarks>
+public enum SettingsSectionKind
+{
+    Work,
+    Audio,
+    Ringtone,
+    Appearance,
+    Support,
+}
+
+/// <summary>Пункт бокового списка.</summary>
+public sealed record SettingsSectionItem(SettingsSectionKind Kind, string Title, string Glyph);
+
+/// <summary>Устройство в выпадающем списке. <c>null</c> в поле — «системное».</summary>
+///
+/// <remarks>
+/// Пункт «системное по умолчанию» — не отсутствие выбора, а выбор: он значит
+/// «ходи за устройством к системе каждый раз», и от него зависит, переедет ли
+/// звук вслед за воткнутой гарнитурой.
+/// </remarks>
+public sealed record AudioDeviceOption(string? Id, string Name);
+
+/// <summary>Состояние окна настроек менеджера.</summary>
+public sealed class SettingsViewModel : Observable
+{
+    private SettingsSectionKind _section = SettingsSectionKind.Work;
+
+    private readonly IAudioPlatform _audio;
+    private readonly IAutoStart _autoStart;
+
+    public SettingsViewModel(AppSettings settings, IUiThread ui, IAudioPlatform audio, IAutoStart autoStart)
+    {
+        Settings = settings;
+        _audio = audio;
+        _autoStart = autoStart;
+        _meterTimer = ui.CreateTimer(TimeSpan.FromMilliseconds(50));
+
+        Sections =
+        [
+            new(SettingsSectionKind.Work, Strings.Get("SectionWork"), "person.crop.circle"),
+            new(SettingsSectionKind.Audio, Strings.Get("SectionAudio"), "mic.fill"),
+            new(SettingsSectionKind.Ringtone, Strings.Get("SectionRingtone"), "bell"),
+            // Своего значка у оформления в комплекте нет. `gearshape` — не
+            // «тема», а «настройка вообще», и это признанная неточность: раздел
+            // опознаётся подписью, а значок держит строку в колонке с прочими.
+            new(SettingsSectionKind.Appearance, Strings.Get("SectionAppearance"), "gearshape"),
+            new(SettingsSectionKind.Support, Strings.Get("SectionSupport"), "stethoscope"),
+        ];
+
+        ReloadDevices();
+
+        // Без условия «замыкание подставлено».
+        //
+        // Команды заводятся в конструкторе, а замыкания приходят инициализатором
+        // объекта — то есть позже. Условие успевало посчитаться на пустом
+        // значении, и «Исправить сеть» оставалась серой навсегда: пересчитать
+        // его было некому. Проверка вернулась внутрь самого действия.
+        RepairNetwork = new RelayCommand(_ => OnRepairNetwork?.Invoke());
+        CheckPresets = new RelayCommand(_ => OnCheckPresets?.Invoke());
+        CollectLogs = new RelayCommand(_ => OnCollectLogs?.Invoke());
+        RunSelfTest = new RelayCommand(_ =>
+        {
+            if (_isSelfTestRunning)
+            {
+                OnStopSelfTest?.Invoke();
+            }
+            else if (!_isInCall)
+            {
+                OnRunSelfTest?.Invoke();
+            }
+        });
+        SaveRecording = new RelayCommand(_ => OnSaveRecording?.Invoke());
+
+        ReturnOnline = new RelayCommand(async _ =>
+        {
+            if (OnReturnOnline is not null)
+            {
+                await OnReturnOnline().ConfigureAwait(true);
+            }
+
+            RefreshLink();
+        });
+    }
+
+    public AppSettings Settings { get; }
+
+    // --- Кнопки, которые прежде были нарисованы и никуда не вели --------------
+    //
+    // Раздел настроек собирали макетом: у «Исправить сеть», «Собрать логи»,
+    // «Применить ключ» и самопроверки звука стояло `IsEnabled="False"`, и ни
+    // одна не была подключена. Заводим их через замыкания от приложения — оно
+    // владеет и телефоном, и линией панели, а окно настроек о них не знает.
+
+    /// <summary>Стук по портам прямо сейчас.</summary>
+    public RelayCommand RepairNetwork { get; }
+
+    /// <summary>Спросить панель о предустановках, не дожидаясь такта.</summary>
+    public RelayCommand CheckPresets { get; }
+
+    /// <summary>Собрать архив с журналом для поддержки.</summary>
+    public RelayCommand CollectLogs { get; }
+
+    internal Action? OnRepairNetwork { get; init; }
+
+    internal Action? OnCheckPresets { get; init; }
+
+    internal Action? OnCollectLogs { get; init; }
+
+    /// <summary>Запустить самопроверку звука. Ставит приложение — тракт его.</summary>
+    internal Action? OnRunSelfTest { get; init; }
+
+    private string? _supportResult;
+
+    /// <summary>Чем кончилось последнее нажатие в «Техподдержке».</summary>
+    public string? SupportResult => _supportResult;
+
+    public bool HasSupportResult => _supportResult is not null;
+
+    /// <summary>Показать человеку, чем кончилось нажатие.</summary>
+    ///
+    /// <remarks>
+    /// Строка результата — своя у каждой кнопки и стоит под ней.
+    ///
+    /// Прежде строка была одна на три кнопки из двух разных страниц, и стояла
+    /// на «Техподдержке». Итог «Исправить сеть», которая живёт на «Работе»,
+    /// оператор не видел вовсе: нажатие выглядело ничем.
+    /// </remarks>
+    internal void ReportSupport(string message, SupportArea area)
+    {
+        _supportResult = message;
+        _supportArea = area;
+        NotifyChanged(nameof(SupportResult));
+        NotifyChanged(nameof(HasSupportResult));
+        NotifyChanged(nameof(HasLogsResult));
+        NotifyChanged(nameof(HasPresetsResult));
+        NotifyChanged(nameof(HasNetworkResult));
+    }
+
+    private SupportArea _supportArea;
+
+    public bool HasLogsResult => _supportResult is not null && _supportArea is SupportArea.Logs;
+
+    public bool HasPresetsResult => _supportResult is not null && _supportArea is SupportArea.Presets;
+
+    public bool HasNetworkResult => _supportResult is not null && _supportArea is SupportArea.Network;
+
+    // --- Самопроверка звука --------------------------------------------------
+
+    private string? _selfTestResult;
+
+    /// <summary>Запустить проверку — или остановить идущую. Одна кнопка на оба.</summary>
+    public RelayCommand RunSelfTest { get; private set; } = null!;
+
+    /// <summary>Остановить проверку: кнопка, уход из раздела, закрытие окна.</summary>
+    internal Action? OnStopSelfTest { get; init; }
+
+    /// <summary>
+    /// Состояние звука для шкал. Ставит приложение: у окна нет ни телефона, ни
+    /// тракта.
+    /// </summary>
+    internal Func<AudioMeterReading>? ReadMeters { get; init; }
+
+    /// <summary>Что вышло: и «говорите» по ходу, и итог.</summary>
+    public string? SelfTestResult => _selfTestResult;
+
+    public bool HasSelfTestResult => _selfTestResult is not null;
+
+    /// <summary>Строка о ходе или итоге проверки. Зовётся из потока интерфейса.</summary>
+    internal void ReportSelfTest(string message)
+    {
+        _selfTestResult = message;
+        NotifyChanged(nameof(SelfTestResult));
+        NotifyChanged(nameof(HasSelfTestResult));
+    }
+
+    private bool _hasRecording;
+
+    /// <summary>
+    /// Сохранить последнюю запись проверки в файл. Видна, только когда запись
+    /// есть и проверка не идёт.
+    /// </summary>
+    public RelayCommand SaveRecording { get; }
+
+    internal Action? OnSaveRecording { get; init; }
+
+    /// <summary>Есть ли запись, которую можно сохранить.</summary>
+    public bool CanSaveRecording => _hasRecording && !_isSelfTestRunning;
+
+    /// <summary>Отметить, что запись появилась. Зовёт приложение по концу проверки.</summary>
+    internal void ReportRecording(bool available)
+    {
+        _hasRecording = available;
+        NotifyChanged(nameof(CanSaveRecording));
+    }
+
+    // --- Шкалы «Голос» и «Звук» ---------------------------------------------
+    //
+    // Шкалы не открывают ничего сами: они читают тракт проверки или тракт
+    // разговора, и только пока хоть один из них работает. Держать микрофон
+    // открытым ради шкалы нельзя — Bluetooth-гарнитура от этого сидит в режиме
+    // гарнитуры, и звук всей системы становится моно и глухим (так вышло на
+    // macOS). Таймер опроса живёт, пока открыт раздел «Звук», и опрос ничего
+    // не стоит: он спрашивает уже работающий тракт.
+
+    private readonly IUiTimer _meterTimer;
+
+    private bool _meterWindowOpen;
+    private bool _isSelfTestRunning;
+    private bool _isInCall;
+    private double _voiceLevel;
+    private double _soundLevel;
+
+    public bool IsSelfTestRunning => _isSelfTestRunning;
+
+    /// <summary>Во время звонка проверка не запускается: это отнятый у собеседника микрофон.</summary>
+    public bool CanRunSelfTest => _isSelfTestRunning || !_isInCall;
+
+    public bool IsSelfTestBlockedByCall => _isInCall && !_isSelfTestRunning;
+
+    public string SelfTestButtonText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "AudioSelfTestStart");
+
+    /// <summary>Шкалы видны во время проверки и разговора, в остальное время — подсказка.</summary>
+    public bool ShowsMeters => _isSelfTestRunning || _isInCall;
+
+    /// <summary>Уровень голоса, линейный.</summary>
+    public double VoiceLevel => _voiceLevel;
+
+    /// <summary>Уровень звука в наушниках, линейный.</summary>
+    public double SoundLevel => _soundLevel;
+
+    /// <summary>Открыт раздел «Звук» — начать опрос. Закрыт — остановить и снять проверку.</summary>
+    internal void UpdateMeterPolling(bool windowOpen)
+    {
+        _meterWindowOpen = windowOpen;
+
+        // Подписка — только пока раздел открыт: настройки живут дольше окна,
+        // и висящий обработчик держал бы закрытое окно в памяти.
+        Settings.Audio.PropertyChanged -= OnAudioSettingChanged;
+
+        if (windowOpen && ShowsAudio)
+        {
+            Settings.Audio.PropertyChanged += OnAudioSettingChanged;
+
+            if (!_meterTimer.IsEnabled)
+            {
+                _meterTimer.Tick -= OnMeterTick;
+                _meterTimer.Tick += OnMeterTick;
+                _meterTimer.Start();
+                OnMeterTick(null, EventArgs.Empty);
+            }
+
+            return;
+        }
+
+        _meterTimer.Stop();
+
+        // Ушли из раздела или закрыли окно — устройство отпускается сразу.
+        OnStopSelfTest?.Invoke();
+    }
+
+    /// <summary>
+    /// Настройки, которые действуют на то, что записывает микрофон, а не на
+    /// то, что звучит в наушниках.
+    /// </summary>
+    private static readonly HashSet<string> CaptureSettings =
+    [
+        nameof(AudioSettings.InputDeviceId),
+        nameof(AudioSettings.MicrophoneGain),
+        nameof(AudioSettings.AutomaticGainControl),
+        nameof(AudioSettings.NoiseSuppression),
+        nameof(AudioSettings.BackgroundVoiceSuppression),
+        nameof(AudioSettings.WindowsProcessing),
+    ];
+
+    /// <summary>
+    /// Переключили обработку после записи — сказать, что запись прежняя.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Проверка проигрывает уже записанное, и записано оно с теми настройками,
+    /// что стояли во время записи. Переключатель, тронутый на воспроизведении
+    /// или после, на слух не меняет ничего — и выглядит неработающим
+    /// (жалоба 17 октября 2026). Громкость собеседника сюда не входит: она
+    /// действует на воспроизведение сразу.
+    /// </remarks>
+    private void OnAudioSettingChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        // Во время проверки молчим: правка на записи действует на её остаток, а
+        // итог проверки эту строку всё равно перепишет.
+        if (e.PropertyName is { } name && CaptureSettings.Contains(name) && _hasRecording && !_isSelfTestRunning)
+        {
+            ReportSelfTest(Strings.Get("AudioSelfTestRerun"));
+        }
+    }
+
+    private void OnMeterTick(object? sender, EventArgs e)
+    {
+        if (ReadMeters?.Invoke() is not AudioMeterReading reading)
+        {
+            return;
+        }
+
+        var running = reading.IsSelfTestRunning;
+        var inCall = reading.IsInCall;
+        var levels = reading.Levels;
+
+        if (running != _isSelfTestRunning || inCall != _isInCall)
+        {
+            _isSelfTestRunning = running;
+            _isInCall = inCall;
+            NotifyChanged(nameof(IsSelfTestRunning));
+            NotifyChanged(nameof(CanRunSelfTest));
+            NotifyChanged(nameof(IsSelfTestBlockedByCall));
+            NotifyChanged(nameof(SelfTestButtonText));
+            NotifyChanged(nameof(ShowsMeters));
+            NotifyChanged(nameof(CanSaveRecording));
+        }
+
+        _voiceLevel = levels?.Voice ?? 0;
+        _soundLevel = levels?.Sound ?? 0;
+        NotifyChanged(nameof(VoiceLevel));
+        NotifyChanged(nameof(SoundLevel));
+    }
+
+    // --- Связь со Spark -------------------------------------------------------
+
+    /// <summary>Идентификатор машины — по нему её находят в Spark.</summary>
+    public string MachineID => Settings.Panel.IsActivated
+        ? Settings.Panel.InstallationID
+        : Strings.Get("SupportMachineNotPaired");
+
+    /// <summary>Связь словами — та же строка, что в «Управлении».</summary>
+    public string LinkState => Strings.Get(
+        Settings.Panel.Mode is PanelMode.Managed && Settings.Panel.HasChannelKey ? "SupportLinkOnline"
+        : Settings.Panel.IsOffline ? "SupportLinkOffline"
+        : "SupportLinkNone");
+
+    /// <summary>Машина в оффлайне: на месте «Проверить» — «Вернуться в онлайн».</summary>
+    public bool IsPanelOffline => Settings.Panel.IsOffline;
+
+    /// <summary>«Вернуться в онлайн».</summary>
+    public RelayCommand ReturnOnline { get; private set; } = null!;
+
+    /// <summary>Вернуть машину под Spark. Ставит приложение — линия его.</summary>
+    internal Func<Task>? OnReturnOnline { get; init; }
+
+    /// <summary>Сменилось состояние линии — перечитать строки связи.</summary>
+    internal void RefreshLink()
+    {
+        NotifyChanged(nameof(MachineID));
+        NotifyChanged(nameof(LinkState));
+        NotifyChanged(nameof(IsPanelOffline));
+    }
+
+    public IReadOnlyList<SettingsSectionItem> Sections { get; }
+
+    public SettingsSectionKind Section
+    {
+        get => _section;
+        set
+        {
+            Set(ref _section, value);
+            UpdateMeterPolling(_meterWindowOpen);
+            foreach (var name in new[]
+            {
+                nameof(ShowsWork), nameof(ShowsAudio), nameof(ShowsRingtone),
+                nameof(ShowsAppearance), nameof(ShowsSupport),
+            })
+            {
+                NotifyChanged(name);
+            }
+        }
+    }
+
+    public bool ShowsWork => _section is SettingsSectionKind.Work;
+
+    /// <summary>
+    /// Запускать софтфон вместе с входом в систему.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Здесь, в «Техподдержке», а не в «Управлении»: автозапуск пишется в ветку
+    /// пользователя, прав администратора не требует, и решать его должен тот,
+    /// кто за машиной работает. Действует сразу — правда о нём живёт в реестре,
+    /// его же показывает диспетчер задач, и читается тоже у системы: снятый там
+    /// автозапуск обязан показаться снятым и здесь.
+    /// </remarks>
+    public bool StartsWithWindows
+    {
+        get => _autoStart.IsEnabled;
+        set
+        {
+            _ = _autoStart.TrySet(value);
+            NotifyChanged();
+        }
+    }
+
+    public bool ShowsAudio => _section is SettingsSectionKind.Audio;
+
+    public bool ShowsRingtone => _section is SettingsSectionKind.Ringtone;
+
+    public bool ShowsAppearance => _section is SettingsSectionKind.Appearance;
+
+    public bool ShowsSupport => _section is SettingsSectionKind.Support;
+
+    public ObservableCollection<AudioDeviceOption> Inputs { get; } = [];
+
+    public ObservableCollection<AudioDeviceOption> Outputs { get; } = [];
+
+    /// <summary>
+    /// Оба устройства заданы явно и разными — значит системного эхоподавления
+    /// не будет.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Текст под этим признаком не обещает эха, и это правка после разбора
+    /// макета: эха не будет ни в наушниках, ни в гарнитуре — там микрофон
+    /// акустически развязан с динамиком. Эхо случается на колонках. Прежняя
+    /// формулировка пугала им всегда, то есть чаще всего впустую.
+    /// </remarks>
+    public bool NeedsAggregate
+        => Settings.Audio.InputDeviceId is not null && Settings.Audio.OutputDeviceId is not null;
+
+    /// <summary>Версия и сборка одной строкой.</summary>
+    ///
+    /// <remarks>
+    /// Первое, что просит поддержка по телефону, — «какая у вас версия». В
+    /// оригинале эта строка сперва стояла только за административным паролем, и
+    /// менеджеру было нечего ответить.
+    ///
+    /// Версия приложения, а не этой сборки — см. <see cref="ProductVersion"/>.
+    /// </remarks>
+    public static string Version => ProductVersion.Display;
+
+    /// <summary>
+    /// Линия обновлений. <c>null</c> — не заведена.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Открытое свойство, а не внутреннее, и это не формальность: привязка WPF
+    /// ищет свойство отражением и до внутреннего не дотягивается — молча, без
+    /// ошибки. Из-за этого в 0.1.2 и 0.1.4 «Проверить обновления» не нажималась,
+    /// а «Установить обновление» висела всегда: обе привязки просто не
+    /// разрешались.
+    /// </remarks>
+    public Admin.UpdatesViewModel? Updates { get; init; }
+
+    /// <summary>Имя выбранного рингтона — или «Стандартный».</summary>
+    public string RingtoneName
+    {
+        get
+        {
+            if (!Settings.Ringtone.HasCustomSound)
+            {
+                return Strings.Get("RingtoneDefault");
+            }
+
+            var name = Path.GetFileName(Settings.Ringtone.CustomSoundPath)!;
+
+            // Пропавший файл называется прямо: рингтон в этом случае молча
+            // вернётся к стандартному, и человек должен понимать почему, а не
+            // слышать не то.
+            return Settings.Ringtone.SoundIsMissing
+                ? name + Strings.Get("RingtoneMissingSuffix")
+                : name;
+        }
+    }
+
+    /// <summary>Толкает подпись рингтона: она считается, а не хранится.</summary>
+    public void NotifyRingtoneName() => NotifyChanged(nameof(RingtoneName));
+
+    /// <summary>Возвращает сегменты языка к записанному в настройках.</summary>
+    public void NotifyLanguage() => Settings.Appearance.NotifyLanguageChanged();
+
+    /// <summary>Перечитывает устройства у системы.</summary>
+    ///
+    /// <remarks>
+    /// Списки берутся готовыми при создании окна, а не спрашиваются у Core Audio
+    /// при показе раздела: в оригинале именно такой опрос давал видимую
+    /// задержку — он успевал не к первой отрисовке, а к следующей, и строки под
+    /// выпадающими списками появлялись на глазах, сдвигая выключатели вниз.
+    /// </remarks>
+    public void ReloadDevices()
+    {
+        Fill(Inputs, AudioDeviceDirection.Capture, Strings.Get("AudioSystemDefaultInput"));
+        Fill(Outputs, AudioDeviceDirection.Render, Strings.Get("AudioSystemDefaultOutput"));
+        NotifyChanged(nameof(NeedsAggregate));
+    }
+
+    private void Fill(
+        ObservableCollection<AudioDeviceOption> target,
+        AudioDeviceDirection direction,
+        string systemTitle)
+    {
+        target.Clear();
+
+        // «Системное» первым пунктом, а не отдельным выключателем рядом: это
+        // одно и то же поле — какое устройство брать.
+        var system = _audio.DefaultDevice(direction);
+        target.Add(new AudioDeviceOption(
+            Id: null,
+            Name: system is null ? systemTitle : $"{systemTitle} — {system.Name}"));
+
+        foreach (var device in _audio.Devices(direction))
+        {
+            target.Add(new AudioDeviceOption(device.Id, device.Name));
+        }
+    }
+}
+
+/// <summary>Под какой кнопкой показать итог нажатия.</summary>
+public enum SupportArea
+{
+    Logs,
+    Presets,
+    Network,
+}
+
+/// <summary>Что шкалам окна настроек показать в этот такт.</summary>
+/// <param name="IsSelfTestRunning">Идёт проверка.</param>
+/// <param name="IsInCall">Идёт звонок — любой, включая неотвеченный.</param>
+/// <param name="Levels">Уровни работающего тракта. <c>null</c> — не работает ни один.</param>
+internal readonly record struct AudioMeterReading(bool IsSelfTestRunning, bool IsInCall, AudioLevels? Levels);

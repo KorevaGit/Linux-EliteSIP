@@ -2,8 +2,8 @@ name: CI
 
 # Сборка и проверки Linux-версии на каждый коммит и каждый pull request.
 #
-# Два задания. build — всё решение (свои проекты и общие из подмодуля
-# shared/) и все проверки. package — пакет .deb тем же tools/build-deb.sh, что
+# Два задания. build — всё решение (проекты оболочки и локальные библиотеки из
+# core/) и все проверки. package — пакет .deb тем же tools/build-deb.sh, что
 # и выпуск: сломанная раскладка, служба или права всплывают здесь, а не на
 # чистой машине у администратора.
 #
@@ -12,9 +12,7 @@ name: CI
 # «Что решено»). Переход на следующую Ubuntu — решение, а не побочный эффект
 # обновления раннера.
 #
-# Подмодуль — Windows-репозиторий KorevaGit/Win-EliteSIP. Если он закрытый,
-# стандартного токена задания на него не хватит: нужен секрет SHARED_REPO_TOKEN
-# (fine-grained, Contents: read на Win-EliteSIP). Открытому хватает и без него.
+# Все исходники находятся в этом репозитории; отдельный токен Windows не нужен.
 
 on:
   push:
@@ -28,26 +26,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.SHARED_REPO_TOKEN || github.token }}
-
-      # Метки подмодуля нужны сборке: git describe вписывает в приложение,
-      # из какого общего кода оно собрано (SupportFacts.SharedCode), и
-      # проверка это сверяет. Клон подмодуля метки сам не приносит.
-      - name: Метки общего кода
-        run: git -C shared fetch --tags --force origin
 
       # Версия SDK — из global.json, та же, что на машине разработки: красный
       # прогон должен воспроизводиться у себя.
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-
-      # Правило подмодуля 1 (docs/PORT-PLAN.md): в shared/ ничего не правят.
-      # Незакоммиченное там — это код, которого нет ни в одном репозитории.
-      - name: Подмодуль без правок
-        run: test -z "$(git -C shared status --porcelain)"
 
       - name: Восстановление
         run: dotnet restore EliteSIP.Linux.slnx
@@ -68,12 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.SHARED_REPO_TOKEN || github.token }}
-
-      - name: Метки общего кода
-        run: git -C shared fetch --tags --force origin
 
       - uses: actions/setup-dotnet@v4
         with:

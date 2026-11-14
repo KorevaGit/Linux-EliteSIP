@@ -1,5 +1,5 @@
 <!--
-    Вопрос с кнопками — перевод shared/src/EliteSIP.App/Theme/Dialog.xaml:
+    Вопрос с кнопками — перевод исторический Windows EliteSIP.App/Theme/Dialog.xaml:
     420 в ширину, заголовок 17, текст 13, сноска 12, кнопки справа.
 -->
 <Window xmlns="https://github.com/avaloniaui"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Выкладка собранного выпуска Linux на канал обновлений и проверка того, что
-# канал отдаёт. По образцу shared/tools/publish.ps1.
+# канал отдаёт. Проверка подписи использует локальный ReleaseKit.
 #
 #   tools/publish.sh --version 0.1.2
 #   tools/publish.sh --version 0.1.2 --dry-run       сверить файлы, ничего не класть
@@ -81,7 +81,7 @@ command -v python3 >/dev/null || fail "нет python3"
 
 # --- Доступы ------------------------------------------------------------------
 
-[ -f "$config" ] || fail "нет $config — заведите его по образцу Windows (shared/docs/RELEASES.md), раздел update"
+[ -f "$config" ] || fail "нет $config — заведите его по docs/RELEASING.md, раздел «Настройка публикации»"
 
 json() {
     python3 -I -c 'import json, sys
@@ -199,7 +199,7 @@ ok "манифест отдаётся, байт в байт тот, что по�
 
 # Подпись — кодом клиента и ключом из заводской настройки Linux: тем, что
 # рабочие места получат вместе с пакетом.
-kit="$root/shared/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll"
+kit="$root/core/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll"
 if [ -f "$kit" ] && [ -f "$provisioning" ]; then
     json "$provisioning" releasesPublicKey > "$work/releases.pub"
     dotnet "$kit" verify "$served_manifest" "$work/releases.pub" >/dev/null \

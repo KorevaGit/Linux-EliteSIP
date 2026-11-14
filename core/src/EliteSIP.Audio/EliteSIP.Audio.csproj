@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Локальный проект независимого Linux-клиента. Происхождение: core/ORIGIN.md. -->
+
+  <ItemGroup>
+    <!--
+      Эхоподавление, шумодав и АРУ. На macOS всё это давал один флаг системы;
+      здесь его нет, и обработка своя. Пакет везёт готовые нативные сборки
+      WebRTC APM, в том числе win-x64 и linux-x64 — сборка C++ с meson и
+      abseil, заложенная в аудит как главный риск проекта, отпала целиком (см.
+      docs/W0-AUDIO.md).
+    -->
+    <PackageReference Include="SoundFlow.Extensions.WebRtc.Apm" Version="1.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Тесты видят внутреннее — то же решение, что в MediaCore: чистые правила
+      выбора устройства и обработка голоса проверяются без звуковой карты.
+    -->
+    <InternalsVisibleTo Include="EliteSIP.Audio.Tests" />
+
+    <!-- Локальный проект независимого Linux-клиента. Происхождение: core/ORIGIN.md. -->
+    <InternalsVisibleTo Include="EliteSIP.Audio.Wasapi" />
+    <InternalsVisibleTo Include="EliteSIP.Audio.Wasapi.Tests" />
+    <InternalsVisibleTo Include="EliteSIP.Audio.Pulse" />
+
+    <!--
+      Стенд видит внутреннее ради одной проверки, которую иначе сделать нечем:
+      эхоподавление продуктового блока обработки на модели комнаты. Через
+      открытую поверхность тракта её не достать — там нужны устройства и
+      громкие динамики, а ноутбук стоит в общем кабинете. Проверять же
+      настройку APM на копии, собранной в стенде, значит проверять копию.
+    -->
+    <InternalsVisibleTo Include="AudioProbe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EliteSIP.MediaCore\EliteSIP.MediaCore.csproj" />
+    <ProjectReference Include="..\EliteSIP.Diagnostics\EliteSIP.Diagnostics.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

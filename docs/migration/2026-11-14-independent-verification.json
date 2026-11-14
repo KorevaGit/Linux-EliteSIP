@@ -1,0 +1,126 @@
+{
+  "suites": [
+    {
+      "suite": "EliteSIP.AdminAccess.Tests",
+      "total": 22,
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.App.Core.Tests",
+      "total": 88,
+      "passed": 88,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Audio.Signals.Tests",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Audio.Tests",
+      "total": 240,
+      "passed": 240,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.CallGuard.Tests",
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.CallHistory.Tests",
+      "total": 32,
+      "passed": 31,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "suite": "EliteSIP.Diagnostics.Tests",
+      "total": 29,
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.MediaCore.Tests",
+      "total": 201,
+      "passed": 200,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "suite": "EliteSIP.PanelLink.Tests",
+      "total": 94,
+      "passed": 94,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.SipCore.Tests",
+      "total": 340,
+      "passed": 340,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Updates.Tests",
+      "total": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.App.Linux.Tests",
+      "total": 64,
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Audio.Pulse.Tests",
+      "total": 30,
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Platform.Linux.Tests",
+      "total": 47,
+      "passed": 47,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Updater.Linux.Tests",
+      "total": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "summary": {
+    "total": 1271,
+    "passed": 1269,
+    "failed": 0,
+    "skipped": 2
+  },
+  "skipped_tests": [
+    "EliteSIP.CallHistory.Tests.CallHistoryPrivacyTests.База_и_её_спутники_закрыты_от_всех_кроме_владельца",
+    "EliteSIP.MediaCore.Tests.RtpSessionTests.Без_настройки_Windows_отдаёт_ICMP_ошибкой_приёма"
+  ],
+  "package": {
+    "version": "0.0.0",
+    "configuration": "stub, https://update.invalid",
+    "contents_verified": true,
+    "installed": false,
+    "published": false
+  }
+}

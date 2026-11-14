@@ -1,27 +1,57 @@
 <Project>
 
   <!--
-    Общие свойства Linux-проектов. Настройки компилятора не повторяются, а
-    берутся из Windows-репозитория: Nullable, предупреждения как ошибки,
-    уровень анализа и языки ресурсов должны совпадать с общим кодом, иначе
-    правка, чистая под одним файлом, ломала бы сборку под другим.
-
-    Проекты из shared/ этот файл не видят: MSBuild берёт ближайший
-    Directory.Build.props вверх по дереву, а для них это shared/Directory.Build.props.
-    Так и должно быть — общий код собирается одинаково в обоих репозиториях.
+    Общие свойства всех проектов решения. Один файл, чтобы настройки не
+    расходились между десятком .csproj: в оригинале ту же роль играл
+    Version.xcconfig и общие swiftSettings в каждом Package.swift.
   -->
-  <Import Project="$(MSBuildThisFileDirectory)shared/Directory.Build.props" />
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!--
+      Nullable и предупреждения-как-ошибки — это то немногое, чем в C#
+      воспроизводится строгость Swift 6. Оригинал собирался в
+      .swiftLanguageMode(.v6), где ни nil, ни гонку через границу потока
+      протащить было нельзя. Отключать по проекту нельзя: смысл именно в том,
+      что правило одно на всё решение.
+    -->
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+
+    <!--
+      Интерфейс двуязычный (ru/en), поэтому глобализацию не урезаем.
+      Инвариантный режим сломал бы сравнение и сортировку строк в истории
+      звонков раньше, чем кто-нибудь заметил бы.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <Deterministic>true</Deterministic>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!--
+      Языки ресурсов: только те, на которых приложение говорит.
+
+      WPF тащит в самодостаточную публикацию свои переводы на четырнадцать
+      языков — восемнадцать мегабайт, из которых нужны два. С переходом на
+      самодостаточный выпуск это перестало быть мелочью: столько же весит и
+      каждое обновление, помноженное на тридцать машин.
+    -->
+    <SatelliteResourceLanguages>en;ru</SatelliteResourceLanguages>
+  </PropertyGroup>
 
   <!--
-    Версия у Linux своя: выпуски разных ОС выходят в разное время, а Spark
-    показывает их раздельно. Импорт выше принёс версию Windows — здесь она
-    перекрывается. Меняется релизным скриптом, руками не трогать.
-
-    Из какого общего кода собран выпуск, говорит указатель подмодуля; при
-    запуске он пишется в журнал рядом с версией.
+    Версия одна на всё решение. Меняется релизным скриптом, руками — не
+    трогать: в оригинале ручной выпуск из десяти шагов рано или поздно
+    выпускался без одного из них, и обычно это была версия.
   -->
   <PropertyGroup>
     <Version>0.1.7</Version>
+    <Company>EliteSIP</Company>
+    <Product>EliteSIP</Product>
   </PropertyGroup>
 
 </Project>

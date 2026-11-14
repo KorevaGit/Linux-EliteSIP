@@ -1,21 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    Приложение Linux-версии (W-L5): окна на Avalonia поверх общего
-    EliteSIP.App.Core. Модели окон, телефон, линия Spark и настройки — общие;
-    здесь только виды, тема и связка с оболочкой Linux (EliteSIP.Platform.Linux)
-    и звуком PulseAudio (EliteSIP.Audio.Pulse).
-
-    Переносятся макет и поведение Windows-версии (shared/src/EliteSIP.App), а
-    не macOS: отступы, растяжение, скругления, капсула профиля, плитки темы.
-    Разметка переписана под Avalonia — стили селекторами и классами вместо
-    триггеров, — а числа взяты из WPF-разметки как есть.
-
-    Имя сборки — EliteSIP.App.Linux: под ним App.Core открывает этому
-    проекту внутреннее (метрики, размеры значков). Короткое имя исполняемого
-    файла в /opt/elitesip, которое зовут ярлык, автозапуск и служба
-    (packaging/), даёт пакет — W-L7.
-  -->
+  <!-- Локальный проект независимого Linux-клиента. Происхождение: core/ORIGIN.md. -->
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -48,10 +33,10 @@
       Значки — тот же файл, что у Windows-версии (Theme/IconLibrary.cs), и
       стандартный рингтон — тот же WAV, смайлики — тот же emoji.pak.
     -->
-    <EmbeddedResource Include="..\..\shared\src\EliteSIP.App\Theme\Icons.xaml" LogicalName="EliteSIP.App.Theme.Icons.xaml" />
-    <Content Include="..\..\shared\src\EliteSIP.App\Assets\ringtone.wav" Link="ringtone.wav" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\..\shared\src\EliteSIP.App\Assets\emoji.pak" Link="emoji.pak" CopyToOutputDirectory="PreserveNewest" />
-    <AvaloniaResource Include="..\..\shared\src\EliteSIP.App\Assets\AppIcon\icon_256x256.png" Link="Assets/elitesip.png" />
+    <EmbeddedResource Include="..\..\core\src\EliteSIP.App\Theme\Icons.xaml" LogicalName="EliteSIP.App.Theme.Icons.xaml" />
+    <Content Include="..\..\core\src\EliteSIP.App\Assets\ringtone.wav" Link="ringtone.wav" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\core\src\EliteSIP.App\Assets\emoji.pak" Link="emoji.pak" CopyToOutputDirectory="PreserveNewest" />
+    <AvaloniaResource Include="..\..\core\src\EliteSIP.App\Assets\AppIcon\icon_256x256.png" Link="Assets/elitesip.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,26 +48,27 @@
   <ItemGroup>
     <ProjectReference Include="..\EliteSIP.Platform.Linux\EliteSIP.Platform.Linux.csproj" />
     <ProjectReference Include="..\EliteSIP.Audio.Pulse\EliteSIP.Audio.Pulse.csproj" />
-    <ProjectReference Include="..\..\shared\src\EliteSIP.App.Core\EliteSIP.App.Core.csproj" />
+    <ProjectReference Include="..\..\core\src\EliteSIP.App.Core\EliteSIP.App.Core.csproj" />
   </ItemGroup>
 
-  <!--
-    Из какого общего кода собран выпуск: git describe подмодуля shared/
-    вписывается в сборку (AssemblyMetadata «SharedCode») и пишется в журнал при
-    запуске и в архив поддержки (Platform/SupportFacts.cs). Номер Linux-версии
-    этого не говорит: подмодуль двигается отдельно (docs/PORT-PLAN.md, «Версия»).
-    Без git (сборка из архива исходников) — «неизвестен», но не отказ сборки.
-  -->
-  <Target Name="StampSharedCode" BeforeTargets="GetAssemblyAttributes">
-    <Exec Command="git -C &quot;$(MSBuildThisFileDirectory)../../shared&quot; describe --tags --long --always --dirty"
+  <!-- Ревизия независимого Linux-репозитория; архив исходников не требует Git. -->
+  <Target Name="StampSourceRevision" BeforeTargets="GetAssemblyAttributes">
+    <PropertyGroup>
+      <LinuxSourceRevision>source-archive</LinuxSourceRevision>
+    </PropertyGroup>
+    <Exec Condition="Exists('$(MSBuildThisFileDirectory)../../.git')"
+          Command="git -C &quot;$(MSBuildThisFileDirectory)../..&quot; rev-parse --short HEAD"
           ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low">
-      <Output TaskParameter="ConsoleOutput" PropertyName="SharedCode" />
-      <Output TaskParameter="ExitCode" PropertyName="SharedCodeExit" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitSourceRevision" />
+      <Output TaskParameter="ExitCode" PropertyName="GitSourceRevisionExit" />
     </Exec>
-    <ItemGroup Condition="'$(SharedCodeExit)' == '0'">
+    <PropertyGroup Condition="'$(GitSourceRevisionExit)' == '0'">
+      <LinuxSourceRevision>$(GitSourceRevision)</LinuxSourceRevision>
+    </PropertyGroup>
+    <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-        <_Parameter1>SharedCode</_Parameter1>
-        <_Parameter2>$(SharedCode)</_Parameter2>
+        <_Parameter1>SourceRevision</_Parameter1>
+        <_Parameter2>$(LinuxSourceRevision)</_Parameter2>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

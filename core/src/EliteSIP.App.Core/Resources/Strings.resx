@@ -1,0 +1,1314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Английские подписи. Нейтральный, то есть запасной, каталог — он же тот,
+    который видит система с любым языком, кроме русского.
+
+    Почему запасной именно английский, объяснено в `docs/localization.md`
+    оригинала: француз и японец должны видеть английский, а не язык, который им
+    ещё незнакомее. На macOS это обеспечивал `developmentRegion = en`, здесь —
+    то, что английский лежит в нейтральном `Strings.resx`, а русский в
+    `Strings.ru.resx`.
+
+    Ключи здесь именованные, а не «ключ — это сам русский текст», как в
+    оригинале. Причина не в решении, а в языке: resx собирается в класс, и
+    свойства с именем «Завершить» в C# не бывает. Взамен пропадает и цена того
+    решения — правка русской подписи больше не заводит новый ключ и не роняет
+    английский перевод.
+-->
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="PanelWindowTitle" xml:space="preserve">
+    <value>EliteSIP</value>
+    <comment>заголовок окна панели</comment>
+  </data>
+  <data name="PanelSettings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>шестерёнка в строке состояния</comment>
+  </data>
+  <data name="PanelHistory" xml:space="preserve">
+    <value>History</value>
+    <comment>кнопка в неподвижном низу панели</comment>
+  </data>
+  <data name="PanelCall" xml:space="preserve">
+    <value>Call</value>
+    <comment>кнопка в неподвижном низу панели</comment>
+  </data>
+  <data name="PanelHangUp" xml:space="preserve">
+    <value>Hang up</value>
+  </data>
+  <data name="PanelNumberPlaceholder" xml:space="preserve">
+    <value>Number</value>
+    <comment>подсказка в поле набора</comment>
+  </data>
+  <data name="PanelClearNumber" xml:space="preserve">
+    <value>Clear number</value>
+  </data>
+  <data name="PanelHold" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="PanelResume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="PanelMicrophone" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="PanelMicrophoneOff" xml:space="preserve">
+    <value>Mic Off</value>
+  </data>
+  <data name="PanelTransfer" xml:space="preserve">
+    <value>Transfer</value>
+  </data>
+  <data name="PanelConference" xml:space="preserve">
+    <value>Conference</value>
+  </data>
+  <data name="PanelTransferNumber" xml:space="preserve">
+    <value>Transfer to</value>
+    <comment>подсказка в поле перевода</comment>
+  </data>
+  <data name="PanelCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="PanelOffline" xml:space="preserve">
+    <value>Disconnected</value>
+    <comment>пункт списка профилей</comment>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SectionWork" xml:space="preserve">
+    <value>Work</value>
+  </data>
+  <data name="SectionAudio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="SectionRingtone" xml:space="preserve">
+    <value>Ringtone</value>
+  </data>
+  <data name="SectionAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SectionSupport" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="WorkPlace" xml:space="preserve">
+    <value>Workplace</value>
+  </data>
+  <data name="WorkOffice" xml:space="preserve">
+    <value>Office</value>
+  </data>
+  <data name="WorkRemote" xml:space="preserve">
+    <value>Remote</value>
+  </data>
+  <data name="WorkPbxAddress" xml:space="preserve">
+    <value>PBX address</value>
+  </data>
+  <data name="WorkSiteNote" xml:space="preserve">
+    <value>Switching changes the PBX address and re-registers: the internal address is unreachable from home, and from the office the external one leads to the same server the long way round.</value>
+  </data>
+  <data name="WorkInCallNote" xml:space="preserve">
+    <value>A call is in progress — switching is not possible right now.</value>
+  </data>
+  <data name="WorkStartupSection" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="WorkTroubleSection" xml:space="preserve">
+    <value>If it will not connect</value>
+  </data>
+  <data name="WorkRepairNetwork" xml:space="preserve">
+    <value>Repair network</value>
+  </data>
+  <data name="WorkRepairNote" xml:space="preserve">
+    <value>Opens the way to the PBX from outside — once and right now. Needed when it stops connecting from home for no visible reason: the home address changed and the gateway remembers the old one.</value>
+  </data>
+  <data name="AudioMicrophone" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="AudioHeadphones" xml:space="preserve">
+    <value>Headphones</value>
+  </data>
+  <data name="AudioGain" xml:space="preserve">
+    <value>Gain</value>
+  </data>
+  <data name="AudioVolume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="AudioSystemDefaultInput" xml:space="preserve">
+    <value>System default</value>
+  </data>
+  <data name="AudioSystemDefaultOutput" xml:space="preserve">
+    <value>System default</value>
+  </data>
+  <data name="AudioGainAutoNote" xml:space="preserve">
+    <value>The system sets the gain: to set it by hand, turn off automatic control below.</value>
+  </data>
+  <data name="AudioAgc" xml:space="preserve">
+    <value>Automatic gain control</value>
+  </data>
+  <data name="AudioRelease" xml:space="preserve">
+    <value>Release the headphones between calls</value>
+  </data>
+  <data name="AudioNoiseSuppression" xml:space="preserve">
+    <value>Noise suppression</value>
+  </data>
+  <data name="AudioNoiseSuppressionNote" xml:space="preserve">
+    <value>Removes steady room noise — hum, fans, hiss. It leaves other people's speech alone: use the switch below for that. Turn it off only on a headset: on laptop speakers it also removes the echo the other side would hear. Applies immediately, during a call too.</value>
+  </data>
+  <data name="AudioReceiveGain" xml:space="preserve">
+    <value>Level the other side's volume</value>
+  </data>
+  <data name="AudioReceiveGainNote" xml:space="preserve">
+    <value>Raises a quiet line by up to +10 dB and lowers a loud one by up to −6 dB — on speech; in pauses the gain holds. Volume above 100 % and levelling run through a soft limiter and do not crackle; on a very quiet line its noise becomes more audible along with the voice.</value>
+  </data>
+  <data name="AudioSelfTestRerun" xml:space="preserve">
+    <value>Setting applied. The test recording was made with the previous ones — run the test again to hear the difference.</value>
+  </data>
+  <data name="AudioSelfTestSave" xml:space="preserve">
+    <value>Save recording</value>
+  </data>
+  <data name="AudioSelfTestSaveTitle" xml:space="preserve">
+    <value>Save the test recording</value>
+  </data>
+  <data name="AudioSelfTestSaved" xml:space="preserve">
+    <value>Recording saved: {0}</value>
+  </data>
+  <data name="AudioSelfTestSaveFailed" xml:space="preserve">
+    <value>The recording was not saved: {0}</value>
+  </data>
+  <data name="AudioWindowsProcessing" xml:space="preserve">
+    <value>Windows processing</value>
+  </data>
+  <data name="AudioWindowsProcessingAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="AudioWindowsProcessingOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="AudioWindowsProcessingOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="AudioWindowsProcessingNote" xml:space="preserve">
+    <value>The driver's and Windows' own voice processing, on top of the app's. "Auto" turns it off on a headset: there it only gets in the way, and its gain in pauses pulls up nearby voices. On a laptop's built-in microphone it stays on: it narrows what the microphone picks up. Applies immediately, during a call too, with a half-second pause.</value>
+  </data>
+  <data name="AudioBackgroundVoices" xml:space="preserve">
+    <value>Reduce voices around you</value>
+  </data>
+  <data name="AudioBackgroundVoicesNote" xml:space="preserve">
+    <value>Anything noticeably quieter than your own voice — colleagues nearby, a TV — is turned down in pauses. Works best on a headset with the microphone at your mouth; on a laptop microphone a loud neighbour will still be heard. If the other side says the start or end of your phrases drops out, turn it off.</value>
+  </data>
+  <data name="AudioLevelsNote" xml:space="preserve">
+    <value>Levels appear here during a call and during the check below: they show what goes into the line and what comes out of it.</value>
+  </data>
+  <data name="AudioSelfTestNote" xml:space="preserve">
+    <value>Five seconds of recording and immediate playback — through the same path as a call.</value>
+  </data>
+  <data name="AudioSelfTestStart" xml:space="preserve">
+    <value>Test microphone and sound</value>
+  </data>
+  <data name="AudioSelfTestStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="AudioSelfTestBusy" xml:space="preserve">
+    <value>The test is unavailable during a call: it would take the microphone you are talking into. The meters below show the call.</value>
+  </data>
+  <data name="AudioMeterVoice" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="AudioMeterSound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="AudioMeterHint" xml:space="preserve">
+    <value>Voice and sound meters appear during the test and during a call. The microphone is opened only for that time.</value>
+  </data>
+  <data name="AudioAggregateNote" xml:space="preserve">
+    <value>Different devices: there will be no system echo cancellation. On speakers the other side will hear themselves, in headphones they will not.</value>
+  </data>
+  <data name="RingtoneEnabled" xml:space="preserve">
+    <value>Play a ringtone</value>
+  </data>
+  <data name="RingtonePlayIn" xml:space="preserve">
+    <value>Play through</value>
+  </data>
+  <data name="RingtoneSystemOutput" xml:space="preserve">
+    <value>System device</value>
+  </data>
+  <data name="RingtoneCallOutput" xml:space="preserve">
+    <value>Call device</value>
+  </data>
+  <data name="RingtoneOutputNote" xml:space="preserve">
+    <value>A headset lying on the desk cannot be heard — then the speakers should ring.</value>
+  </data>
+  <data name="RingtoneSound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="RingtoneDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="RingtoneChooseFile" xml:space="preserve">
+    <value>Choose a file…</value>
+  </data>
+  <data name="RingtonePreview" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="RingtoneMissingSuffix" xml:space="preserve">
+    <value> — file not found</value>
+  </data>
+  <data name="RingtoneUnreadable" xml:space="preserve">
+    <value>file can't be played, the standard ringtone will ring</value>
+  </data>
+  <data name="SupportArchiveNote" xml:space="preserve">
+    <value>An archive with the log and system details: support uses it to work out what happened to a call.</value>
+  </data>
+  <data name="SupportCollectLogs" xml:space="preserve">
+    <value>Collect logs</value>
+  </data>
+  <data name="SupportVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="SupportCheckUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="SupportNewKeySection" xml:space="preserve">
+    <value>New key</value>
+  </data>
+  <data name="SupportNewKeyNote" xml:space="preserve">
+    <value>If you were sent a key to change the settings, enter it here. The number and settings will change by themselves; nothing needs reinstalling.</value>
+  </data>
+  <data name="SupportKey" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="SupportApplyKey" xml:space="preserve">
+    <value>Apply key</value>
+  </data>
+  <data name="AppearanceTheme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="AppearanceSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="AppearanceLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="AppearanceDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="AppearanceLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="AppearanceLanguageSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="AppearanceLanguageNote" xml:space="preserve">
+    <value>“System” follows Windows: Russian where the system has Russian, English in all other cases.</value>
+  </data>
+  <data name="AppearanceLanguageRestartNote" xml:space="preserve">
+    <value>Switching restarts the application: the language is chosen at startup and cannot be changed for open windows. The registration will be dropped and re-established, and a call in progress will be cut off.</value>
+  </data>
+  <data name="AppearanceThemeNote" xml:space="preserve">
+    <value>The theme applies immediately and needs no restart.</value>
+  </data>
+  <data name="AppearanceLanguageQuestion" xml:space="preserve">
+    <value>Change the language?</value>
+  </data>
+  <data name="AppearanceLanguageQuestionBody" xml:space="preserve">
+    <value>The language changes for all windows at once, and the application will restart for that: the registration will be dropped and re-established. If a call is in progress, it will be cut off.</value>
+  </data>
+  <data name="AdminModeTitle" xml:space="preserve">
+    <value>Administrator mode</value>
+  </data>
+  <data name="AdminModeNeedsPassword" xml:space="preserve">
+    <value>Password required</value>
+  </data>
+  <data name="AdminModeOpen" xml:space="preserve">
+    <value>Administration ›</value>
+  </data>
+  <data name="HistoryWindowTitle" xml:space="preserve">
+    <value>Call history</value>
+  </data>
+  <data name="HistoryWindowTitleWithProfile" xml:space="preserve">
+    <value>Call history — {0}</value>
+  </data>
+  <data name="HistoryEmpty" xml:space="preserve">
+    <value>Nothing here yet</value>
+  </data>
+  <data name="HistoryToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="HistoryYesterday" xml:space="preserve">
+    <value>Yesterday</value>
+  </data>
+  <data name="HistoryTransferred" xml:space="preserve">
+    <value>transferred</value>
+  </data>
+  <data name="HistoryConsultation" xml:space="preserve">
+    <value>consultation</value>
+  </data>
+  <data name="HistoryConference" xml:space="preserve">
+    <value>conference</value>
+  </data>
+  <data name="HistoryRedial" xml:space="preserve">
+    <value>Call again</value>
+  </data>
+  <data name="HistorySnapshot" xml:space="preserve">
+    <value>Copy the list as a picture</value>
+  </data>
+  <data name="HistorySnapshotDone" xml:space="preserve">
+    <value>Picture copied</value>
+  </data>
+  <data name="AdminUnlockTitle" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="AdminUnlockSubtitle" xml:space="preserve">
+    <value>Accounts, keys, autoclicker protection and diagnostics.</value>
+  </data>
+  <data name="AdminUnlockEnter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="AdminUnlockWarning" xml:space="preserve">
+    <value>No password is set on this machine — administration is open to anyone who reaches it. Changes here alter the whole workplace.</value>
+  </data>
+  <data name="AdminUnlockWrongPassword" xml:space="preserve">
+    <value>Wrong password.</value>
+  </data>
+  <data name="AdminWindowTitle" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="AdminGroupMachine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="AdminSectionMacros" xml:space="preserve">
+    <value>Keys</value>
+  </data>
+  <data name="AdminSectionHistory" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="AdminSectionAccess" xml:space="preserve">
+    <value>Access</value>
+  </data>
+  <data name="AdminSectionDiagnostics" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="AdminSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="AdminRevert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="AdminDirtyTitle" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="AdminDirtyBody" xml:space="preserve">
+    <value>Nothing is written to disk until you press Save.</value>
+  </data>
+  <data name="AdminCleanTitle" xml:space="preserve">
+    <value>No changes</value>
+  </data>
+  <data name="AdminCleanBody" xml:space="preserve">
+    <value>This machine's settings are set by its administrator.</value>
+  </data>
+  <data name="AdminCleanBodyManaged" xml:space="preserve">
+    <value>This machine's settings are managed by Spark. Changes saved here will take it offline.</value>
+  </data>
+  <data name="SupportCheckPresets" xml:space="preserve">
+    <value>Check preset updates</value>
+  </data>
+  <data name="SupportPresetsNote" xml:space="preserve">
+    <value>Asks the panel about this workplace — macro keys, queues, addresses. Normally this happens on its own every two hours.</value>
+  </data>
+  <data name="SupportKeyChecking" xml:space="preserve">
+    <value>Checking the key…</value>
+  </data>
+  <data name="SupportKeyApplied" xml:space="preserve">
+    <value>Settings have changed. The application will restart.</value>
+  </data>
+  <data name="SupportLogsCollected" xml:space="preserve">
+    <value>Archive collected: {0}</value>
+  </data>
+  <data name="SupportLogsFailed" xml:space="preserve">
+    <value>Could not collect the archive: {0}</value>
+  </data>
+  <data name="SupportNetworkRepaired" xml:space="preserve">
+    <value>The path to the PBX has been reopened.</value>
+  </data>
+  <data name="SupportPresetsAsked" xml:space="preserve">
+    <value>The panel has been asked.</value>
+  </data>
+  <data name="FirstRunKeyNoChannel" xml:space="preserve">
+    <value>This build carries no factory settings, so there is nowhere to check the key. Such a machine will receive neither presets nor updates: set it up manually and tell whoever built the release.</value>
+  </data>
+  <data name="AdminResetTitle" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="AdminResetButton" xml:space="preserve">
+    <value>Reset machine…</value>
+  </data>
+  <data name="AdminResetInCall" xml:space="preserve">
+    <value>unavailable during a call</value>
+  </data>
+  <data name="AdminResetNote" xml:space="preserve">
+    <value>Erases settings, history and the log — the machine becomes exactly as it was right after installation, with no administrator password. Use it to hand the workplace over to another employee.</value>
+  </data>
+  <data name="AdminResetConfirmTitle" xml:space="preserve">
+    <value>Reset the machine?</value>
+  </data>
+  <data name="AdminResetConfirmBody" xml:space="preserve">
+    <value>Settings, call history and the log will be erased. Profiles, passwords, macro keys, queues and the port-knock sequence will be gone; no administrator password will remain, and the protected settings will be open to everyone.</value>
+  </data>
+  <data name="AdminResetConfirmFootnote" xml:space="preserve">
+    <value>This cannot be undone by Revert or recovered from the support archive: the archive is built from the log, and the log is erased along with everything else.</value>
+  </data>
+  <data name="AdminResetConfirmButton" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="AdminSaveConfirmTitle" xml:space="preserve">
+    <value>Save settings?</value>
+  </data>
+  <data name="AdminSaveConfirmBody" xml:space="preserve">
+    <value>This machine's settings become local: they are set by its administrator, not by a configuration file. The save will be written to the log.</value>
+  </data>
+  <data name="AdminMacrosTitle" xml:space="preserve">
+    <value>Macro keys</value>
+  </data>
+  <data name="AdminMacroTitle" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="AdminMacroSequence" xml:space="preserve">
+    <value>Sequence</value>
+  </data>
+  <data name="AdminMacroTransfers" xml:space="preserve">
+    <value>Transfers the call</value>
+  </data>
+  <data name="AdminMacroAdd" xml:space="preserve">
+    <value>Add a key</value>
+  </data>
+  <data name="AdminMacroRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="AdminMacroUp" xml:space="preserve">
+    <value>Up</value>
+  </data>
+  <data name="AdminMacroDown" xml:space="preserve">
+    <value>Down</value>
+  </data>
+  <data name="AdminMacrosNote" xml:space="preserve">
+    <value>The label and the sequence are yours: the codes belong to this company's PBX, and the application does not try to guess them. The order matters — the operator aims at a position rather than reading the labels each time.</value>
+  </data>
+  <data name="AdminMacroTransfersNote" xml:space="preserve">
+    <value>“Transfers the call” marks the call as transferred in the history. This cannot be guessed from the sequence: every PBX has its own codes, and the mark goes into the history, which is read as evidence.</value>
+  </data>
+  <data name="AdminMacroLayout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="AdminMacroColumns" xml:space="preserve">
+    <value>Per row</value>
+  </data>
+  <data name="AdminMacroHeightAuto" xml:space="preserve">
+    <value>Height from the labels</value>
+  </data>
+  <data name="AdminMacroHeight" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="AdminHistoryTitle" xml:space="preserve">
+    <value>Call history</value>
+  </data>
+  <data name="AdminHistoryEnabled" xml:space="preserve">
+    <value>Keep the history</value>
+  </data>
+  <data name="AdminHistoryAge" xml:space="preserve">
+    <value>Keep, days</value>
+  </data>
+  <data name="AdminHistoryNote" xml:space="preserve">
+    <value>The switch is administrative, not managerial: the history is evidence when a complaint is reviewed, and the person whose calls it records must not decide whether to keep it.</value>
+  </data>
+  <data name="AdminAccessTitle" xml:space="preserve">
+    <value>Administrator password</value>
+  </data>
+  <data name="AdminAccessNewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="AdminAccessRepeatPassword" xml:space="preserve">
+    <value>Repeat</value>
+  </data>
+  <data name="AdminAccessSet" xml:space="preserve">
+    <value>Set the password</value>
+  </data>
+  <data name="AdminAccessRemove" xml:space="preserve">
+    <value>Remove the password</value>
+  </data>
+  <data name="AdminAccessMismatch" xml:space="preserve">
+    <value>The passwords do not match.</value>
+  </data>
+  <data name="AdminAccessProtected" xml:space="preserve">
+    <value>A password is set. If it is forgotten, look it up in the panel — that is where it comes from.</value>
+  </data>
+  <data name="AdminAccessOpen" xml:space="preserve">
+    <value>No password: administration is open to anyone who reaches the machine.</value>
+  </data>
+  <data name="AdminAccessApplied" xml:space="preserve">
+    <value>The password applies at once rather than on “Save”: it is the key to the settings, not a setting.</value>
+  </data>
+  <data name="AdminDiagnosticsTitle" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="AdminDiagnosticsSettingsPath" xml:space="preserve">
+    <value>Settings file</value>
+  </data>
+  <data name="AdminDiagnosticsOpenFolder" xml:space="preserve">
+    <value>Show the folder</value>
+  </data>
+  <data name="AdminDiagnosticsNote" xml:space="preserve">
+    <value>The log and the settings live side by side. They are attached to a support request — the archive is collected in the Support section.</value>
+  </data>
+  <data name="AppearanceLanguageConfirm" xml:space="preserve">
+    <value>Switch and restart</value>
+    <comment>подтверждение в вопросе о смене языка</comment>
+  </data>
+  <data name="AdminRemovePasswordConfirm" xml:space="preserve">
+    <value>Remove password</value>
+  </data>
+  <data name="FirstRunAbandonConfirm" xml:space="preserve">
+    <value>Quit setup</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Continue</value>
+    <comment>кнопка подтверждения в вопросе приложения</comment>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="DialogDiscard" xml:space="preserve">
+    <value>Don't save</value>
+  </data>
+  <data name="AdminCloseDirtyTitle" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="AdminCloseDirtyBody" xml:space="preserve">
+    <value>This window has unsaved changes. Save them before closing?</value>
+  </data>
+  <data name="AdminRemovePasswordTitle" xml:space="preserve">
+    <value>Remove the password?</value>
+  </data>
+  <data name="AdminRemovePasswordBody" xml:space="preserve">
+    <value>After this, administration will open to anyone who reaches the machine: accounts, keys and autoclicker protection will be available without a password.</value>
+  </data>
+  <data name="AdminSectionAccount" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="AdminSectionPbx" xml:space="preserve">
+    <value>PBX</value>
+  </data>
+  <data name="AdminSectionQueues" xml:space="preserve">
+    <value>Queues</value>
+  </data>
+  <data name="AdminSectionMaintenance" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="AdminGroupCall" xml:space="preserve">
+    <value>Call</value>
+  </data>
+  <data name="AdminAccountTitle" xml:space="preserve">
+    <value>SIP account</value>
+  </data>
+  <data name="AdminAccountUsername" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="AdminAccountDisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="AdminAccountPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="AdminAccountPasswordSet" xml:space="preserve">
+    <value>A password is set. The field is deliberately empty: the stored password cannot be read back, but it could be read over the administrator's shoulder. Leaving it empty keeps the current one.</value>
+  </data>
+  <data name="AdminAccountPasswordNone" xml:space="preserve">
+    <value>No password — the registration will not come up.</value>
+  </data>
+  <data name="AdminAccountPasswordNote" xml:space="preserve">
+    <value>The password is encrypted by Windows and bound to this user: a settings file carried to another machine does not give it up.</value>
+  </data>
+  <data name="AdminPbxTitle" xml:space="preserve">
+    <value>PBX addresses</value>
+  </data>
+  <data name="AdminPbxOffice" xml:space="preserve">
+    <value>From the office</value>
+  </data>
+  <data name="AdminPbxRemote" xml:space="preserve">
+    <value>From home</value>
+  </data>
+  <data name="AdminPbxPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="AdminPbxTransport" xml:space="preserve">
+    <value>Transport</value>
+  </data>
+  <data name="AdminPbxExpiry" xml:space="preserve">
+    <value>Registration, s</value>
+  </data>
+  <data name="AdminPbxAddressNote" xml:space="preserve">
+    <value>Two addresses that the Work section switches between: the internal one is unreachable from home, and from the office the external one leads to the same server the long way round.</value>
+  </data>
+  <data name="AdminPbxFeatureTitle" xml:space="preserve">
+    <value>PBX feature codes</value>
+  </data>
+  <data name="AdminPbxTransfer" xml:space="preserve">
+    <value>Transfer</value>
+  </data>
+  <data name="AdminPbxConference" xml:space="preserve">
+    <value>Conference</value>
+  </data>
+  <data name="AdminPbxFeatureNote" xml:space="preserve">
+    <value>The codes differ between Asterisk installations and the application does not guess them: an empty code means the button does not work, not that it will do something at random.</value>
+  </data>
+  <data name="AdminQueuesTitle" xml:space="preserve">
+    <value>Queues</value>
+  </data>
+  <data name="AdminQueueNumber" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="AdminQueueTitle" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="AdminQueueAdd" xml:space="preserve">
+    <value>Add a queue</value>
+  </data>
+  <data name="AdminQueuesNote" xml:space="preserve">
+    <value>On a queue distribution the number tells the operator nothing. The titles from here are shown both in the incoming call window and in the history, instead of the digits.</value>
+  </data>
+  <data name="AdminMaintenanceTitle" xml:space="preserve">
+    <value>Maintenance</value>
+  </data>
+  <data name="AdminMaintenanceLog" xml:space="preserve">
+    <value>Write the log to a file</value>
+  </data>
+  <data name="AdminMaintenanceTrace" xml:space="preserve">
+    <value>Write the SIP trace</value>
+  </data>
+  <data name="AdminMaintenanceNote" xml:space="preserve">
+    <value>The log is attached to support requests: with it off there will be nothing to collect. The trace is verbose and not needed in daily work, but it is the first thing asked for when working out why registration fails.</value>
+  </data>
+  <data name="TrayShowPanel" xml:space="preserve">
+    <value>Show the panel</value>
+  </data>
+  <data name="TrayHidePanel" xml:space="preserve">
+    <value>Hide the panel</value>
+  </data>
+  <data name="TrayHistory" xml:space="preserve">
+    <value>Call history</value>
+  </data>
+  <data name="TraySettings" xml:space="preserve">
+    <value>Settings…</value>
+  </data>
+  <data name="TrayDoNotDisturb" xml:space="preserve">
+    <value>Do not disturb</value>
+  </data>
+  <data name="TrayQuit" xml:space="preserve">
+    <value>Quit EliteSIP</value>
+  </data>
+  <data name="TrayOffline" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="TrayRegistered" xml:space="preserve">
+    <value>On line</value>
+  </data>
+  <data name="TrayRegistering" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="TrayFailed" xml:space="preserve">
+    <value>No connection</value>
+  </data>
+  <data name="TrayIdle" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="FirstRunTitle" xml:space="preserve">
+    <value>Workplace setup</value>
+  </data>
+  <data name="FirstRunWelcomeTitle" xml:space="preserve">
+    <value>Welcome to EliteSIP</value>
+  </data>
+  <data name="FirstRunWelcomeSubtitle" xml:space="preserve">
+    <value>The workplace is set up once. It takes a minute.</value>
+  </data>
+  <data name="FirstRunLanguageNote" xml:space="preserve">
+    <value>The interface language. The application will reopen in the one you choose.</value>
+  </data>
+  <data name="FirstRunUserTitle" xml:space="preserve">
+    <value>First user</value>
+  </data>
+  <data name="FirstRunUserSubtitle" xml:space="preserve">
+    <value>Who will work at this machine.</value>
+  </data>
+  <data name="FirstRunAdminNote" xml:space="preserve">
+    <value>The administrator password closes off Administration — accounts, keys and diagnostics. Leave it empty if the machine stands in a protected place: a password can be set later.</value>
+  </data>
+  <data name="FirstRunAppearanceSubtitle" xml:space="preserve">
+    <value>The panel sits above your work windows all day. Choose what does not get in the way of looking at them.</value>
+  </data>
+  <data name="FirstRunFinaleTitle" xml:space="preserve">
+    <value>All set</value>
+  </data>
+  <data name="FirstRunFinaleNote" xml:space="preserve">
+    <value>The rest — the second site, macro keys, queues — is set up in Administration, behind the administrator password.</value>
+  </data>
+  <data name="FirstRunBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="FirstRunNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="FirstRunFinish" xml:space="preserve">
+    <value>Start working</value>
+  </data>
+  <data name="FirstRunAbandonTitle" xml:space="preserve">
+    <value>Abandon the setup?</value>
+  </data>
+  <data name="FirstRunAbandonBody" xml:space="preserve">
+    <value>What you entered will not be saved and the application will close: an unconfigured machine does not make calls and does not open Administration. The wizard will open again next time.</value>
+  </data>
+  <data name="HistoryPickDay" xml:space="preserve">
+    <value>Show the calls of one day</value>
+  </data>
+  <data name="HistoryAllDays" xml:space="preserve">
+    <value>Show all days</value>
+  </data>
+  <data name="TroubleNoAccount" xml:space="preserve">
+    <value>The profile is not set up</value>
+  </data>
+  <data name="TroubleNoPassword" xml:space="preserve">
+    <value>The password cannot be read</value>
+  </data>
+  <data name="TroubleNoMediaAddress" xml:space="preserve">
+    <value>The server did not report our address</value>
+  </data>
+  <data name="TroubleChannelClosed" xml:space="preserve">
+    <value>No connection to the PBX</value>
+  </data>
+  <data name="TroubleNoAudio" xml:space="preserve">
+    <value>No audio device</value>
+  </data>
+  <data name="CallStatusDialing" xml:space="preserve">
+    <value>Dialling…</value>
+  </data>
+  <data name="CallStatusRinging" xml:space="preserve">
+    <value>Ringing…</value>
+  </data>
+  <data name="CallStatusTalking" xml:space="preserve">
+    <value>talking</value>
+  </data>
+
+  <!-- Окно входящего вызова: этап W9. -->
+  <data name="IncomingWindowTitle" xml:space="preserve">
+    <value>Incoming call</value>
+  </data>
+  <data name="IncomingCaption" xml:space="preserve">
+    <value>Incoming call</value>
+  </data>
+  <data name="IncomingNumberCopied" xml:space="preserve">
+    <value>Number copied</value>
+  </data>
+  <data name="IncomingCopyNumber" xml:space="preserve">
+    <value>Copy number</value>
+  </data>
+  <data name="IncomingGuardOn" xml:space="preserve">
+    <value>Autoclicker protection is on</value>
+  </data>
+  <data name="IncomingAnswer" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="IncomingDecline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="IncomingDigitPrompt" xml:space="preserve">
+    <value>To answer, press</value>
+  </data>
+  <data name="IncomingDealPrompt" xml:space="preserve">
+    <value>This is your own deal call — answer it to start dialling the client.</value>
+  </data>
+  <data name="IncomingDeal" xml:space="preserve">
+    <value>Deal call</value>
+  </data>
+  <data name="IncomingDistribution" xml:space="preserve">
+    <value>🔥Hot lead🔥</value>
+  </data>
+
+  <!-- Раздел «Входящие» в «Управлении»: политика защиты. -->
+  <data name="AdminSectionIncoming" xml:space="preserve">
+    <value>Incoming</value>
+  </data>
+  <data name="AdminGuardTitle" xml:space="preserve">
+    <value>Protection</value>
+  </data>
+  <data name="AdminGuardEnabled" xml:space="preserve">
+    <value>Autoclicker protection</value>
+  </data>
+  <data name="AdminGuardManagedNote" xml:space="preserve">
+    <value>The value comes from the panel as a preset. A change here applies at once and holds until that preset is deployed again — after which the panel value returns.</value>
+  </data>
+  <data name="AdminGuardOffNote" xml:space="preserve">
+    <value>Turning it off is recorded in the log: every call is marked as answered without protection.</value>
+  </data>
+  <data name="AdminGuardWhyNote" xml:space="preserve">
+    <value>An autoclicker takes the lead faster than colleagues without being at the desk, and the lead goes to silence.</value>
+  </data>
+  <data name="AdminGuardRandomTitle" xml:space="preserve">
+    <value>Randomness</value>
+  </data>
+  <data name="AdminGuardRandomPosition" xml:space="preserve">
+    <value>Random window position</value>
+  </data>
+  <data name="AdminGuardTuning" xml:space="preserve">
+    <value>Distances</value>
+  </data>
+  <data name="AdminGuardTuningAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="AdminGuardTuningManual" xml:space="preserve">
+    <value>By hand</value>
+  </data>
+  <data name="AdminGuardMinimumTravel" xml:space="preserve">
+    <value>Minimum travel</value>
+  </data>
+  <data name="AdminGuardScreenMargin" xml:space="preserve">
+    <value>Screen margin</value>
+  </data>
+  <data name="AdminGuardRandomNote" xml:space="preserve">
+    <value>Breaks clickers that hit fixed coordinates.</value>
+  </data>
+  <data name="AdminGuardTuningNote" xml:space="preserve">
+    <value>On «Auto» the values are the tested ones and the sliders are locked: a mouse wheel over an unlocked slider changes protection silently, and nothing shows it later. «By hand» unlocks them and hands the numbers to whoever set them.</value>
+  </data>
+  <data name="AdminGuardDigitTitle" xml:space="preserve">
+    <value>Digit confirmation</value>
+  </data>
+  <data name="AdminGuardDigitEnabled" xml:space="preserve">
+    <value>Confirm with a digit</value>
+  </data>
+  <data name="AdminGuardTargets" xml:space="preserve">
+    <value>Targets to choose from</value>
+  </data>
+  <data name="AdminGuardDigitNote" xml:space="preserve">
+    <value>Instead of an Answer button a row of digits is shown, and only the one named in the caption takes the call. Breaks a clicker that looks for the button by its picture. Off by default: it costs the operator attention on every call, while a random window position costs nothing.</value>
+  </data>
+  <data name="AdminGuardLivenessTitle" xml:space="preserve">
+    <value>Signs of a live person</value>
+  </data>
+  <data name="AdminGuardCursor" xml:space="preserve">
+    <value>Require pointer movement</value>
+  </data>
+  <data name="AdminGuardCursorTravel" xml:space="preserve">
+    <value>Required pointer travel</value>
+  </data>
+  <data name="AdminGuardCursorNote" xml:space="preserve">
+    <value>SendInput puts the pointer at a point in a single event — such movement has no path at all.</value>
+  </data>
+  <data name="AdminGuardSynthetic" xml:space="preserve">
+    <value>Reject synthetic clicks</value>
+  </data>
+  <data name="AdminGuardSyntheticNote" xml:space="preserve">
+    <value>Windows marks clicks made by software itself, and only a driver can forge that mark. By default it is still only written to the report.</value>
+  </data>
+  <data name="AdminGuardCheckTitle" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="AdminGuardCheckShow" xml:space="preserve">
+    <value>Show the window</value>
+  </data>
+  <data name="AdminGuardCheckDeal" xml:space="preserve">
+    <value>Show a deal call</value>
+  </data>
+  <data name="AdminGuardCheckNote" xml:space="preserve">
+    <value>A deal call arrives from the manager's own number: the CRM picks them up first and only then dials the client. No settings are needed for that — the number comes from the active profile.</value>
+  </data>
+  <data name="AdminGuardLastCall" xml:space="preserve">
+    <value>Last call</value>
+  </data>
+
+  <!-- Линия панели: этап W10. -->
+  <data name="ActivationNoChannel" xml:space="preserve">
+    <value>Could not reach the server: {0}. Check the network and try again.</value>
+  </data>
+  <data name="PresetsLineOff" xml:space="preserve">
+    <value>the line is off: no key</value>
+  </data>
+  <data name="PresetsManualMode" xml:space="preserve">
+    <value>the machine is in manual mode</value>
+  </data>
+  <data name="PresetsNoChannelKey" xml:space="preserve">
+    <value>the machine has no channel key</value>
+  </data>
+  <data name="PresetsChannelDown" xml:space="preserve">
+    <value>the channel is unreachable</value>
+  </data>
+  <data name="PresetsChannelSaid" xml:space="preserve">
+    <value>the channel answered {0}</value>
+  </data>
+  <data name="PresetsSignatureFailed" xml:space="preserve">
+    <value>file discarded: the signature did not match</value>
+  </data>
+  <data name="PresetsNoEntry" xml:space="preserve">
+    <value>no entry of our own in the file</value>
+  </data>
+  <data name="PresetsAlreadyFresh" xml:space="preserve">
+    <value>the settings are already up to date</value>
+  </data>
+  <data name="PresetsWaiting" xml:space="preserve">
+    <value>revision {0} is waiting for the call to end</value>
+  </data>
+  <data name="PresetsApplied" xml:space="preserve">
+    <value>revision {0} applied</value>
+  </data>
+
+  <data name="FirstRunKeyTitle" xml:space="preserve">
+    <value>Activation key</value>
+  </data>
+  <data name="FirstRunKeySubtitle" xml:space="preserve">
+    <value>Twelve characters from your administrator. Everything else — number, password and PBX address — comes with them.</value>
+  </data>
+  <data name="FirstRunKeyCheck" xml:space="preserve">
+    <value>Check the key</value>
+  </data>
+  <data name="FirstRunKeyChecking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="FirstRunKeyManual" xml:space="preserve">
+    <value>Set up by hand</value>
+  </data>
+
+  <data name="AdminSectionSupport" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="AdminSupportTitle" xml:space="preserve">
+    <value>Link with the panel</value>
+  </data>
+  <data name="AdminSupportMachine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="AdminSupportPreset" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="AdminSupportRevision" xml:space="preserve">
+    <value>revision</value>
+  </data>
+  <data name="AdminSupportLastContact" xml:space="preserve">
+    <value>Channel answered</value>
+  </data>
+  <data name="AdminSupportManaged" xml:space="preserve">
+    <value>Follow the panel</value>
+  </data>
+  <data name="AdminSupportManagedNote" xml:space="preserve">
+    <value>Turned off, the machine keeps what it has and stops taking new revisions. Turned back on, it asks for its preset again and replaces local edits with the server ones.</value>
+  </data>
+  <data name="AdminSupportCheckNow" xml:space="preserve">
+    <value>Check settings now</value>
+  </data>
+  <data name="AdminSupportReflashTitle" xml:space="preserve">
+    <value>Re-flash</value>
+  </data>
+  <data name="AdminSupportReflashKey" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="AdminSupportReflashApply" xml:space="preserve">
+    <value>Apply the key</value>
+  </data>
+  <data name="AdminSupportReflashNote" xml:space="preserve">
+    <value>A key issued for this machine: it replaces the number, the password and the preset. The key burns the moment it is checked, so it cannot be applied during a call.</value>
+  </data>
+  <data name="SupportNeverContacted" xml:space="preserve">
+    <value>never</value>
+  </data>
+  <data name="SupportReflashed" xml:space="preserve">
+    <value>Re-flashed: number {0}, preset “{1}”</value>
+  </data>
+
+  <data name="AdminPbxTlsTitle" xml:space="preserve">
+    <value>Certificate check</value>
+  </data>
+  <data name="AdminPbxTlsFingerprint" xml:space="preserve">
+    <value>SHA-256 fingerprint</value>
+  </data>
+  <data name="AdminPbxTlsFingerprintNote" xml:space="preserve">
+    <value>Empty means the usual system check. A fingerprint replaces it and is the way to trust a self-signed certificate without weakening anything else. Several fingerprints, comma-separated, let a certificate be replaced without downtime.</value>
+  </data>
+  <data name="AdminPbxTlsAcceptAny" xml:space="preserve">
+    <value>Accept any certificate</value>
+  </data>
+  <data name="AdminPbxTlsAcceptAnyNote" xml:space="preserve">
+    <value>This turns off protection against interception entirely: whoever sits in the middle reads the SIP password and the call itself, and TLS still shows as on. Only for a lab on this same machine.</value>
+  </data>
+
+  <data name="AdminKnockTitle" xml:space="preserve">
+    <value>Port knocking</value>
+  </data>
+  <data name="AdminKnockNote" xml:space="preserve">
+    <value>The gateway keeps the ports closed and opens them to whoever sends the agreed sequence of ICMP packets of certain lengths. This is connectivity, not protection: it decides who is let in and says nothing about who can read — SIP and RTP go the same open UDP as before. An empty list turns knocking off.</value>
+  </data>
+  <data name="AdminKnockHost" xml:space="preserve">
+    <value>Address (empty — the PBX)</value>
+  </data>
+  <data name="AdminKnockBytes" xml:space="preserve">
+    <value>Bytes</value>
+  </data>
+  <data name="AdminKnockCount" xml:space="preserve">
+    <value>Times</value>
+  </data>
+  <data name="AdminKnockAdd" xml:space="preserve">
+    <value>Add a step</value>
+  </data>
+  <data name="AdminKnockSpacing" xml:space="preserve">
+    <value>Gap, seconds</value>
+  </data>
+  <data name="AdminKnockRepeat" xml:space="preserve">
+    <value>Repeat, seconds</value>
+  </data>
+  <data name="AdminKnockSummary" xml:space="preserve">
+    <value>{0} packets: that is {1:0.#} seconds of silence before the first REGISTER on a remote machine.</value>
+  </data>
+  <data name="AdminKnockDisabled" xml:space="preserve">
+    <value>No steps — knocking is off.</value>
+  </data>
+
+  <data name="UpdatesLineOff" xml:space="preserve">
+    <value>the update line is off</value>
+  </data>
+  <data name="UpdatesUpToDate" xml:space="preserve">
+    <value>the installed version is current</value>
+  </data>
+  <data name="UpdatesReady" xml:space="preserve">
+    <value>version {0} is downloaded and waiting</value>
+  </data>
+  <data name="UpdatesDownloadFailed" xml:space="preserve">
+    <value>the installer did not download</value>
+  </data>
+  <data name="UpdateOfferTitle" xml:space="preserve">
+    <value>Update to {0}?</value>
+  </data>
+  <data name="UpdateOfferBody" xml:space="preserve">
+    <value>The update is already downloaded and checked — installing takes a few seconds, and the app will start again on its own. Postponing is fine: the reminder comes back in half an hour.</value>
+  </data>
+  <data name="UpdateOfferInstall" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="AdminDiagnosticsCheckUpdates" xml:space="preserve">
+    <value>Check for updates now</value>
+  </data>
+  <data name="AdminDiagnosticsInstallUpdate" xml:space="preserve">
+    <value>Install the update</value>
+  </data>
+
+  <data name="UpdatesChecking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+
+  <data name="AdminMaintenanceAutoStart" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="AdminMaintenanceAutoStartNote" xml:space="preserve">
+    <value>A softphone that did not come back after a night-time restart misses the first calls of the shift. Startup is also shown in Task Manager, on the Startup tab.</value>
+  </data>
+  <data name="AudioInputSection" xml:space="preserve">
+    <value>Microphone</value>
+  </data>
+  <data name="AudioOutputSection" xml:space="preserve">
+    <value>Headphones</value>
+  </data>
+  <data name="AudioDevice" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="AudioProcessingSection" xml:space="preserve">
+    <value>Voice processing</value>
+  </data>
+  <data name="AudioSelfTestSection" xml:space="preserve">
+    <value>Sound check</value>
+  </data>
+  <data name="SupportLogsSection" xml:space="preserve">
+    <value>Logs for support</value>
+  </data>
+  <data name="SupportUpdatesSection" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="SupportPresetsSection" xml:space="preserve">
+    <value>Presets</value>
+  </data>
+  <data name="SwitchOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="SwitchOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="UpdatesDownloading" xml:space="preserve">
+    <value>Downloading {0}: {1} of {2} MB</value>
+  </data>
+  <data name="AdminUnlockCapsLock" xml:space="preserve">
+    <value>Caps Lock is on</value>
+  </data>
+  <data name="PanelNumberChanged" xml:space="preserve">
+    <value>The administrator changed your number: {0}</value>
+  </data>
+  <data name="AdminDirtyBodyManaged" xml:space="preserve">
+    <value>Saving takes the machine offline: Spark stops sending it settings until it is brought back online (with a button, no re-pairing).</value>
+  </data>
+  <data name="AdminSupportLink" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="SupportLinkOnline" xml:space="preserve">
+    <value>Spark, online</value>
+  </data>
+  <data name="SupportLinkOffline" xml:space="preserve">
+    <value>offline, manual</value>
+  </data>
+  <data name="SupportLinkNone" xml:space="preserve">
+    <value>manual, machine not paired with Spark</value>
+  </data>
+  <data name="SupportReturnOnline" xml:space="preserve">
+    <value>Go back online</value>
+  </data>
+  <data name="SupportReturnOnlineNote" xml:space="preserve">
+    <value>The machine is offline: changes were saved here, and Spark leaves its settings alone. Going back online replaces local changes with the settings from Spark; no re-pairing needed.</value>
+  </data>
+  <data name="SupportSparkSection" xml:space="preserve">
+    <value>Spark link</value>
+  </data>
+  <data name="SupportMachineNotPaired" xml:space="preserve">
+    <value>not paired with Spark</value>
+  </data>
+  <data name="FirstRunPairTitle" xml:space="preserve">
+    <value>Pair with Spark</value>
+  </data>
+  <data name="FirstRunPairSubtitle" xml:space="preserve">
+    <value>Read the code to your administrator: they will enter it in Spark or scan the QR in EliteSIP Connect. The machine sets itself up.</value>
+  </data>
+  <data name="FirstRunPairCodeLabel" xml:space="preserve">
+    <value>Machine code</value>
+  </data>
+  <data name="FirstRunPairNewCode" xml:space="preserve">
+    <value>Not me — show a new code</value>
+  </data>
+  <data name="FirstRunPairOpening" xml:space="preserve">
+    <value>Getting a code…</value>
+  </data>
+  <data name="FirstRunPairWaiting" xml:space="preserve">
+    <value>Waiting for pairing. The code stays the same while the machine is on — it can be paired days later.</value>
+  </data>
+  <data name="FirstRunPairSettingUp" xml:space="preserve">
+    <value>Paired — fetching settings…</value>
+  </data>
+  <data name="FirstRunPairRetry" xml:space="preserve">
+    <value>No connection to Spark ({0}). Retrying in {1} s.</value>
+  </data>
+  <!-- Автоподъём (0.1.61). -->
+  <data name="AdminAutoAnswerTitle" xml:space="preserve">
+    <value>Auto answer</value>
+  </data>
+  <data name="AdminNumbersTitle" xml:space="preserve">
+    <value>Caller numbers</value>
+  </data>
+  <data name="AdminMasksMobileNumbers" xml:space="preserve">
+    <value>Hide mobile numbers</value>
+  </data>
+  <data name="AdminMasksMobileNumbersNote" xml:space="preserve">
+    <value>A mobile number is shown as +7 and asterisks — in the incoming call window, on the panel during a call and in history. Landline and internal numbers are always visible. Turn it off for departments that need the client's number in the clear.</value>
+  </data>
+  <data name="AdminAutoAnswerOff" xml:space="preserve">
+    <value>Off — calls are answered by the operator</value>
+  </data>
+  <data name="AdminAutoAnswerAlways" xml:space="preserve">
+    <value>Always</value>
+  </data>
+  <data name="AdminAutoAnswerHeader" xml:space="preserve">
+    <value>When the PBX asks for it (X-Autoanswer, Call-Info answer-after, Alert-Info)</value>
+  </data>
+  <data name="AdminAutoAnswerList" xml:space="preserve">
+    <value>For numbers from the list</value>
+  </data>
+  <data name="AdminAutoAnswerNumbers" xml:space="preserve">
+    <value>Numbers</value>
+  </data>
+  <data name="AdminAutoAnswerNote" xml:space="preserve">
+    <value>An auto-answered call is picked up at once, without ringtone or incoming window. Numbers are compared by digits; long ones by the last ten. Not applied on top of an active call.</value>
+  </data>
+  <data name="AdminAutoAnswerAlwaysNote" xml:space="preserve">
+    <value>Every incoming call will be answered even if nobody is at the workplace.</value>
+  </data>
+  <data name="StatusConnecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="StatusReconnecting" xml:space="preserve">
+    <value>Reconnecting…</value>
+  </data>
+  <data name="StatusFixingNetwork" xml:space="preserve">
+    <value>Fixing network…</value>
+  </data>
+  <data name="StatusSwitchingNumber" xml:space="preserve">
+    <value>Switching number…</value>
+  </data>
+  <data name="StatusDisconnecting" xml:space="preserve">
+    <value>Disconnecting…</value>
+  </data>
+  <data name="StatusWaitingServer" xml:space="preserve">
+    <value>Waiting for server…</value>
+  </data>
+  <data name="StatusAudioRestarting" xml:space="preserve">
+    <value>Restarting audio…</value>
+  </data>
+  <data name="StatusAudioLost" xml:space="preserve">
+    <value>Audio lost</value>
+  </data>
+  <data name="StatusMicSilent" xml:space="preserve">
+    <value>Microphone is silent</value>
+  </data>
+  <data name="StatusNoInbound" xml:space="preserve">
+    <value>No audio from caller</value>
+  </data>
+  <data name="StatusInboundStalled" xml:space="preserve">
+    <value>Caller dropped out</value>
+  </data>
+  <data name="StatusPoorNetwork" xml:space="preserve">
+    <value>Poor connection</value>
+  </data>
+  <data name="StatusMediaNetworkError" xml:space="preserve">
+    <value>Audio network error</value>
+  </data>
+</root>

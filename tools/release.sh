@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 #
 # Выпуск Linux-версии EliteSIP: одна команда вместо десяти шагов — по образцу
-# shared/tools/release.ps1, и по той же причине: ручной выпуск рано или поздно
+# проверяет весь путь: ручной выпуск рано или поздно
 # выходит без одного из шагов, и обычно это версия или подпись.
 #
 #   tools/release.sh --version 0.1.2 --signing-key ~/.config/EliteSIP-release/linux-releases.key
 #
 # Шаги идут в этом порядке и не переставляются:
 #
-#   1. дерево чистое, подмодуль shared/ без правок и стоит на метке
-#      Windows-репозитория — v<версия> или linux-v<версия>, отправленной на
-#      GitHub (правила подмодуля 1 и 3), версия растёт;
+#   1. дерево Linux чистое, версия растёт;
 #   2. версия проставляется в Directory.Build.props;
 #   3. сборка и все проверки; провалилась хоть одна — выпуска нет;
 #   4. заводская настройка сверяется с каналом и ключами;
@@ -31,7 +29,7 @@
 # Ключ подписи — СВОЙ у линии Linux, не ключ Windows (план, W-L7, «Канал»):
 # с общим ключом подписанный манифест Linux, подложенный в
 # releases/current.json, прошёл бы проверку Windows-клиента. Новая пара —
-# `dotnet shared/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll keygen <каталог>`,
+# `dotnet core/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll keygen <каталог>`,
 # открытая половина — в releasesPublicKey заводской настройки Linux.
 #
 # Ключи:
@@ -45,8 +43,7 @@
 #                           скрипт откажется подписывать тем же ключом
 #   --notes ТЕКСТ           заметки выпуска (поле notes манифеста)
 #   --source ИСТОЧНИК       дополнительный источник NuGet для публикации
-#   --dry-run               не трогать дерево: грязное дерево и подмодуль не
-#                           на метке — предупреждение, версия не пишется
+#   --dry-run               грязное дерево — предупреждение, версия не пишется
 
 set -euo pipefail
 
@@ -99,9 +96,9 @@ done
 
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-# --- 1. Дерево, подмодуль, версия ---------------------------------------------
+# --- 1. Дерево и версия ---------------------------------------------
 
-step "проверка дерева, подмодуля и версии"
+step "проверка дерева и версии"
 
 cd "$root"
 
@@ -112,40 +109,8 @@ if [ -n "$(git status --porcelain)" ]; then
         || fail "в рабочем дереве есть несохранённые правки"
 fi
 
-# Правило подмодуля 1: общий код здесь не правится. Незакоммиченная правка в
-# shared/ — это выпуск из кода, которого нет ни в одном репозитории.
-if [ -n "$(git -C shared status --porcelain)" ]; then
-    $dry_run && warn "в shared/ есть несохранённые правки" \
-        || fail "в shared/ есть несохранённые правки — общий код правится в Win-EliteSIP"
-fi
-
-# Правило подмодуля 3: указатель стоит на метке, которая есть в Windows-
-# репозитории на GitHub, — иначе подмодуль на чужой машине коммит не найдёт и
-# выпуск не воспроизвести. Метка — одна из двух:
-#
-#   v<версия>        выпуск Windows: общий код прошёл её пилот;
-#   linux-v<версия>  общий код этого выпуска Linux, раньше выпуска Windows
-#                    (решение 22 октября 2026: Linux-версия не ждёт Windows).
-#                    Ставится в Windows-репозитории на коммит подмодуля и
-#                    отправляется туда же; main Windows она не трогает.
-shared_head=$(git -C shared rev-parse HEAD)
-shared_tag=$(git -C shared describe --tags --exact-match --match 'v*' 2>/dev/null \
-    || git -C shared describe --tags --exact-match --match "linux-v$version" 2>/dev/null || true)
-shared_published=false
-if [ -n "$shared_tag" ]; then
-    # Метка на GitHub обязана указывать на тот же коммит: локальная метка,
-    # которую забыли отправить, — это и есть «подмодуль не найдёт».
-    remote=$(git -C shared ls-remote --tags origin "refs/tags/$shared_tag" "refs/tags/$shared_tag^{}" 2>/dev/null \
-        | awk '{print $1}')
-    grep -qx "$shared_head" <<<"$remote" && shared_published=true
-fi
-if [ -z "$shared_tag" ]; then
-    $dry_run && warn "подмодуль shared/ не на метке v* или linux-v$version ($(git -C shared describe --tags 2>/dev/null || git -C shared rev-parse --short HEAD))" \
-        || fail "подмодуль shared/ не стоит на метке v<версия> или linux-v$version Windows-репозитория"
-elif ! $shared_published; then
-    $dry_run && warn "метки $shared_tag нет на GitHub (или она указывает не на $shared_head)" \
-        || fail "метки $shared_tag нет в Windows-репозитории на GitHub — git -C shared push origin $shared_tag"
-fi
+# Ревизия всех исходников — из единственного Linux-репозитория.
+source_revision=$(git rev-parse --short HEAD)
 
 current=$(sed -n 's:.*<Version>\([^<]*\)</Version>.*:\1:p' "$props" | head -1)
 [ -n "$current" ] || fail "в $props нет <Version>"
@@ -155,15 +120,14 @@ if [ "$(printf '%s\n%s\n' "$current" "$version" | sort -V | tail -1)" != "$versi
     fail "версия $version не больше текущей $current"
 fi
 
-# Метка выпуска — v<версия> в этом репозитории. Не путать с linux-v<версия> в
-# Windows-репозитории: та помечает общий код выпуска, эта — сам выпуск.
+# Метка выпуска принадлежит только Linux-репозиторию.
 release_tag="v$version"
 if git rev-parse -q --verify "refs/tags/$release_tag" >/dev/null; then
     $dry_run && warn "метка $release_tag уже есть" || fail "метка $release_tag уже есть: такой выпуск уже был"
 fi
 
 echo "  версия: $current -> $version"
-echo "  общий код: ${shared_tag:-не на метке} ($(git -C shared rev-parse --short HEAD))"
+echo "  исходники Linux: $source_revision"
 
 # --- 2. Версия в Directory.Build.props ----------------------------------------
 
@@ -187,7 +151,7 @@ dotnet build EliteSIP.Linux.slnx --configuration Release --nologo -maxcpucount:"
 dotnet test EliteSIP.Linux.slnx --configuration Release --nologo --no-build -maxcpucount:"$jobs" \
     || fail "проверки не прошли"
 
-kit="$root/shared/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll"
+kit="$root/core/tools/ReleaseKit/bin/Release/net10.0/releasekit.dll"
 [ -f "$kit" ] || fail "releasekit не собран: $kit"
 
 releasekit() {
@@ -298,12 +262,12 @@ if ! $dry_run; then
     # появляются вместе с пакетом — из того самого дерева, из которого он собран.
     git -C "$root" commit -q -m "Выпуск Linux $version
 
-Общий код: ${shared_tag:-не на метке} ($(git -C shared rev-parse --short HEAD)).
+Исходники Linux до изменения версии: $source_revision.
 Пакет: EliteSIP-$version.deb, sha256 $digest." -- Directory.Build.props \
         || fail "коммит с версией не сохранился"
     trap - EXIT
 
-    git -C "$root" tag -a "$release_tag" -m "EliteSIP Linux $version, общий код ${shared_tag:-$(git -C shared rev-parse --short HEAD)}" \
+    git -C "$root" tag -a "$release_tag" -m "EliteSIP Linux $version" \
         || fail "метка $release_tag не поставилась"
 
     echo "  коммит: $(git -C "$root" log -1 --format='%h %s')"

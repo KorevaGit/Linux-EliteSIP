@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Собирает Palette.axaml из палитр Windows-версии.
 
-Числа живут в shared/src/EliteSIP.App/Theme/Palette.{Light,Dark}.xaml, и
+Числа живут в core/src/EliteSIP.App/Theme/Palette.{Light,Dark}.xaml, и
 правятся там. Этот сценарий переносит их сюда, в одну палитру с вариантами
 тем Avalonia, и добавляет кисти SimpleTheme тех же цветов — так поля, списки
 и меню простой темы выходят цветами продукта.
@@ -13,7 +13,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-SOURCE = ROOT / "shared/src/EliteSIP.App/Theme"
+SOURCE = ROOT / "core/src/EliteSIP.App/Theme"
 TARGET = pathlib.Path(__file__).with_name("Palette.axaml")
 
 # Кисть SimpleTheme ← кисть продукта.
@@ -58,7 +58,7 @@ dark = dict(read("Palette.Dark.xaml"))
 assert set(dark) == {key for key, _ in light}, "ключи палитр Windows разошлись"
 
 TARGET.write_text(f"""<!--
-    Палитра — числа обеих тем Windows-версии (shared/src/EliteSIP.App/Theme/
+    Палитра — числа обеих тем Windows-версии (core/src/EliteSIP.App/Theme/
     Palette.Light.xaml и Palette.Dark.xaml), сведённые в одну с вариантами тем
     Avalonia. Там словарь подменялся целиком при смене темы, здесь тему меняет
     RequestedThemeVariant приложения, и кисти, взятые через DynamicResource,

@@ -1,0 +1,761 @@
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
+
+namespace EliteSIP.Audio;
+
+/// <summary>
+/// Служебные звуки: гудки звонящему, рингтон входящего и короткие подсказки —
+/// нажатие клавиши набора и отбой.
+///
+/// <b>Почему это не тракт разговора.</b> Тракт занят кодеком, RTP и
+/// эхоподавлением, поднимается на ответ и владеет одним устройством. Гудки
+/// нужны раньше, чем он поднимается, а рингтон — на устройстве, которое
+/// оператор выбрал отдельно, ровно затем, чтобы услышать звонок, когда
+/// гарнитура лежит на столе. Пропускать служебные звуки через тракт значило бы
+/// поднимать разговор до разговора и терять этот выбор.
+///
+/// <b>Когда гудки рисуются, а когда принимаются.</b> Если станция прислала
+/// SDP в 183 (ранние медиа), гудки, IVR и «абонент недоступен» идут её потоком
+/// через тракт разговора, и здесь не звучит ничего. Рисуется тон только на 180
+/// без SDP — так станция говорит «звонит, гудков не будет, играй сам». Тон тот,
+/// что российская телефонная сеть называет КПВ: 425 Гц, секунда через четыре.
+///
+/// До 0.1.56 тон рисовался на любой 180/183, а поток станции не принимался
+/// вовсе: медиа поднималось на 200 OK. На направлениях с ранними медиа это
+/// давало то тишину, то наш тон поверх обрывка объявления — «гудки через раз».
+///
+/// <b>Общий с 21 октября 2026.</b> Что звучит и когда — одинаково на Windows и
+/// Linux и живёт здесь; ОС отличается только выводом на устройство и разбором
+/// сжатого файла. Их даёт <see cref="SignalOutputs"/>: WASAPI и Media Foundation
+/// на Windows (<c>EliteSIP.Audio.Wasapi</c>), PulseAudio и NLayer на Linux.
+/// </summary>
+public sealed class SignalSoundPlayer : ISignalSounds
+{
+    private readonly object _gate = new();
+    private readonly Action<string>? _log;
+    private readonly SignalOutputs _outputs;
+
+    private ISignalOutput? _output;
+
+    /// <summary>Что играет: гудки и рингтон снимаются каждый своей кнопкой.</summary>
+    private Signal _signal;
+
+    /// <summary>Источник, если он владеет файлом. Снимается вместе с выводом.</summary>
+    private IDisposable? _sourceOwner;
+
+    private bool _disposed;
+
+    public SignalSoundPlayer(SignalOutputs outputs, Action<string>? log = null)
+    {
+        ArgumentNullException.ThrowIfNull(outputs);
+        _outputs = outputs;
+        _log = log;
+    }
+
+    /// <summary>Играют ли гудки или рингтон прямо сейчас.</summary>
+    public bool IsPlaying
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _output is not null;
+            }
+        }
+    }
+
+    /// <summary>Гудки звонящему. Повторный вызов ничего не меняет.</summary>
+    ///
+    /// <param name="deviceId">
+    /// Устройство разговора или <c>null</c> — системное. Гудки звучат там же,
+    /// где через секунду зазвучит собеседник: до 0.1.56 они шли в системное
+    /// устройство, и оператор в гарнитуре, выбранной не системной, набирал
+    /// номер в тишине, а гудки играли в колонках.
+    /// </param>
+    /// <param name="volume">Громкость от нуля до единицы.</param>
+    public void StartRingback(string? deviceId, double volume = 0.35)
+        => Start(new RingbackProvider(volume), deviceId, Signal.Ringback);
+
+    /// <summary>Снимает гудки, если играют они, а не рингтон.</summary>
+    public void StopRingback() => Stop(Signal.Ringback);
+
+    /// <summary>Снимает рингтон, если играет он, а не гудки.</summary>
+    ///
+    /// <remarks>
+    /// Окно входящего снимало звонок общим <see cref="Stop()"/>, и заодно глушило
+    /// гудки исходящего, который ещё ждал ответа: оператор принимал или
+    /// отклонял входящий и дальше ждал свой вызов в тишине.
+    /// </remarks>
+    public void StopRingtone() => Stop(Signal.Ringtone);
+
+    /// <summary>
+    /// Рингтон входящего.
+    /// </summary>
+    ///
+    /// <param name="filePath">Свой файл или <c>null</c> — рисованный звонок.</param>
+    /// <param name="volume">Громкость от нуля до единицы.</param>
+    /// <param name="deviceId">
+    /// Устройство вывода или <c>null</c> — системное. Разница здесь не
+    /// косметическая: на устройстве разговора звонок слышно только в надетой
+    /// гарнитуре.
+    /// </param>
+    public void StartRingtone(string? filePath, double volume, string? deviceId)
+    {
+        // Прослушивание в настройках уступает настоящему звонку: иначе занятый
+        // им вывод не дал бы зазвонить входящему вовсе.
+        Stop(Signal.Preview);
+
+        Start(RingtoneSource(filePath, volume, loop: true), deviceId, Signal.Ringtone);
+    }
+
+    /// <summary>
+    /// Прослушивание рингтона в настройках — один проход тем же путём, что и звонок.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// До 0.1.68 окно настроек играло файл своим <c>MediaPlayer</c>, а при
+    /// стандартном рингтоне не играло ничего: стандартный звук рисовался здесь,
+    /// и окну его было взять неоткуда. Теперь звучит ровно то, что зазвонит на
+    /// входящем, тем же декодером и на том же устройстве.
+    /// </remarks>
+    /// <returns><see langword="false"/> — свой файл не читается, играет стандартный.</returns>
+    public bool PreviewRingtone(string? filePath, double volume, string? deviceId)
+    {
+        Stop(Signal.Preview);
+
+        var source = RingtoneSource(filePath, volume, loop: false, out var fileFailed);
+        Start(source, deviceId, Signal.Preview);
+        return !fileFailed;
+    }
+
+    /// <summary>Снимает прослушивание, если играет оно.</summary>
+    public void StopPreview() => Stop(Signal.Preview);
+
+    /// <summary>
+    /// Стандартный рингтон — файл рядом с программой. Отсутствует — рисованный звонок.
+    /// </summary>
+    public static string DefaultRingtonePath { get; } = Path.Combine(AppContext.BaseDirectory, "ringtone.wav");
+
+    /// <summary>Форматы своего рингтона.</summary>
+    public static IReadOnlyList<string> SupportedRingtoneExtensions { get; } = [".wav", ".mp3", ".ogg"];
+
+    private ISampleProvider RingtoneSource(string? filePath, double volume, bool loop)
+        => RingtoneSource(filePath, volume, loop, out _);
+
+    /// <summary>
+    /// Что играть: свой файл, иначе стандартный файл, иначе рисованный звонок.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// На каждой ступени отказ ведёт на следующую, а не в тишину: тишина вместо
+    /// звонка — это пропущенный вызов.
+    /// </remarks>
+    private ISampleProvider RingtoneSource(string? filePath, double volume, bool loop, out bool fileFailed)
+    {
+        fileFailed = false;
+
+        if (filePath is { Length: > 0 } path && File.Exists(path))
+        {
+            if (TryOpen(path, volume, loop) is { } own)
+            {
+                return own;
+            }
+
+            fileFailed = true;
+        }
+
+        if (File.Exists(DefaultRingtonePath) && TryOpen(DefaultRingtonePath, volume, loop) is { } standard)
+        {
+            return standard;
+        }
+
+        return new RingtoneProvider(volume);
+    }
+
+    private FileSoundProvider? TryOpen(string path, double volume, bool loop)
+    {
+        try
+        {
+            return FileSoundProvider.Open(path, volume, loop, _outputs.OpenFile);
+        }
+        catch (Exception error) when (error is IOException or FormatException or ArgumentException
+                                          or InvalidOperationException or NotSupportedException
+                                          or UnauthorizedAccessException
+                                          or System.Runtime.InteropServices.COMException)
+        {
+            // Файл был и испортился, или это не звук вовсе.
+            _log?.Invoke($"рингтон «{path}» не читается ({error.Message}) — беру стандартный");
+            return null;
+        }
+    }
+
+    /// <summary>Снимает то, что играет. Тишина — обычное состояние, молча.</summary>
+    public void Stop() => Stop(only: null);
+
+    /// <param name="only">снять, только если играет это. <c>null</c> — что угодно.</param>
+    private void Stop(Signal? only)
+    {
+        ISignalOutput? going;
+        IDisposable? owner;
+
+        lock (_gate)
+        {
+            if (only is Signal wanted && (_output is null || _signal != wanted))
+            {
+                return;
+            }
+
+            going = _output;
+            owner = _sourceOwner;
+            _output = null;
+            _sourceOwner = null;
+        }
+
+        if (going is null)
+        {
+            return;
+        }
+
+        try
+        {
+            going.Stop();
+        }
+        catch (Exception error) when (error is InvalidOperationException
+                                          or System.Runtime.InteropServices.COMException)
+        {
+            // Устройство исчезло вместе со звуком — снимать уже нечего.
+        }
+        finally
+        {
+            going.Dispose();
+            owner?.Dispose();
+        }
+    }
+
+    private void Start(ISampleProvider provider, string? deviceId, Signal signal)
+    {
+        lock (_gate)
+        {
+            if (_disposed || _output is not null)
+            {
+                return;
+            }
+        }
+
+        try
+        {
+            ISignalOutput output = _outputs.Open(deviceId);
+            output.Play(provider);
+
+            lock (_gate)
+            {
+                // Пока мы открывали устройство, звонок мог кончиться: открытие
+                // устройства занимает десятки миллисекунд, а трубку снимают быстрее.
+                if (_disposed)
+                {
+                    output.Dispose();
+                    (provider as IDisposable)?.Dispose();
+                    return;
+                }
+
+                _output = output;
+                _signal = signal;
+                _sourceOwner = provider as IDisposable;
+            }
+        }
+        catch (Exception error)
+        {
+            // Отсутствие служебного звука не должно ронять звонок: без гудка
+            // разговор состоится, без исключения в потоке сигнализации — нет.
+            _log?.Invoke($"{signal switch { Signal.Ringback => "гудки", Signal.Preview => "прослушивание", _ => "рингтон" }} не играют: {error.Message}");
+        }
+    }
+
+    /// <summary>Звук нажатия клавиши набора. Клавиши вне набора молчат.</summary>
+    /// <param name="deviceId">Устройство разговора или <c>null</c> — системное.</param>
+    public void PlayKeyTone(char key, string? deviceId)
+    {
+        if (KeyToneProvider.For(key) is { } tone)
+        {
+            PlayCue(tone, deviceId);
+        }
+    }
+
+    /// <summary>Звук завершения разговора.</summary>
+    /// <param name="deviceId">Устройство разговора или <c>null</c> — системное.</param>
+    public void PlayHangUp(string? deviceId) => PlayCue(new HangUpToneProvider(), deviceId);
+
+    /// <summary>Тихое подтверждение подключения, только в устройстве оператора.</summary>
+    /// <param name="deviceId">Устройство разговора или <c>null</c> — системное.</param>
+    public void PlayConnected(string? deviceId) => PlayCue(CreateConnectedTone(), deviceId);
+
+    internal static ISampleProvider CreateConnectedTone() => new ConnectedToneProvider();
+
+    public void Dispose()
+    {
+        lock (_gate)
+        {
+            _disposed = true;
+        }
+
+        Stop();
+
+        lock (_cueGate)
+        {
+            CloseCuesLocked();
+        }
+    }
+
+    // MARK: - Подсказки: нажатие клавиши, подключение, отбой
+
+    /// <summary>
+    /// Сколько держать устройство подсказок открытым после последней.
+    ///
+    /// Открытие потока WASAPI стоит десятков миллисекунд, и на каждое нажатие
+    /// клавиши это слышно как запаздывание звука за пальцем. Держать его вечно
+    /// тоже нельзя: открытый вывод не даёт Bluetooth-гарнитуре уйти в сон.
+    /// Три секунды покрывают набор номера целиком.
+    /// </summary>
+    private static readonly TimeSpan CueIdleClose = TimeSpan.FromSeconds(3);
+
+    private readonly object _cueGate = new();
+    private ISignalOutput? _cueOutput;
+    private MixingSampleProvider? _cueMixer;
+    private string? _cueDeviceId;
+    private Timer? _cueIdle;
+
+    /// <summary>
+    /// Играет короткий звук поверх того, что уже играет.
+    ///
+    /// Отдельно от гудков и рингтона: у тех вывод один на звук и второй не
+    /// начинается, пока играет первый, а подсказки идут пачкой — пять цифр за
+    /// секунду — и обязаны накладываться. Поэтому здесь смеситель на одном
+    /// выводе, а не вывод на каждую подсказку.
+    /// </summary>
+    private void PlayCue(ISampleProvider cue, string? deviceId)
+    {
+        lock (_cueGate)
+        {
+            if (Volatile.Read(ref _disposed))
+            {
+                return;
+            }
+
+            try
+            {
+                if (_cueOutput is null || _cueDeviceId != deviceId)
+                {
+                    CloseCuesLocked();
+
+                    // ReadFully: смеситель без входов отдаёт тишину, а не
+                    // короткий кадр, — иначе вывод остановится после первой
+                    // же подсказки.
+                    MixingSampleProvider mixer = new(cue.WaveFormat) { ReadFully = true };
+                    ISignalOutput output = _outputs.Open(deviceId);
+                    output.Play(mixer);
+
+                    _cueMixer = mixer;
+                    _cueOutput = output;
+                    _cueDeviceId = deviceId;
+                }
+
+                _cueMixer!.AddMixerInput(cue);
+
+                _cueIdle?.Dispose();
+                _cueIdle = new Timer(
+                    _ =>
+                    {
+                        lock (_cueGate)
+                        {
+                            CloseCuesLocked();
+                        }
+                    },
+                    state: null,
+                    dueTime: CueIdleClose,
+                    period: Timeout.InfiniteTimeSpan);
+            }
+            catch (Exception error)
+            {
+                // Подсказка — не то, из-за чего можно уронить набор номера.
+                _log?.Invoke($"звук подсказки не играет: {error.Message}");
+                CloseCuesLocked();
+            }
+        }
+    }
+
+    private void CloseCuesLocked()
+    {
+        _cueIdle?.Dispose();
+        _cueIdle = null;
+
+        ISignalOutput? output = _cueOutput;
+        _cueOutput = null;
+        _cueMixer = null;
+        _cueDeviceId = null;
+
+        if (output is null)
+        {
+            return;
+        }
+
+        try
+        {
+            output.Stop();
+        }
+        catch (Exception error) when (error is InvalidOperationException
+                                          or System.Runtime.InteropServices.COMException)
+        {
+            // Устройство исчезло — останавливать нечего.
+        }
+        finally
+        {
+            output.Dispose();
+        }
+    }
+
+
+    /// <summary>Длинные сигналы: играют, пока их не снимут.</summary>
+    private enum Signal
+    {
+        Ringback,
+        Ringtone,
+        Preview,
+    }
+
+    /// <summary>Общее у всех рисованных сигналов: моно, 48 кГц.</summary>
+    private abstract class ToneProvider(double volume) : ISampleProvider
+    {
+        protected const int Rate = 48_000;
+
+        private readonly float _volume = (float)Math.Clamp(volume, 0, 1);
+
+        private long _position;
+
+        public WaveFormat WaveFormat { get; } = WaveFormat.CreateIeeeFloatWaveFormat(Rate, 1);
+
+        /// <summary>Отсчёт сигнала до громкости. <c>null</c> — сигнал кончился.</summary>
+        protected abstract double? ValueAt(long sample);
+
+        public int Read(Span<float> buffer)
+        {
+            for (int index = 0; index < buffer.Length; index++)
+            {
+                if (ValueAt(_position) is not double value)
+                {
+                    // Короткий кадр — это конец: смеситель снимет источник.
+                    return index;
+                }
+
+                buffer[index] = (float)(value * _volume);
+                _position++;
+            }
+
+            return buffer.Length;
+        }
+
+        /// <summary>Сумма синусоид в момент <paramref name="sample"/>.</summary>
+        protected static double Partials(long sample, ReadOnlySpan<(double Hertz, double Amplitude)> partials)
+        {
+            double value = 0;
+            foreach ((double hertz, double amplitude) in partials)
+            {
+                value += amplitude * Math.Sin(2 * Math.PI * hertz * sample / Rate);
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Плавные края тона длиной <paramref name="length"/>: обрыв синусоиды
+        /// на ненулевой фазе слышен как щелчок, и он раздражает сильнее самого
+        /// звука.
+        /// </summary>
+        protected static double Envelope(long position, long length, long ramp)
+            => Math.Min(1.0, Math.Min((double)position / ramp, (double)(length - position) / ramp));
+    }
+
+    /// <summary>КПВ: 425 Гц, секунда звучания через четыре секунды тишины.</summary>
+    private sealed class RingbackProvider(double volume) : ToneProvider(volume)
+    {
+        private const int PeriodSamples = Rate * 5;
+        private const int ToneSamples = Rate;
+        private const int Ramp = Rate / 100;
+
+        protected override double? ValueAt(long sample)
+        {
+            long inPeriod = sample % PeriodSamples;
+            return inPeriod >= ToneSamples
+                ? 0
+                : Math.Sin(2 * Math.PI * 425 * sample / Rate) * Envelope(inPeriod, ToneSamples, Ramp);
+        }
+    }
+
+    /// <summary>
+    /// Стандартный звонок — тот же, что в macOS-версии: два коротких тона и
+    /// длинная пауза.
+    ///
+    /// До 11 сентября 2026 здесь стояла своя трель — чистые 880 и 660 Гц
+    /// попеременно, две секунды подряд из пяти, на полной громкости настройки.
+    /// Оператор назвал её «очень громкой и противной» и попросил звонок, как
+    /// на Mac. Причины оригинала те же и здесь: пауза длинная, потому что
+    /// рингтон звучит на фоне работы в CRM и непрерывная трель мешает думать;
+    /// две гармоники вместо одной, потому что чистая синусоида на колонках
+    /// ноутбука звучит как неисправность; общий уровень — половина шкалы.
+    /// </summary>
+    private sealed class RingtoneProvider(double volume) : ToneProvider(volume)
+    {
+        private const int ToneSamples = Rate * 4 / 10;
+        private const int GapSamples = Rate * 2 / 10;
+        private const int SilenceSamples = Rate * 2;
+        private const int PeriodSamples = (ToneSamples * 2) + GapSamples + SilenceSamples;
+        private const int Ramp = Rate * 12 / 1000;
+
+        /// <summary>Ре и ля пятой октавы — из оригинала.</summary>
+        private static readonly (double, double)[] Chord = [(587.33, 0.6), (880.00, 0.4)];
+
+        protected override double? ValueAt(long sample)
+        {
+            long inPeriod = sample % PeriodSamples;
+            long inTone = inPeriod < ToneSamples
+                ? inPeriod
+                : inPeriod - ToneSamples - GapSamples;
+
+            if (inTone < 0 || inTone >= ToneSamples)
+            {
+                return 0;
+            }
+
+            return Partials(inTone, Chord) * Envelope(inTone, ToneSamples, Ramp) * 0.5;
+        }
+    }
+
+    /// <summary>
+    /// Нажатие клавиши при наборе номера: пара частот DTMF этой клавиши,
+    /// коротко и едва слышно.
+    ///
+    /// Частоты DTMF, а не щелчок: так звучит набор на любом телефоне, и ухо
+    /// узнаёт его, не отвлекаясь. Уровень около −26 дБ от полной шкалы —
+    /// подтверждение нажатия, а не сигнал.
+    /// </summary>
+    private sealed class KeyToneProvider((double Hertz, double Amplitude)[] pair) : ToneProvider(1)
+    {
+        private const int LengthSamples = Rate * 70 / 1000;
+        private const int Ramp = Rate * 8 / 1000;
+
+        protected override double? ValueAt(long sample) => sample >= LengthSamples
+            ? null
+            : Partials(sample, pair) * Envelope(sample, LengthSamples, Ramp);
+
+        public static KeyToneProvider? For(char key)
+        {
+            // Строки и столбцы клавиатуры DTMF (ITU-T Q.23).
+            (int row, int column) = key switch
+            {
+                '1' => (0, 0), '2' => (0, 1), '3' => (0, 2),
+                '4' => (1, 0), '5' => (1, 1), '6' => (1, 2),
+                '7' => (2, 0), '8' => (2, 1), '9' => (2, 2),
+                '*' => (3, 0), '0' or '+' => (3, 1), '#' => (3, 2),
+                _ => (-1, -1),
+            };
+
+            if (row < 0)
+            {
+                return null;
+            }
+
+            double[] rows = [697, 770, 852, 941];
+            double[] columns = [1209, 1336, 1477];
+            return new KeyToneProvider([(rows[row], 0.025), (columns[column], 0.025)]);
+        }
+    }
+
+    /// <summary>
+    /// Подключение: две мягкие ноты вверх, до и ми, 340 мс. Пик около
+    /// −30 dBFS — тише отбоя примерно на 7 дБ: подтверждение, а не звонок.
+    /// </summary>
+    private sealed class ConnectedToneProvider() : ToneProvider(0.032)
+    {
+        private const int LengthSamples = Rate * 34 / 100;
+
+        protected override double? ValueAt(long sample)
+        {
+            if (sample >= LengthSamples)
+            {
+                return null;
+            }
+
+            double time = (double)sample / Rate;
+            return Note(time, 0, 523.25, 0.19, 0.90)
+                + Note(time, 0.11, 659.25, 0.23, 0.75);
+        }
+
+        private static double Note(double time, double start, double frequency, double length, double gain)
+        {
+            double local = time - start;
+            if (local < 0 || local >= length)
+            {
+                return 0;
+            }
+
+            double attack = Math.Pow(Math.Sin(Math.Min(local / 0.012, 1) * Math.PI / 2), 2);
+            double release = Math.Pow(Math.Sin(Math.Min((length - local) / 0.060, 1) * Math.PI / 2), 2);
+            double phase = 2 * Math.PI * frequency * local;
+            return gain * attack * release * Math.Exp(-7 * local)
+                * (Math.Sin(phase) + 0.08 * Math.Sin(2 * phase)) / 1.08;
+        }
+    }
+
+    /// <summary>
+    /// Отбой: две мягкие ноты вниз, ре и ля, как в звонке, — только тише и
+    /// короче. Подтверждает «разговор кончился», не требуя смотреть на экран.
+    /// </summary>
+    private sealed class HangUpToneProvider() : ToneProvider(1)
+    {
+        private const int NoteSamples = Rate * 12 / 100;
+        private const int Ramp = Rate * 10 / 1000;
+
+        private static readonly (double, double)[] High = [(587.33, 0.07)];
+        private static readonly (double, double)[] Low = [(440.00, 0.07)];
+
+        protected override double? ValueAt(long sample)
+        {
+            if (sample >= NoteSamples * 2)
+            {
+                return null;
+            }
+
+            long inNote = sample % NoteSamples;
+            return Partials(inNote, sample < NoteSamples ? High : Low)
+                * Envelope(inNote, NoteSamples, Ramp);
+        }
+    }
+
+    /// <summary>
+    /// Звуковой файл рингтона: WAV и MP3 через NAudio, OGG через NVorbis.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Звонок зацикливается — звонит, пока не сняли. Прослушивание играет один
+    /// проход и дальше отдаёт тишину, а не конец потока: короткий кадр WASAPI
+    /// понимает как «источник кончился» и останавливает вывод, а вывод
+    /// снимается только нашим <c>Stop</c>.
+    /// </remarks>
+    private sealed class FileSoundProvider : ISampleProvider, IDisposable
+    {
+        private readonly ISampleProvider _source;
+        private readonly IDisposable _owner;
+        private readonly Action _rewind;
+        private readonly bool _loop;
+        private bool _ended;
+
+        private FileSoundProvider(ISampleProvider source, IDisposable owner, Action rewind, bool loop)
+        {
+            // В моно, если файл стерео: устройство звонка может быть каким
+            // угодно, а сводить каналы умеет NAudio, а не мы.
+            _source = source.WaveFormat.Channels == 2 ? new StereoToMonoSampleProvider(source) : source;
+            _owner = owner;
+            _rewind = rewind;
+            _loop = loop;
+        }
+
+        public static FileSoundProvider Open(string path, double volume, bool loop, Func<string, WaveStream> openFile)
+        {
+            float gain = (float)Math.Clamp(volume, 0, 1);
+
+            if (string.Equals(Path.GetExtension(path), ".ogg", StringComparison.OrdinalIgnoreCase))
+            {
+                var vorbis = new NVorbis.VorbisReader(path);
+                try
+                {
+                    var samples = new VorbisSampleProvider(vorbis);
+                    return new FileSoundProvider(
+                        new VolumeSampleProvider(samples) { Volume = gain },
+                        vorbis,
+                        () => vorbis.SamplePosition = 0,
+                        loop);
+                }
+                catch
+                {
+                    vorbis.Dispose();
+                    throw;
+                }
+            }
+
+            // WAV и MP3 разбирает ОС-зависимый читатель (SignalOutputs.OpenFile):
+            // MP3 на Windows — Media Foundation, на Linux — NLayer. Громкость
+            // та же, что давал AudioFileReader.Volume: множитель на отсчёт.
+            var reader = openFile(path);
+            try
+            {
+                return new FileSoundProvider(
+                    new VolumeSampleProvider(reader.ToSampleProvider()) { Volume = gain },
+                    reader,
+                    () => reader.Position = 0,
+                    loop);
+            }
+            catch
+            {
+                reader.Dispose();
+                throw;
+            }
+        }
+
+        public WaveFormat WaveFormat => _source.WaveFormat;
+
+        public int Read(Span<float> buffer)
+        {
+            int filled = 0;
+            bool readSinceRewind = true;
+
+            while (filled < buffer.Length && !_ended)
+            {
+                int read = _source.Read(buffer[filled..]);
+                if (read > 0)
+                {
+                    filled += read;
+                    readSinceRewind = true;
+                    continue;
+                }
+
+                // Конец файла. Пустой файл крутить в цикле нельзя — это занятый
+                // поток звука и тишина в динамике.
+                if (!_loop || !readSinceRewind)
+                {
+                    _ended = true;
+                    break;
+                }
+
+                _rewind();
+                readSinceRewind = false;
+            }
+
+            buffer[filled..].Clear();
+            return buffer.Length;
+        }
+
+        public void Dispose() => _owner.Dispose();
+    }
+
+    /// <summary>OGG Vorbis как источник отсчётов NAudio.</summary>
+    private sealed class VorbisSampleProvider(NVorbis.VorbisReader reader) : ISampleProvider
+    {
+        private float[] _scratch = [];
+
+        public WaveFormat WaveFormat { get; } =
+            WaveFormat.CreateIeeeFloatWaveFormat(reader.SampleRate, reader.Channels);
+
+        public int Read(Span<float> buffer)
+        {
+            if (_scratch.Length < buffer.Length)
+            {
+                _scratch = new float[buffer.Length];
+            }
+
+            // Целым числом кадров: оборванный кадр перепутал бы каналы на стыке.
+            int count = buffer.Length - (buffer.Length % reader.Channels);
+            int read = reader.ReadSamples(_scratch, 0, count);
+            _scratch.AsSpan(0, read).CopyTo(buffer);
+            return read;
+        }
+    }
+}

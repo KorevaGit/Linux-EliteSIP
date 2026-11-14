@@ -1,0 +1,1645 @@
+{
+  "source_commit": "d3d9498820704a2faf6c602e87fe91b501b0d391",
+  "files": [
+    {
+      "path": "core/src/EliteSIP.AdminAccess/AdminAccessError.cs",
+      "source_path": "src/EliteSIP.AdminAccess/AdminAccessError.cs",
+      "sha256": "b48813308ff71a7863922da2e4f724df3acb7b0955145f5f67e69608b39cbdab"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/AdminAccessState.cs",
+      "source_path": "src/EliteSIP.AdminAccess/AdminAccessState.cs",
+      "sha256": "8fbe6c73a8308ba6573c8fddc4c4300772e8ab1243687ddbeb16d8f4defe49e2"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/AdminCredential.cs",
+      "source_path": "src/EliteSIP.AdminAccess/AdminCredential.cs",
+      "sha256": "df24f831e78d5e3e0cbf8152e1ff545f6913a9dcbd8fe9e845ff6ab087c3f5e9"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj",
+      "source_path": "src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj",
+      "sha256": "2c3ddeae6aa92fd72f0fd88491d5143a2c28b29c9cae71d1f7a28a647ca2f4a2"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/KeyDerivation.cs",
+      "source_path": "src/EliteSIP.AdminAccess/KeyDerivation.cs",
+      "sha256": "e710e51fe2646948139316d11d519e13575df6c1eda08dbcfabe37d14afd8e1c"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/ProtectedSecret.Unix.cs",
+      "source_path": "src/EliteSIP.AdminAccess/ProtectedSecret.Unix.cs",
+      "sha256": "bfea39beeebb6c48d216a7d49be6885e3ef5438652a424e0872404c2bed16e3f"
+    },
+    {
+      "path": "core/src/EliteSIP.AdminAccess/ProtectedSecret.cs",
+      "source_path": "src/EliteSIP.AdminAccess/ProtectedSecret.cs",
+      "sha256": "c4f7e8bf32e4a0d7eb993a30ae21c40f9dee96eae6b80dfef101fcf5923b1892"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Admin/AdministrationViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Admin/AdministrationViewModel.cs",
+      "sha256": "3ce050819e7a12d992eb6eeff37874121bfc6e1d275c8a5141e71d47006b7e48"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Admin/SupportViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Admin/SupportViewModel.cs",
+      "sha256": "4c440a1a3925f95aa1092539199ffb66a85e94369896453ad5ec49d7e5eeec44"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Admin/UpdatesViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Admin/UpdatesViewModel.cs",
+      "sha256": "26985732f89b34f5da0289135abff7b7372e8352935650e007cc0fef3d103de0"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/EliteSIP.App.Core.csproj",
+      "source_path": "src/EliteSIP.App.Core/EliteSIP.App.Core.csproj",
+      "sha256": "732ce4d14538d0d31197e373164425c0b72ab79977b9ef7c6559b5e8f3b9201e"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/FirstRun/FirstRunViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/FirstRun/FirstRunViewModel.cs",
+      "sha256": "696801f3258d3fd5b8dbac70df81ac6c555da9536b47c8aadd45196b71f18cc3"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/History/CallHistoryViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/History/CallHistoryViewModel.cs",
+      "sha256": "868d7a3332555597625f0a364dac4e820cca03b949b4ff46869cfc659dee7f6e"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/History/HistoryCalendar.cs",
+      "source_path": "src/EliteSIP.App.Core/History/HistoryCalendar.cs",
+      "sha256": "5e8597a3da87476da9a815403f0b07509f76a73d7d4093c4a0e9c9ee3229274a"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/History/HistoryDemo.cs",
+      "source_path": "src/EliteSIP.App.Core/History/HistoryDemo.cs",
+      "sha256": "9397fbf260fd0e388bcbe63135af76fd4e73ce701107796ee10dd97dda2264fd"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/History/HistoryPresentation.cs",
+      "source_path": "src/EliteSIP.App.Core/History/HistoryPresentation.cs",
+      "sha256": "a54980a593c69cea6a056c7fa3218d5680572ed705b4f1d726d6f512092c784b"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Incoming/IncomingCallSubject.cs",
+      "source_path": "src/EliteSIP.App.Core/Incoming/IncomingCallSubject.cs",
+      "sha256": "f5fc37fbfc55eb2e2b421d0bbeb3b2e05d4124fd8f6a38454b105a6a9bd22679"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Incoming/IncomingCallViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Incoming/IncomingCallViewModel.cs",
+      "sha256": "6dc0e1e3ace7b2c9afa3c76d9fbd2e3a2ebde06b5aa6318151f94dac1b9441ba"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Panel/PanelDemo.cs",
+      "source_path": "src/EliteSIP.App.Core/Panel/PanelDemo.cs",
+      "sha256": "d08af99195cf841c01f23a4922d409bdb8750387d7089892bf79836a1d774b44"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Panel/PanelViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Panel/PanelViewModel.cs",
+      "sha256": "b3f39052b162eada0c5ea503a4d678aaa082f15b5a813e7292f3ea877a764098"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Panel/RelayCommand.cs",
+      "source_path": "src/EliteSIP.App.Core/Panel/RelayCommand.cs",
+      "sha256": "5fdcfe0d049b253f5f7e87c65f8c607992794b2ac418b1d903502607044302c8"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/ClientEventLog.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/ClientEventLog.cs",
+      "sha256": "3e759ab0e4b89a73bcc5de2d0fb469c941ad3c0d8901d16666f36f8a440306fb"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/ConfigApply.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/ConfigApply.cs",
+      "sha256": "9945ac06aee87384045dbec38e3b535f7eb1e3b3777935a14f5a88209c5d31ce"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/MachineService.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/MachineService.cs",
+      "sha256": "eec0f3175209141eb6865f552351f0286f9b05a08a02861e48e6057a51aa0084"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/Pairing.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/Pairing.cs",
+      "sha256": "4dd2c94fba910cc44af5061bcb49f89ce23dda57aa4ddfb1bb11bcb71772ec21"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/PairingSetup.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/PairingSetup.cs",
+      "sha256": "5ed363d50dbef714f96501d94ad6fbb2d2e2c139a449b08ace9d522ff03a7c50"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/PanelLineHost.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/PanelLineHost.cs",
+      "sha256": "90a9532b5966c9c751a307b7fea7fdc4c99aae167a422ec57f6d31c4468ec259"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/PresetApply.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/PresetApply.cs",
+      "sha256": "f6d0d3ca0bc9ef4fec8d812f50912ee918664681484fc7bda7eb5773f2c307aa"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/PresetService.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/PresetService.cs",
+      "sha256": "774b60817fcf4b9d4ef245301c50577ed1042fb8907156e790687badf53a71ad"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/Provisioning.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/Provisioning.cs",
+      "sha256": "7f1e8ffeb97f22d1e3fdbbc5ed1926da5909d75ee75228f82d847ba8a21ff7d9"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/PanelLine/UpdateService.cs",
+      "source_path": "src/EliteSIP.App.Core/PanelLine/UpdateService.cs",
+      "sha256": "ed3a0d4c6065018b8edb58ad990047793bc445835c0c6af1296478b5a24d3aa9"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Platform/IAudioPlatform.cs",
+      "source_path": "src/EliteSIP.App.Core/Platform/IAudioPlatform.cs",
+      "sha256": "dc04ab75074fc65303f64c118602f8b52a9875febbc6c0971646da215620a6dd"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Platform/IShellServices.cs",
+      "source_path": "src/EliteSIP.App.Core/Platform/IShellServices.cs",
+      "sha256": "73512465b5dc3434c47beebc6811aa2dc4d5f37419c0343ddb535c79008746da"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Platform/IUiThread.cs",
+      "source_path": "src/EliteSIP.App.Core/Platform/IUiThread.cs",
+      "sha256": "7896426e18a2b79c45676b3fabf2dde3bc610f4950785ca945efb52a97695f45"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Platform/ProductVersion.cs",
+      "source_path": "src/EliteSIP.App.Core/Platform/ProductVersion.cs",
+      "sha256": "f7def7846f3bbf77c3f82920048cadaa71e3ee6dd736a71c7d014c7bc2589429"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Resources/Strings.cs",
+      "source_path": "src/EliteSIP.App.Core/Resources/Strings.cs",
+      "sha256": "8f3eadd132be681fb4e3b6da8661de484d7f9bf7c8fafebee706d50b98e27be3"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Resources/Strings.resx",
+      "source_path": "src/EliteSIP.App.Core/Resources/Strings.resx",
+      "sha256": "d8e2b217e0f823205f4e6f99f03af30503accf742d6c48b29ab3e23f24b995ed"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Resources/Strings.ru.resx",
+      "source_path": "src/EliteSIP.App.Core/Resources/Strings.ru.resx",
+      "sha256": "2c909cd3f0805384d27d06bfb39ee89f5cc9e81a770324694b31ddddce7f9e2c"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/AdminSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/AdminSettings.cs",
+      "sha256": "0c2c79a21b1f20737a2e84cd9a526859d526d1bdd74f88bcab1fc7b62a8cfb85"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/AppSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/AppSettings.cs",
+      "sha256": "0811321dde2577906f1e1e0988d0d82ab176a690ef815ea1d7b82ff05c975e9e"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/IncomingCallSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/IncomingCallSettings.cs",
+      "sha256": "f6c7b92ea7feaf77fd690474e25f7e3c9e9487c2eb4b285c502437d8bbbe8bf3"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/IncomingWindowPlacementSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/IncomingWindowPlacementSettings.cs",
+      "sha256": "a99b55ce80556bf25665870dfdfc014680e3c9551c9305b8ac0da79e16a904be"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/PanelSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/PanelSettings.cs",
+      "sha256": "121487f02f73e5ea5af59cab94abce827228383316252f87ed6131d656fc7405"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/PbxSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/PbxSettings.cs",
+      "sha256": "f4c07047cfa6ca72ee4e9656c4ad150060a93052ff67e1b15df4c72211549dd4"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/PortKnockSettings.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/PortKnockSettings.cs",
+      "sha256": "17461d9904b27af49f3845dba91e4ea37cbad1e0029a9f6b3a77a7dd2d7b502a"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/ProfileSetting.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/ProfileSetting.cs",
+      "sha256": "4f4e0c8454799f5cc2cff5aaa913170f776ae72c20a9be8c200d1d2af37f7b6b"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Settings/SettingsViewModel.cs",
+      "source_path": "src/EliteSIP.App.Core/Settings/SettingsViewModel.cs",
+      "sha256": "44df5c5ed217ac7b7954a806772207f03519a19a3f854e0f2d42cdeb59ffd07f"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Shell/CrashGuard.cs",
+      "source_path": "src/EliteSIP.App.Core/Shell/CrashGuard.cs",
+      "sha256": "5252c9de27a3769e8d03b8ff55682bd747f668174bdc5691f127f43ae090fd0c"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Shell/PhoneService.cs",
+      "source_path": "src/EliteSIP.App.Core/Shell/PhoneService.cs",
+      "sha256": "704f9e7246d4bd0c9982109abd956bbbaa3dfebed228cf38a4ab84a0fa93e86c"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Shell/SetupInProgress.cs",
+      "source_path": "src/EliteSIP.App.Core/Shell/SetupInProgress.cs",
+      "sha256": "01e77da050449f727d9484a3f0a51061c8cb87100f6588968c346e14787df21e"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Theme/Appearance.cs",
+      "source_path": "src/EliteSIP.App.Core/Theme/Appearance.cs",
+      "sha256": "9ee38b92634fece9b688c6a722d808977b0a3a4f09b357158f498d8da7e83eff"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Theme/EmojiPack.cs",
+      "source_path": "src/EliteSIP.App.Core/Theme/EmojiPack.cs",
+      "sha256": "fef4aeaa966f7ed92478e6de2151c985d663d2208ca60b3a8b4b91ed25632a33"
+    },
+    {
+      "path": "core/src/EliteSIP.App.Core/Theme/Metrics.cs",
+      "source_path": "src/EliteSIP.App.Core/Theme/Metrics.cs",
+      "sha256": "6db48c2d122be653260205e8bf86728ff61ac8685703923fde41f2164fec54e9"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/EliteSIP.ico",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/EliteSIP.ico",
+      "sha256": "389de544adf6ad365e9ef68f79e3466b1fa2b71091d6a04c595af83613ebac55"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/icon_128x128.png",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/icon_128x128.png",
+      "sha256": "4dad5ceeb7196af1e55984bb0db9e4d4fa8ed862124183a16defcce2e334e23c"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/icon_16x16.png",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/icon_16x16.png",
+      "sha256": "fa43c90eea259cd791efaab7215bb5a85f762a7b1802e09ccc848c0f2c03681d"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/icon_256x256.png",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/icon_256x256.png",
+      "sha256": "67af39319624fa33de55893a688bfc86be96834030f65409e5f4705ee3319f64"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/icon_32x32.png",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/icon_32x32.png",
+      "sha256": "310b4355a4249394d3ed53f4a8477841d2f3091ef11fd86f6daac30b0947b0e4"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/AppIcon/icon_512x512.png",
+      "source_path": "src/EliteSIP.App/Assets/AppIcon/icon_512x512.png",
+      "sha256": "a2b5f528b6374b6582ea4770d97146562a5a47c327e74dc05284f85691d8a533"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/Splash.png",
+      "source_path": "src/EliteSIP.App/Assets/Splash.png",
+      "sha256": "a675cb748b2379ee6672d5943c63eb90bf3ba585afeb56f06a1189647d778f39"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/emoji.pak",
+      "source_path": "src/EliteSIP.App/Assets/emoji.pak",
+      "sha256": "90ff36927ca72180862e6203af657c5c8d56a9db58537028a45a0e42b21703b7"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Assets/ringtone.wav",
+      "source_path": "src/EliteSIP.App/Assets/ringtone.wav",
+      "sha256": "2ccd7df4586a25cc42298944bec6fa9aa7fb3b548167396ab0e78c7d9e3e5535"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Theme/Icons.xaml",
+      "source_path": "src/EliteSIP.App/Theme/Icons.xaml",
+      "sha256": "c4bac5326580e8834afb4e93c281dfb2385ea6cbde6afbf5817db5816562f70a"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj",
+      "source_path": "src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj",
+      "sha256": "9c063e21858b6fb6ac06c0389eee101cae85a74fbfd9ab811b3f3ed44141703b"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio.Signals/SignalOutputs.cs",
+      "source_path": "src/EliteSIP.Audio.Signals/SignalOutputs.cs",
+      "sha256": "188f32200e041490b7271a496ca8e5ec405014fdd7c1d6b7d3a9aae69c773cc9"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio.Signals/SignalSoundPlayer.cs",
+      "source_path": "src/EliteSIP.Audio.Signals/SignalSoundPlayer.cs",
+      "sha256": "db36050bd9f19fed00f263d4f8fb7fbe3a54a9fe34965a6dcd35a24a4d43f3aa"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioDevice.cs",
+      "source_path": "src/EliteSIP.Audio/AudioDevice.cs",
+      "sha256": "3da61d36c6481130e6b41ac7e645b9b6858cb9c15eb29ae0ecfc376386a9c56a"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioDeviceChange.cs",
+      "source_path": "src/EliteSIP.Audio/AudioDeviceChange.cs",
+      "sha256": "d5aa1cad06333ab51fddc272569d920e1ae95716b0462a8cc6b14f09e9298862"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioDeviceRules.cs",
+      "source_path": "src/EliteSIP.Audio/AudioDeviceRules.cs",
+      "sha256": "82db890a4a3a8b8f5af30d1069426e2ab8dca8fa4e4cec40b950ebeaca894640"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioOwnership.cs",
+      "source_path": "src/EliteSIP.Audio/AudioOwnership.cs",
+      "sha256": "664775f602b1d6017b34d0d0ca1d1f69b524648dbde3d09fa5a9f86e9e226846"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioRestartPolicy.cs",
+      "source_path": "src/EliteSIP.Audio/AudioRestartPolicy.cs",
+      "sha256": "09551fe4ccb9544d79fa6bb8cd4e19429ce8a6217e9f74ee40a047cb587c3518"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioRoute.cs",
+      "source_path": "src/EliteSIP.Audio/AudioRoute.cs",
+      "sha256": "1c9d5dc4943267f0460d528fb726b4ba79643266090733d9286d52e340c0c721"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/AudioSelfTest.cs",
+      "source_path": "src/EliteSIP.Audio/AudioSelfTest.cs",
+      "sha256": "e8959d7031e0950215de5ea7c48d5a614c36a3a308a766ce93cb28c3aaefdb6f"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/BackgroundVoiceGate.cs",
+      "source_path": "src/EliteSIP.Audio/BackgroundVoiceGate.cs",
+      "sha256": "f627698eebf8ca880d4a23603b035b61d35d664c3bdc457c3ad8f67c64b736b7"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/ClockDrift.cs",
+      "source_path": "src/EliteSIP.Audio/ClockDrift.cs",
+      "sha256": "379b63400f8651b6ff8ff3018be973e8299d3b17137695a6de72200ea7d53ad2"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/DelayedWorkScheduler.cs",
+      "source_path": "src/EliteSIP.Audio/DelayedWorkScheduler.cs",
+      "sha256": "c239c330b49825088ae83e1d054a7dab7729180d3ce44571659a1f244d741496"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/DeviceActivityWatch.cs",
+      "source_path": "src/EliteSIP.Audio/DeviceActivityWatch.cs",
+      "sha256": "02a59dbbd952f6a3e2d044b4806de1c9e196634cbb2618350e51f5b44944b49c"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/DeviceChangeRelevance.cs",
+      "source_path": "src/EliteSIP.Audio/DeviceChangeRelevance.cs",
+      "sha256": "86c6f55e6e9b2edbaf8547ddb67ee49ab634ee7d898874e3511283198aa698d0"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/EliteSIP.Audio.csproj",
+      "source_path": "src/EliteSIP.Audio/EliteSIP.Audio.csproj",
+      "sha256": "094b82b73af2d5078a6b37982d5d2d13dacd110c9512cac97c13a2ecfedc1e6a"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/MediaSession.cs",
+      "source_path": "src/EliteSIP.Audio/MediaSession.cs",
+      "sha256": "a09897e305e452f63815347f5ebbf020476037afb6c1e719c9994d57139630f0"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/PlaybackRateController.cs",
+      "source_path": "src/EliteSIP.Audio/PlaybackRateController.cs",
+      "sha256": "5014573447f168c79faa785f0ae20d32d82fac2ed923e543fc9058ec476bee59"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/ReceiveTuning.cs",
+      "source_path": "src/EliteSIP.Audio/ReceiveTuning.cs",
+      "sha256": "edcb79f8ad46d31e0a919211284a69bc06eab517727be6f6ff803dbaf519908a"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/Resampler.cs",
+      "source_path": "src/EliteSIP.Audio/Resampler.cs",
+      "sha256": "367bdfdefa7aeea5dbc5bf56ba480d4ac743257bd6d5ba35af81f3f7280b2dfe"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/RestartSupervisor.cs",
+      "source_path": "src/EliteSIP.Audio/RestartSupervisor.cs",
+      "sha256": "b78d4a3babb8ccaccc2071d5130b67d6f53f3f88633a40a732030744e54a97d7"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/SampleBalance.cs",
+      "source_path": "src/EliteSIP.Audio/SampleBalance.cs",
+      "sha256": "6eaedcf3df9db4abd37ec1d441eefd277d9d0a1c364903342a4dfd81b5f1174d"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/SignalSounds.cs",
+      "source_path": "src/EliteSIP.Audio/SignalSounds.cs",
+      "sha256": "a24cb3bb35128e50fce760460788ad473e124e63ba9559bfa0871032b01f608c"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/SpeechGainControl.cs",
+      "source_path": "src/EliteSIP.Audio/SpeechGainControl.cs",
+      "sha256": "556f60d38a3ae5cbd1e21f1810e11be1ffed47f0d564bc537a06007ade8242bc"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/VoiceAudioBus.cs",
+      "source_path": "src/EliteSIP.Audio/VoiceAudioBus.cs",
+      "sha256": "1bd6212fad331a3bd7e6ae68b8433e38391fff355c554ed122a5d5bc4693387e"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/VoiceAudioConfiguration.cs",
+      "source_path": "src/EliteSIP.Audio/VoiceAudioConfiguration.cs",
+      "sha256": "f07158f556a66b9c0f8f78e9dd80a5eb828698501df6a1596b28d2ea4876e77b"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/VoiceAudioEngine.cs",
+      "source_path": "src/EliteSIP.Audio/VoiceAudioEngine.cs",
+      "sha256": "6ca48c8660373a965ebb3fd2d83e346cc4731fd0300c3b958799d1ad377d6de8"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/VoiceAudioException.cs",
+      "source_path": "src/EliteSIP.Audio/VoiceAudioException.cs",
+      "sha256": "dffc73c82e1bfde6f5677cc64b685c74d16f4b87f854b6f660edb29d7b148578"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/VoiceProcessor.cs",
+      "source_path": "src/EliteSIP.Audio/VoiceProcessor.cs",
+      "sha256": "1beea3b9fc6f61b81250572dd0afa1ac51f063f717fa1189d02dfb0b5d9066a3"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/WaveFile.cs",
+      "source_path": "src/EliteSIP.Audio/WaveFile.cs",
+      "sha256": "2764000de940ee389343f68f8ea8f85765ee36ae0d83edd397f5957f3a18a40e"
+    },
+    {
+      "path": "core/src/EliteSIP.Audio/WindowsCaptureProcessing.cs",
+      "source_path": "src/EliteSIP.Audio/WindowsCaptureProcessing.cs",
+      "sha256": "6c11ae8a2f44ba36dea94511ee227e8889daf2ba1510bd3f5ba2030dcd7b4685"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/CallGuardChallenge.cs",
+      "source_path": "src/EliteSIP.CallGuard/CallGuardChallenge.cs",
+      "sha256": "0cf9afa3f3fe317aad93dc87dd1d6c8980696bcd17a5ff7f793b5257f719a71a"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/CallGuardPolicy.cs",
+      "source_path": "src/EliteSIP.CallGuard/CallGuardPolicy.cs",
+      "sha256": "4f7f2230851cc228b8c21c669f33454f47561a1ff5f3d719e2a53860b5a283bc"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/CallGuardSession.cs",
+      "source_path": "src/EliteSIP.CallGuard/CallGuardSession.cs",
+      "sha256": "cbf6a2dd0a4b158193559ef11e4ef5d91cb2f2eac79f1ae27d20e54e36d173f8"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/CallGuardVerdict.cs",
+      "source_path": "src/EliteSIP.CallGuard/CallGuardVerdict.cs",
+      "sha256": "3ea28fce964033eea138b294e944173414675a9ae978402f964366619bbbb976"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj",
+      "source_path": "src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj",
+      "sha256": "11c0c110e19c9eaeaef66a0382f7a3e4ff6ab395d99ca6664e1ba378371cc47c"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/Geometry.cs",
+      "source_path": "src/EliteSIP.CallGuard/Geometry.cs",
+      "sha256": "9ec94551904e9e9456e0816b8dc8eff41b6f7d13508d0774c9b38ec8c354e6b3"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/IncomingCallPlacement.cs",
+      "source_path": "src/EliteSIP.CallGuard/IncomingCallPlacement.cs",
+      "sha256": "6247216bb894371869a71c24ca54c58b6dd5031424ced6bea144066661464ba6"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/Resources/PackageStrings.cs",
+      "source_path": "src/EliteSIP.CallGuard/Resources/PackageStrings.cs",
+      "sha256": "c1c338e1c246a5b79f740e5ee08d4bf6587fd3c5bbd8a1c9245666cbdfcd24c0"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/Resources/Strings.resx",
+      "source_path": "src/EliteSIP.CallGuard/Resources/Strings.resx",
+      "sha256": "969d4d4687b896c2e51875dd9da4267fa147039ef440875321bf4a1f1118babc"
+    },
+    {
+      "path": "core/src/EliteSIP.CallGuard/Resources/Strings.ru.resx",
+      "source_path": "src/EliteSIP.CallGuard/Resources/Strings.ru.resx",
+      "sha256": "901f6f000b45f6c593731c9567c98e4ac7df1e17fa34c7c0dca18555eb6056a5"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/CallHistoryStore.cs",
+      "source_path": "src/EliteSIP.CallHistory/CallHistoryStore.cs",
+      "sha256": "8566f49c8ba3cf202d867f059b5347b38e0ed78546109de14e9b637d2dfd418c"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/CallRecord.cs",
+      "source_path": "src/EliteSIP.CallHistory/CallRecord.cs",
+      "sha256": "25b04be87289e76e9a7fa5814540553c82001aadf0b3e55b36f99bd937d52065"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj",
+      "source_path": "src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj",
+      "sha256": "f5fd00e074759ce9b901891fd76d3881bd4f57258b7ad7ed5d44abcb519ac993"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/HistoryFilePrivacy.cs",
+      "source_path": "src/EliteSIP.CallHistory/HistoryFilePrivacy.cs",
+      "sha256": "7fdfd42040e85d9983d45d0ee1e4fedc9f6adc3bd6ac94240b8f1121809e20c7"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/NumberSighting.cs",
+      "source_path": "src/EliteSIP.CallHistory/NumberSighting.cs",
+      "sha256": "d5c4676bd4593ab6e79e37b00753a3cdf18d46cab881a9f80d371038b2de43ec"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/Resources/PackageStrings.cs",
+      "source_path": "src/EliteSIP.CallHistory/Resources/PackageStrings.cs",
+      "sha256": "cfb9313670eb30820b24ad610a3244b5b66550e52991ea8edbb7a2fe73064635"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/Resources/Strings.resx",
+      "source_path": "src/EliteSIP.CallHistory/Resources/Strings.resx",
+      "sha256": "8a32362fafbb0d1054e88a9a001abcc2e0a3cf31efe55abd5c3a9afd213b9830"
+    },
+    {
+      "path": "core/src/EliteSIP.CallHistory/Resources/Strings.ru.resx",
+      "source_path": "src/EliteSIP.CallHistory/Resources/Strings.ru.resx",
+      "sha256": "7757fdd05b31475eaba1c1b2a79228105e143a248cb21c8a17bf7230ab19a452"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/AppendOnlyFile.Unix.cs",
+      "source_path": "src/EliteSIP.Diagnostics/AppendOnlyFile.Unix.cs",
+      "sha256": "656d8fa6690422d24fad10ef40d0f2a37b910021a114e305b9827c67d76cac79"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/AppendOnlyFile.cs",
+      "source_path": "src/EliteSIP.Diagnostics/AppendOnlyFile.cs",
+      "sha256": "42090424221d179b32fb12e78a5ae5a00fe8be5e31512d22b35731e095158978"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj",
+      "source_path": "src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj",
+      "sha256": "256db69cb58b5570ae0e2119f84ed7318b30aee8723a4e539cfa32975ef010ee"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/LogFile.cs",
+      "source_path": "src/EliteSIP.Diagnostics/LogFile.cs",
+      "sha256": "e66802621b72061e77732f4285bf859898b78293ed956a84f14f8589d88d6491"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/LogRedaction.cs",
+      "source_path": "src/EliteSIP.Diagnostics/LogRedaction.cs",
+      "sha256": "4794ca6ea6615ccca04bb5c2e978af190631dfc5b6fb81d4152bb7ff3b143d18"
+    },
+    {
+      "path": "core/src/EliteSIP.Diagnostics/SupportArchive.cs",
+      "source_path": "src/EliteSIP.Diagnostics/SupportArchive.cs",
+      "sha256": "fae9fda12cc1f87de41f37985e4dd3467d1cd307985b047f6966744c03688fda"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/CallLine.cs",
+      "source_path": "src/EliteSIP.Lines/CallLine.cs",
+      "sha256": "ffc216d8827b01487ad867edd534d12146b90899c7629ad7dae6f0179144636b"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/EliteSIP.Lines.csproj",
+      "source_path": "src/EliteSIP.Lines/EliteSIP.Lines.csproj",
+      "sha256": "708b6a20e99181957869a29e3d2eb382bdae1daae396610d5269241e656f26a6"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/ILineMedia.cs",
+      "source_path": "src/EliteSIP.Lines/ILineMedia.cs",
+      "sha256": "00c9e9091574783edd362170328f865b148ab53a00b6d7f6fcc4c75cfc0aa70f"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/ILineSignaling.cs",
+      "source_path": "src/EliteSIP.Lines/ILineSignaling.cs",
+      "sha256": "b1fde9e1f8d8e01da7d5e919a839dfe012942157e1fcfb6dc4ab206fe32c6e19"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/LineController.cs",
+      "source_path": "src/EliteSIP.Lines/LineController.cs",
+      "sha256": "e7d3f5b4d50d9ce6fa970d312612d8f5a9d79be61240100a6e609e49aa7a8a0a"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/MediaSessionLine.cs",
+      "source_path": "src/EliteSIP.Lines/MediaSessionLine.cs",
+      "sha256": "d487f1e26b61c71a06bdb69292fd9e16a6216083194088e487e191f78e68b09f"
+    },
+    {
+      "path": "core/src/EliteSIP.Lines/SipUserAgentSignaling.cs",
+      "source_path": "src/EliteSIP.Lines/SipUserAgentSignaling.cs",
+      "sha256": "b960ed66a9b4b1d75f0edf662f7c20480d1259fa31336c09d697887e561ba75d"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/AudioCodec.cs",
+      "source_path": "src/EliteSIP.MediaCore/AudioCodec.cs",
+      "sha256": "52228c538936e15a942a6d9f6736446926514163c8ba49b6a879be00fe49dff8"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/AudioDelayEstimator.cs",
+      "source_path": "src/EliteSIP.MediaCore/AudioDelayEstimator.cs",
+      "sha256": "7ac7eb2ec746b60559a9a27fdabb9c75da8a5c0a9ff94faa890156fd02cdaf8f"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/AudioTestSignal.cs",
+      "source_path": "src/EliteSIP.MediaCore/AudioTestSignal.cs",
+      "sha256": "e7371fa0ed905cc1ec6478b029f2f5ebe0faa9222766da3e4bd7535123240434"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/Dtmf.cs",
+      "source_path": "src/EliteSIP.MediaCore/Dtmf.cs",
+      "sha256": "5465c5004cb1f887848901e5aee60a81c878ae6cb77e7139f49164b49abf1491"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj",
+      "source_path": "src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj",
+      "sha256": "9a8fa14b72b4ea956db3da3c4666214bc5b1a1f6495e42ae774130f7e1c38881"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/G711.cs",
+      "source_path": "src/EliteSIP.MediaCore/G711.cs",
+      "sha256": "5dfac9a806c5f4cc71107d657226201ab38c3d7bf4c19e239159d5a7e26d203d"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/G722.cs",
+      "source_path": "src/EliteSIP.MediaCore/G722.cs",
+      "sha256": "6e852615115c3ad8b4a8916015bad57d5eea9f071d757adedc1c5099b0f43b50"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/InboundStreamWatch.cs",
+      "source_path": "src/EliteSIP.MediaCore/InboundStreamWatch.cs",
+      "sha256": "9be856d5fe0fb9942d1198de9519b9a660eade4e1d9f8c7c6f30f943fc44181e"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/JitterBuffer.cs",
+      "source_path": "src/EliteSIP.MediaCore/JitterBuffer.cs",
+      "sha256": "8e39ccaa6be945c682afe860587d7f87690d5e7784aeb78d07f239b978e5c3ab"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/PacketLossConcealer.cs",
+      "source_path": "src/EliteSIP.MediaCore/PacketLossConcealer.cs",
+      "sha256": "d1703ec8cf8eb06451046b1c54fec7cd643ea516970f20b72611721da33cc19f"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/RemoteSourceFilter.cs",
+      "source_path": "src/EliteSIP.MediaCore/RemoteSourceFilter.cs",
+      "sha256": "34f91d8f44583c3870912f851bdee8975a51994458934121030427807fde902f"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/RtcpPacket.cs",
+      "source_path": "src/EliteSIP.MediaCore/RtcpPacket.cs",
+      "sha256": "0dcd260b6beb53c96744f912e5387d11237f51285f908c38bdef1762b8718eb9"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/RtcpSession.cs",
+      "source_path": "src/EliteSIP.MediaCore/RtcpSession.cs",
+      "sha256": "820796fbb1a5f9c485db74089356dbeb7f56e94a03019058cff728b2feccfd57"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/RtpPacket.cs",
+      "source_path": "src/EliteSIP.MediaCore/RtpPacket.cs",
+      "sha256": "4462f2dc02598d949503c501cedb107d57d7fdef4c4ca5909c27099b05d748a1"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/RtpSession.cs",
+      "source_path": "src/EliteSIP.MediaCore/RtpSession.cs",
+      "sha256": "19c793793d30afedfab9705d070af4509fa879ac984146968359f68fc8124bb3"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/SampleRing.cs",
+      "source_path": "src/EliteSIP.MediaCore/SampleRing.cs",
+      "sha256": "00bdef6c8b16974fa50935cd9add3e649d5cc2bd14a5c213b4a9f2b5213e47fb"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/SdesCrypto.cs",
+      "source_path": "src/EliteSIP.MediaCore/SdesCrypto.cs",
+      "sha256": "c93c52e69985260ed9e9e5cf0a9936d59fd13c2340dc52704ec93d98dd31a1ab"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/Sdp.cs",
+      "source_path": "src/EliteSIP.MediaCore/Sdp.cs",
+      "sha256": "5748842294e710303bce07e4d88adf0e7a3667b94f911c3eeb7390a5000ff84f"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/SdpNegotiator.cs",
+      "source_path": "src/EliteSIP.MediaCore/SdpNegotiator.cs",
+      "sha256": "b1f222d672f376bf7d928b6e55f1690a82a0bc675cad74ca93e566ca3ca40454"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/SdpParser.cs",
+      "source_path": "src/EliteSIP.MediaCore/SdpParser.cs",
+      "sha256": "80c0cce009d7fb604eed93c7829da5756198a963bff47d118c743005cdf2e550"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/Srtp.cs",
+      "source_path": "src/EliteSIP.MediaCore/Srtp.cs",
+      "sha256": "3d8a41c77a2c840dd7f7aa0dfb09980646398864ceb018af1592ffca5a3fade0"
+    },
+    {
+      "path": "core/src/EliteSIP.MediaCore/UdpSocketOptions.cs",
+      "source_path": "src/EliteSIP.MediaCore/UdpSocketOptions.cs",
+      "sha256": "fa6f087a58fe70e03edbbad01c757a8175178f862429e602d2269b53ef1be90c"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj",
+      "source_path": "src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj",
+      "sha256": "adabbdec2921b7d47f7dfc91775e159da48bb4caeb05d6ec38f809e5f6770f2d"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/MachineConfig.cs",
+      "source_path": "src/EliteSIP.PanelLink/MachineConfig.cs",
+      "sha256": "3a6010bb79297bfc76f9edb5fbee07a39809a83aeab57e2633a9d15a990ba299"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/MachineIdentity.cs",
+      "source_path": "src/EliteSIP.PanelLink/MachineIdentity.cs",
+      "sha256": "47370fc468645fa9e167c82af017dd3d87f3853afbf5dc7a905344f7d4b50f68"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/ManagedFields.cs",
+      "source_path": "src/EliteSIP.PanelLink/ManagedFields.cs",
+      "sha256": "c5c9e465b00750916586cafa9dede4d258bcc81e993dfc09d4dc9e249129e0f5"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/PanelLinkError.cs",
+      "source_path": "src/EliteSIP.PanelLink/PanelLinkError.cs",
+      "sha256": "c4d09726da611e1d69898b70d8b00fccad164f126b6858dd9da4968b6177559a"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/PresetBundle.cs",
+      "source_path": "src/EliteSIP.PanelLink/PresetBundle.cs",
+      "sha256": "023849c713f5865c9995787065d7e9cfc8d42863397df5d44812b7135cf62364"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/QrCode.cs",
+      "source_path": "src/EliteSIP.PanelLink/QrCode.cs",
+      "sha256": "ec3c217db52957dc6b1d2b0436513b67f3f86561ec28d645b88013ac51e7a0ca"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/ReleaseLine.cs",
+      "source_path": "src/EliteSIP.PanelLink/ReleaseLine.cs",
+      "sha256": "9a7e76f9edfa66d23c200184c43728c72c6fd7a8a3f910e1a223b15456647701"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/ReleaseManifest.cs",
+      "source_path": "src/EliteSIP.PanelLink/ReleaseManifest.cs",
+      "sha256": "2e00f6bd279b8ff94ffd4833506e77a77e25a85db76d8040ad4048e8c37e6a1f"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/Resources/PackageStrings.cs",
+      "source_path": "src/EliteSIP.PanelLink/Resources/PackageStrings.cs",
+      "sha256": "2589129fbf0c66254331600920ebdaaeb6d1a6b99bd74c5a044b43109ba3f39c"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/Resources/Strings.resx",
+      "source_path": "src/EliteSIP.PanelLink/Resources/Strings.resx",
+      "sha256": "ac53c100358d2b974c7de7b39226cb486c09f87f07968b6f427b949020f8b7c5"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/Resources/Strings.ru.resx",
+      "source_path": "src/EliteSIP.PanelLink/Resources/Strings.ru.resx",
+      "sha256": "de3b1b90ad80bf1355c148aa21daadc2ecbd53d4cfea88a83cff427f09b992bf"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/SignedEnvelope.cs",
+      "source_path": "src/EliteSIP.PanelLink/SignedEnvelope.cs",
+      "sha256": "6f389056245a3791c5b0be1a4bbbf8375883110aaf298c2f735248a898b7f221"
+    },
+    {
+      "path": "core/src/EliteSIP.PanelLink/WireJson.cs",
+      "source_path": "src/EliteSIP.PanelLink/WireJson.cs",
+      "sha256": "64f451e42f7b5719b12b50322ae83ca1fa390adfe70a133d0b724eeeb9e77985"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj",
+      "source_path": "src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj",
+      "sha256": "d601204f3b1cfa2cb7ef35bd058d0678acdfc04d609729ac13cc934d5d40aef6"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore.Udp/SipSocketOptions.cs",
+      "source_path": "src/EliteSIP.SipCore.Udp/SipSocketOptions.cs",
+      "sha256": "f8dfd8c4ae150c672eaa137ed7153eefd517f8986a9240ebe3c3f9e7625d733c"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore.Udp/SocketSipTransport.cs",
+      "source_path": "src/EliteSIP.SipCore.Udp/SocketSipTransport.cs",
+      "sha256": "01deef123bf91e323b7e41cf56725bc5263cf2721b79c3865daae5b7830c414e"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/DialedNumber.cs",
+      "source_path": "src/EliteSIP.SipCore/DialedNumber.cs",
+      "sha256": "4649de6015f6be198af86c5abd98ef38c5106dd77c2fef2f1e2ef8d969b702b2"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/DigestAuthentication.cs",
+      "source_path": "src/EliteSIP.SipCore/DigestAuthentication.cs",
+      "sha256": "5a251aee9be544e92f1dbdcc6bcd9f62d61b98ea2cb2b3b2205ead76959339e9"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/EliteSIP.SipCore.csproj",
+      "source_path": "src/EliteSIP.SipCore/EliteSIP.SipCore.csproj",
+      "sha256": "db3730827f12806d298de617cf62129e93ab31e3356ee855a88b5d28761dc737"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/IcmpEcho.cs",
+      "source_path": "src/EliteSIP.SipCore/IcmpEcho.cs",
+      "sha256": "3623703c85e9441c88a39edd7a23d7588c987ba70022f1a4a09dcae3bfc5a4e0"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/NameAddress.cs",
+      "source_path": "src/EliteSIP.SipCore/NameAddress.cs",
+      "sha256": "00c412f3e3213b6a79b830b2b24df8822f4221ed40c40400dcfe68e0641804c3"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/PortKnockSequence.cs",
+      "source_path": "src/EliteSIP.SipCore/PortKnockSequence.cs",
+      "sha256": "7e8bf0644cb9ce7dfb8cbf12eea2d267bad6f5e49a679f6f256ebca455c7b54d"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/PortKnocker.cs",
+      "source_path": "src/EliteSIP.SipCore/PortKnocker.cs",
+      "sha256": "f9bf88a7ad2467b2cecbbc56d384d9eed73a67392c884e55111266b0f90bb906"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/QualifyWatch.cs",
+      "source_path": "src/EliteSIP.SipCore/QualifyWatch.cs",
+      "sha256": "e39175325e35c8b58e22949cd6b1fa05c9a18f3b83ab0e8454e64c7779c40b92"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipAccount.cs",
+      "source_path": "src/EliteSIP.SipCore/SipAccount.cs",
+      "sha256": "69961a17c347db7efd01ae6df1096cfd05ffd57156151edb0ba96d5c2d335c4f"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipCall.cs",
+      "source_path": "src/EliteSIP.SipCore/SipCall.cs",
+      "sha256": "f5bf53b594838a7886504b8c24ea975b090000953e3b370d5a7f5742992245c4"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipDialog.cs",
+      "source_path": "src/EliteSIP.SipCore/SipDialog.cs",
+      "sha256": "0f59fe262a8acaf1337b2a501ff4cbf9ae5dad45f413075e0022bf991cebedf6"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipEndpoint.cs",
+      "source_path": "src/EliteSIP.SipCore/SipEndpoint.cs",
+      "sha256": "61f8f77171f92f4dc0a3a79883d6652d52e2bdea7e0d32d60cd614712866b20d"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipHeaderName.cs",
+      "source_path": "src/EliteSIP.SipCore/SipHeaderName.cs",
+      "sha256": "37af78bf0372b6dd77e31cb330708ff5e02ef3e5fa30c2672ce039424c59d9bb"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipHeaders.cs",
+      "source_path": "src/EliteSIP.SipCore/SipHeaders.cs",
+      "sha256": "bbf3731ac5f668c4e41ae39d69cb7e50c3fc729e9e62028a82cec66a6cb0c94c"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipInviteEvent.cs",
+      "source_path": "src/EliteSIP.SipCore/SipInviteEvent.cs",
+      "sha256": "77c0399c310cb97b28cd8af1d5b2fc239e406eaa44c863112cb80854c0fe63ae"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipLexer.cs",
+      "source_path": "src/EliteSIP.SipCore/SipLexer.cs",
+      "sha256": "fe9366f3f0a229f67d1795adaea64f17098553476ad1cd713520dc1a4ba0eb95"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipMessage.cs",
+      "source_path": "src/EliteSIP.SipCore/SipMessage.cs",
+      "sha256": "f5d9d9cad8e444172d37976002e8718fde3cd13f5295bc5ff3ffe5be5c0e891f"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipMessageFramer.cs",
+      "source_path": "src/EliteSIP.SipCore/SipMessageFramer.cs",
+      "sha256": "e400d005bd83f19d07c090257b574ec52908e4cb0b180e2c14eb5033058313c4"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipMethod.cs",
+      "source_path": "src/EliteSIP.SipCore/SipMethod.cs",
+      "sha256": "ddc8dc2bf0a93c6c27cc70ce9debd0bc13555752ce3e4ec4999d631aa07ac4cb"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipParameter.cs",
+      "source_path": "src/EliteSIP.SipCore/SipParameter.cs",
+      "sha256": "20359049ffac765d237f2fd77ebf46a02817606be9078c1ee5ef9dcb72979a04"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipParser.cs",
+      "source_path": "src/EliteSIP.SipCore/SipParser.cs",
+      "sha256": "a825dff62e7daa5f1c9207599712427ab01477f56951ab7c542140d774b09eeb"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipRegistrationState.cs",
+      "source_path": "src/EliteSIP.SipCore/SipRegistrationState.cs",
+      "sha256": "0fc2a7995c77eaa88ec12d5c793743597426265ffce7b53571f0a2500ae5bff7"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipSessionTimer.cs",
+      "source_path": "src/EliteSIP.SipCore/SipSessionTimer.cs",
+      "sha256": "a1cabc7f86cdf52a8200f5f51070b80d424745b2ad404ad66fe72102e11b1048"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTlsPinning.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTlsPinning.cs",
+      "sha256": "64da67aebab186f29dcdf0e058f9814a8131c1afe56f2e79fc89d8862ca3ee80"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipToken.cs",
+      "source_path": "src/EliteSIP.SipCore/SipToken.cs",
+      "sha256": "01c19fa2a298d55e2a117fd3cd3d263ffc3d998738280d51ee3240c67bbf27b2"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTransactionLayer.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTransactionLayer.cs",
+      "sha256": "de3fd8872bc9ed8949f9ddced099a8bee3911f8277b28720fe7b14e838e2359b"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTransfer.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTransfer.cs",
+      "sha256": "67bd5aab235315d6a2ac3da4f7adcfc811837729b1412862547b8665095405c0"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTransport.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTransport.cs",
+      "sha256": "7b0ec2b76642358123d2693a1d919fd0496cfbc510b0943ec29bbcc3c8e90080"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTransportChannel.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTransportChannel.cs",
+      "sha256": "0178b2c8c0b7f2050e51b31761ca26a44da6a9354309d3dd29cbecfc1da6a640"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipTransportFailureText.cs",
+      "source_path": "src/EliteSIP.SipCore/SipTransportFailureText.cs",
+      "sha256": "7c976376c9a7f04cef5cc235d1e6f7123daa21080eb0d336fac6ff1536dc078b"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipUri.cs",
+      "source_path": "src/EliteSIP.SipCore/SipUri.cs",
+      "sha256": "3217839c7195fb0835b7646f91a920df0abb664e0df537599e91f7f700bf34ae"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipUserAgent.Calls.cs",
+      "source_path": "src/EliteSIP.SipCore/SipUserAgent.Calls.cs",
+      "sha256": "9cff66e1c00431468f8bcd9a98e3b6a2ae8d557dbba51b621f02cba98dc09cdd"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipUserAgent.Inbound.cs",
+      "source_path": "src/EliteSIP.SipCore/SipUserAgent.Inbound.cs",
+      "sha256": "5ce2c2a2fb4d8b179c2aef94b473a6328a3173ac0d6836e43904023fbbbfcd9e"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipUserAgent.cs",
+      "source_path": "src/EliteSIP.SipCore/SipUserAgent.cs",
+      "sha256": "823350a0435d6a92359c80f5cecf904f9e70c74b58bd80f210eb8821b5063b26"
+    },
+    {
+      "path": "core/src/EliteSIP.SipCore/SipVia.cs",
+      "source_path": "src/EliteSIP.SipCore/SipVia.cs",
+      "sha256": "3fe1c7b386d36416d970e0111ad64987ca247afffe1a28e421dcdb59b3cdb699"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/Consent.cs",
+      "source_path": "src/EliteSIP.Updates/Consent.cs",
+      "sha256": "f0c1a7b7d4bc8e0ad921fef1b40efe912b1c5eb735d017107d59e9b98399be91"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/EliteSIP.Updates.csproj",
+      "source_path": "src/EliteSIP.Updates/EliteSIP.Updates.csproj",
+      "sha256": "9f73ce0daaa83a728c8eb80457cea93b6339cfb4020e0d9e004c12afcb1886cb"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/Http.cs",
+      "source_path": "src/EliteSIP.Updates/Http.cs",
+      "sha256": "33150f0a8fc75481b51bb819c2757fb5b74f7769b7aa2495e2c29c0bd1ce7820"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/Provisioning.cs",
+      "source_path": "src/EliteSIP.Updates/Provisioning.cs",
+      "sha256": "2e8f2515f5ccc2a65f3fe7851a6a9c0a73b1488523c6452b4287a451eaacfb63"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/Recovery.cs",
+      "source_path": "src/EliteSIP.Updates/Recovery.cs",
+      "sha256": "4f6eff439c7caabcea4d18b511f170af625719c212b2841e0d29ece395c90e07"
+    },
+    {
+      "path": "core/src/EliteSIP.Updates/UpdaterLog.cs",
+      "source_path": "src/EliteSIP.Updates/UpdaterLog.cs",
+      "sha256": "57bc2943e9a032c272456fc2ec1797af92228b2836baf75a30a5c4ae6a626343"
+    },
+    {
+      "path": "core/tests/EliteSIP.AdminAccess.Tests/AdminAccessStateTests.cs",
+      "source_path": "tests/EliteSIP.AdminAccess.Tests/AdminAccessStateTests.cs",
+      "sha256": "6355c1ce09be8cc2ee5918485f6504d10c32b940590b5730665d002f5174c618"
+    },
+    {
+      "path": "core/tests/EliteSIP.AdminAccess.Tests/AdminCredentialTests.cs",
+      "source_path": "tests/EliteSIP.AdminAccess.Tests/AdminCredentialTests.cs",
+      "sha256": "969ecda8240f49ac696b6997d1ee84c74a5e3164b9f4c9ce872887dffead0973"
+    },
+    {
+      "path": "core/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj",
+      "source_path": "tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj",
+      "sha256": "ca3d2ddc3842156a544329be68d9bab0d3d62cb3c2a29b7a6e1c7a25f70c7d03"
+    },
+    {
+      "path": "core/tests/EliteSIP.AdminAccess.Tests/ProtectedSecretTests.cs",
+      "source_path": "tests/EliteSIP.AdminAccess.Tests/ProtectedSecretTests.cs",
+      "sha256": "e2d0353e018cb36bb082a746c10faef776b4ea3b0863a13bebfd0ab7fa575c64"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/AutoAnswerTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/AutoAnswerTests.cs",
+      "sha256": "d65b19cccc3d9fd3d480284357d29fb352edf322acf43412c600583f85fa99a4"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/ClientEventLogTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/ClientEventLogTests.cs",
+      "sha256": "318b46bdc82a7e3e8077d45ac356a37341963cfd5427ac07d6d65b1921e27b51"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/ConfigApplyTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/ConfigApplyTests.cs",
+      "sha256": "b17c6f37dbdf5421b937ddcda889a126950afe3994ba9dfb101db21f5ba11043"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/CopyAndMuteTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/CopyAndMuteTests.cs",
+      "sha256": "08cb0b38e30e669e24cab7302bd6ba4a8f1745b999e9469b825c15d94533e090"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/CrashGuardTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/CrashGuardTests.cs",
+      "sha256": "b7d85aab0aa3a62dd674d1bdec5fa91db1f20ecae95616504ca5d213788eeb1c"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj",
+      "source_path": "tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj",
+      "sha256": "8afa33d6d1970221a60828ffd427ede1551f352026cf86ca8d935b75fcebeef1"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/EmojiPackTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/EmojiPackTests.cs",
+      "sha256": "8b3afca36e124cb3361df2e493a37bfdbfa6f542afe563b2bb6c1aaac5018924"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/HistoryPresentationTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/HistoryPresentationTests.cs",
+      "sha256": "84f790120365b0ac914e986ebcda51a915577c12491003d0678df397714fec4f"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/IncomingPlacementSettingsTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/IncomingPlacementSettingsTests.cs",
+      "sha256": "496c3def7e595bf7f0afc35c6583a9e6bacd8a8dbbd171894ea46d8ca7e502da"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/MobileNumberMaskTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/MobileNumberMaskTests.cs",
+      "sha256": "a295a80cb0e8c1f9eb6bc68b663d5e1471f5968bab5dc7efe9dd1f2c74fc869e"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/ProductVersionTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/ProductVersionTests.cs",
+      "sha256": "66dbf2f1d45262db0ac6945a0d6ce336a52028eb188f8780a7a4c4f8cf8edb46"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/SettingsUpgradeTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/SettingsUpgradeTests.cs",
+      "sha256": "113093d55191c1ac9afec4020d65580f8da6a06a04f650e16e733e08d7ac766a"
+    },
+    {
+      "path": "core/tests/EliteSIP.App.Core.Tests/StringsTests.cs",
+      "source_path": "tests/EliteSIP.App.Core.Tests/StringsTests.cs",
+      "sha256": "17fe81d98327c88a6460f96abd16bc1aa2b107bd0cd92eaf434c8dae22da7bc5"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Signals.Tests/ConnectionToneTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Signals.Tests/ConnectionToneTests.cs",
+      "sha256": "ff462fb0f5a29f3063bc267d834d31600d0e9c86fef888a118c20f8ab3e4570d"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj",
+      "source_path": "tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj",
+      "sha256": "5fa28900cf4d6106f9e84936362ac6f6d5a897433eacdf3229a53b807347bd8d"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Signals.Tests/SignalSoundPlayerTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Signals.Tests/SignalSoundPlayerTests.cs",
+      "sha256": "e757ee9300df6a439802843efb41e3f853804327b21161eea2d00bf845dace86"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/AudioOwnershipTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/AudioOwnershipTests.cs",
+      "sha256": "9ccbe6c6c9fccc94eb001b0d435286a2d4b27f728c9f830e9e761c3ea1674ff1"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/AudioRestartPolicyTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/AudioRestartPolicyTests.cs",
+      "sha256": "851c9699dd8f43b36603102f7babf07ed48017908e7791f6b0aa070add8e868b"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/AudioRouteTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/AudioRouteTests.cs",
+      "sha256": "b62000c922e873abd0fa46816da6cf9d667768fc9e177e09b44395f6b05ad05c"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/AudioSelfTestTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/AudioSelfTestTests.cs",
+      "sha256": "5ff755a6be1322ac5732f69192a11cef237bec18d4508e33e725e7d82d4fc52b"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/ClockDriftTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/ClockDriftTests.cs",
+      "sha256": "009b17374619c7b66778dd4f8ea90d3d1ab697d17d53aaf870551245566bb2ea"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/DeviceActivityWatchTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/DeviceActivityWatchTests.cs",
+      "sha256": "f032e59e42bea9842c30ce7ba38cd905c044df6b6766cf023be9b3625f592a0c"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/DeviceChangeRelevanceTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/DeviceChangeRelevanceTests.cs",
+      "sha256": "65c01512b176d58bfee67afde5cd53c2228811544b569d63644dfc91e9c1ed62"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj",
+      "source_path": "tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj",
+      "sha256": "39090e894d19a1bb43512a845d8ad88c50874c40df8727a6ae4f98cf18158a40"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/FakeVoiceAudioEngine.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/FakeVoiceAudioEngine.cs",
+      "sha256": "3142b3111144bec82ec13ddb8d8c18977538443cea4901e3a2eb95e40fcc22b6"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/MediaSessionTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/MediaSessionTests.cs",
+      "sha256": "970c6b1945af4b81d8732394815c75c1498ea1f4703dc4d265aac85215484f20"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/PlaybackModelTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/PlaybackModelTests.cs",
+      "sha256": "811069ef1d79128fe907b18b096c703341e233c5b1df3fad3f658c8ccc70117a"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/ProcessingRateTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/ProcessingRateTests.cs",
+      "sha256": "c42cab182af291354fa96f5d3731c20151168d921d5f1d712ec63f7821b40ce2"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/ReceiveLevelingTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/ReceiveLevelingTests.cs",
+      "sha256": "bb650d83a9132b6500bf7b1709fb21b2ad8fc0887cc445dab33794ab9ab82f7b"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/ResamplerTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/ResamplerTests.cs",
+      "sha256": "b9fdb12a48fe7899a26381e62f56913325bcd5edd766239cf4d8c79fd08a399a"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/RestartSupervisorTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/RestartSupervisorTests.cs",
+      "sha256": "353633d7d0d924402b68f273b1a2f3fdad122bde30c72b7859c025477e1c9296"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/SampleBalanceTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/SampleBalanceTests.cs",
+      "sha256": "03541e6f2ed1707a0b655f0769c88ceb69b2707057abddc367b93e7f3d31324c"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/SpareCaptureTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/SpareCaptureTests.cs",
+      "sha256": "a945bc29ded8db7a7d91bce7a462f10a66d7e54866c1e2be534c15ec7762c94c"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/VoiceAudioBusTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/VoiceAudioBusTests.cs",
+      "sha256": "5b07ebafbf170259e8c6d15d0766058f532c532bf890d124bc8420e460029014"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/VoiceProcessorTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/VoiceProcessorTests.cs",
+      "sha256": "d9fa92d66e3c1f88f73caa793c81ff0d423a316802457d496f03fa31d630d9cf"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/WaveFileTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/WaveFileTests.cs",
+      "sha256": "513dcaa310eef15b5fd34a930db1d47457d65b723ab83b45cf76d2fecc1abc35"
+    },
+    {
+      "path": "core/tests/EliteSIP.Audio.Tests/WindowsCaptureProcessingTests.cs",
+      "source_path": "tests/EliteSIP.Audio.Tests/WindowsCaptureProcessingTests.cs",
+      "sha256": "dacf7fd51488f0267d997c709728725e29c60897ced86567d82c36e116997ebd"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallGuard.Tests/CallGuardSessionTests.cs",
+      "source_path": "tests/EliteSIP.CallGuard.Tests/CallGuardSessionTests.cs",
+      "sha256": "906eac809ca5b881c05fed5e8bb0e00ea24cf62e0fc9665b5beac4b74b8cb6fb"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj",
+      "source_path": "tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj",
+      "sha256": "1a80304e3dd835dec6655e30fdae44ecf32a16e4592b07cc5acdc3c7723fc06d"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallGuard.Tests/IncomingCallPlacementTests.cs",
+      "source_path": "tests/EliteSIP.CallGuard.Tests/IncomingCallPlacementTests.cs",
+      "sha256": "50d037a5bce0eaf5651e7b63768d107db421bebd9ccd82506f7334992e477b5a"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallHistory.Tests/CallHistoryPrivacyTests.cs",
+      "source_path": "tests/EliteSIP.CallHistory.Tests/CallHistoryPrivacyTests.cs",
+      "sha256": "43b4790a4efafc52ac88e8c1708d4f2388f15ebd75bf07d50e0bdb6b58414f2a"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallHistory.Tests/CallHistoryStoreTests.cs",
+      "source_path": "tests/EliteSIP.CallHistory.Tests/CallHistoryStoreTests.cs",
+      "sha256": "65d8c723f13699de8a79e8781dfc93cd4d99674fa2c7d7e2bced12f4bf36ba5b"
+    },
+    {
+      "path": "core/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj",
+      "source_path": "tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj",
+      "sha256": "a5659415e236e93f01210ddbaa4b63d529211acb7d9d0b10e7afec1ec4b64e7a"
+    },
+    {
+      "path": "core/tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj",
+      "source_path": "tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj",
+      "sha256": "1d9a303040d01b899fc323ee0c1703bf58baf6e2967d5906a9678dc36678097e"
+    },
+    {
+      "path": "core/tests/EliteSIP.Diagnostics.Tests/LogFileTests.cs",
+      "source_path": "tests/EliteSIP.Diagnostics.Tests/LogFileTests.cs",
+      "sha256": "704057cb8da267e1e9b1eb5fe6da8bab635995880920196da01b450147d88cd6"
+    },
+    {
+      "path": "core/tests/EliteSIP.Diagnostics.Tests/LogRedactionTests.cs",
+      "source_path": "tests/EliteSIP.Diagnostics.Tests/LogRedactionTests.cs",
+      "sha256": "d208284e90d1257753d745d78400c63191b53723fb4e4ff11d4d121d556ca979"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/AudioCodecTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/AudioCodecTests.cs",
+      "sha256": "5b269cd36ae316071381a93435fa29443c81ce51afe82f58fbe5826cfc35bb12"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/AudioDelayEstimatorTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/AudioDelayEstimatorTests.cs",
+      "sha256": "53b9dccf71b0ae44aec193796a4aa584f5ba52d3f575c16e3528deda439fe504"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/DscpMarkingTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/DscpMarkingTests.cs",
+      "sha256": "dca6b523030931e10da0da600da2102fad8e27cac67d609bc7731d0f82213dc9"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/DtmfTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/DtmfTests.cs",
+      "sha256": "20241551c5bc1fe6b72c04dc7df950c38415030a51319f9d7463411a1d6b26b4"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/EliteSIP.MediaCore.Tests.csproj",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/EliteSIP.MediaCore.Tests.csproj",
+      "sha256": "e813b6ba44b219d42573d5df332aecc294d541a2cb5672ee0c86abb21670091c"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/G711Tests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/G711Tests.cs",
+      "sha256": "cf90d17d6583d02322c1c16971a1425a9bc24cfeaf38da2ea33f6f04982043b5"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/G722Tests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/G722Tests.cs",
+      "sha256": "df1ab8ba315c73c09169b539d51f62c583443f04723cf4d7a476b47e2fac7bbd"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/InboundStreamWatchTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/InboundStreamWatchTests.cs",
+      "sha256": "34de185d23462bdf80110da1d996fda307d6791f13866429c2a9985a237a2487"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/JitterBufferTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/JitterBufferTests.cs",
+      "sha256": "dead1c8b9094265aef9f1432a621f2fab16f05dd66d46b486979a163c0cc86e6"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/PacketLossConcealerTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/PacketLossConcealerTests.cs",
+      "sha256": "50a7744808404e33a954c3f148aef983f0fae104a034baa22b4577ad736005aa"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/RemoteSourceFilterTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/RemoteSourceFilterTests.cs",
+      "sha256": "d80aa625dea0c1570bf85df1198dd80b19ad723614bcc81097efa6338bb7d1b9"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/RtcpTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/RtcpTests.cs",
+      "sha256": "4db2f4845318b8d574f60faa2099dda4ed64c505cd735b4ea5005b355e8bcd64"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/RtpPacketTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/RtpPacketTests.cs",
+      "sha256": "fe8261c86aea60ec3193d6f87b60ed38e74724af87016c82083dda4e3dc81cef"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/RtpSessionTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/RtpSessionTests.cs",
+      "sha256": "a865877e49efb7ad2f3efa20fc0c7e344b59dd286dff88b82a5cac5dd2cd136d"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/SampleRingTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/SampleRingTests.cs",
+      "sha256": "28265edccee910de18296e4753e52a6e97577840ad3e249389de6e094a100244"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/SdpTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/SdpTests.cs",
+      "sha256": "b584c4663d406d3a83526aae9cc7d60c4dd86b08e9134db34512d2ea515cbf62"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/SrtpRolloverTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/SrtpRolloverTests.cs",
+      "sha256": "4d08b26326db9668f3db8910263a1ac14d5cf1e1b55a864b0aec0e7963a62a7b"
+    },
+    {
+      "path": "core/tests/EliteSIP.MediaCore.Tests/SrtpTests.cs",
+      "source_path": "tests/EliteSIP.MediaCore.Tests/SrtpTests.cs",
+      "sha256": "6921c850d7d0b013e2eb0bf67e8638ce4a345b2789f70fdad2e87dc8b0436fe0"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/EliteSIP.PanelLink.Tests.csproj",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/EliteSIP.PanelLink.Tests.csproj",
+      "sha256": "db657af1aae6e1895abcb01f6bde348a30656423fdf84faf91d8c0f4c53c3ca6"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/Fixtures.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/Fixtures.cs",
+      "sha256": "5274369264a66ea9615490ad482e33a6d55afbfb534a2fa910d8f34bf47c068d"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/MachineConfigTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/MachineConfigTests.cs",
+      "sha256": "802cfe358b695b4db9f1a2d1321130ba35c0fb43d33a9feec3ba872ac69432ff"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/MachineObjectTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/MachineObjectTests.cs",
+      "sha256": "184f112707760848ab6a3b9108a0051c1dab8d0fb8c4c06de5d0a9ac7dcf5957"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/ManagedFieldsTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/ManagedFieldsTests.cs",
+      "sha256": "8daf538cfdf64aed9983dca75b84168386b6a93654a868eec616d20424f9098e"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/PresetBundleTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/PresetBundleTests.cs",
+      "sha256": "fb98ecef96bf8aecb2c4145091b32a45a3acdead07e5edcbc36e92204f3e0561"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/QrCodeTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/QrCodeTests.cs",
+      "sha256": "952c6e0468f9948bcf8ab73e6e6cde0c2f0b21bdc409c6813107a717f54940c7"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/ReleaseLineTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/ReleaseLineTests.cs",
+      "sha256": "0b662f7047c23a0e84cddc39ffd1fee84cef8ba5c946917094007842f9e6d52c"
+    },
+    {
+      "path": "core/tests/EliteSIP.PanelLink.Tests/ReleaseManifestTests.cs",
+      "source_path": "tests/EliteSIP.PanelLink.Tests/ReleaseManifestTests.cs",
+      "sha256": "eb8d03277c9f3cee5409982794d03907db6752b549e15b0ce38c81733ad6ddbe"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/AutoAnswerHeaderTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/AutoAnswerHeaderTests.cs",
+      "sha256": "aefe9c01a9865dade128640e92a429baf306065ec154913548ce01b4b9e85270"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/CallTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/CallTests.cs",
+      "sha256": "ffdf9f80cfa6bad39becb41fd93ad855ad767eb434c9767d0534cfc4beaf0adc"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/ChannelLifecycleTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/ChannelLifecycleTests.cs",
+      "sha256": "c2ae472c59e440a9c7726fbb0fcf26d5369efbedbbcbc6d43e355bf211ba300c"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/DialedNumberTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/DialedNumberTests.cs",
+      "sha256": "3cb4f5612d75f9d73e0cbde0e6b1730d21ac5e8da7c517ce9d2fd3b8b102436e"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/DigestAuthenticationTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/DigestAuthenticationTests.cs",
+      "sha256": "347192fe548cb6e36d176c4c8da0d2e15cc1f9fb3a2b57039908b3f2b7ff73b0"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/DscpMarkingTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/DscpMarkingTests.cs",
+      "sha256": "783e95acb7cc2a0a1eff4e2bdfa8c0c5f7a610c80f4b0f9e2b5220c434858d40"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/EliteSIP.SipCore.Tests.csproj",
+      "source_path": "tests/EliteSIP.SipCore.Tests/EliteSIP.SipCore.Tests.csproj",
+      "sha256": "c94af1b541026d3209c5f4e0cb432bb5e16502fcb4076f2f27462673bef6c1e9"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/InboundRequestTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/InboundRequestTests.cs",
+      "sha256": "9514b865f47b7ceef13a37a1a6d0c519fd70304b67c985fef3d4da13a54e7ff9"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/IncomingCallTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/IncomingCallTests.cs",
+      "sha256": "b5937d3a2aea8a8e79aa5b9b2b59b10be6fbd7c89b20930c8645730e0ed712dd"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/InviteTransactionTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/InviteTransactionTests.cs",
+      "sha256": "2fe655a705adc4b74c990f4e078ce843bbca14bb1886ff58e313157faa88f5cf"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/KeepAliveTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/KeepAliveTests.cs",
+      "sha256": "e4aaac76c3a1d5451556978663a2d3f85eb46469d8e276f1d670688ef53b40ee"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/LinesTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/LinesTests.cs",
+      "sha256": "c55d43ea18913c4379d272703b041d4eda2c9d93e4b6c74ef2b37cc0bbe7ec26"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/NameAddressTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/NameAddressTests.cs",
+      "sha256": "f5537e579553f6d71346c5ed5cb8a4a73fd5ece1ce55413378a2ac152014da03"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/PortKnockTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/PortKnockTests.cs",
+      "sha256": "da85ee5062023bcd8cd6be8e8922bbf8aeb0238b275b3e6dd1aa87d77ce818d6"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/QualifyWatchTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/QualifyWatchTests.cs",
+      "sha256": "72f8743d3861b806eaee799021296f92ef1173b2397b99c66f279f8a5eb68717"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/RegistrationTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/RegistrationTests.cs",
+      "sha256": "f36070dd9fda677408d7818e27024d10ca3d70241a7827d0590331cf2162c2f5"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/RenegotiationTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/RenegotiationTests.cs",
+      "sha256": "d0f48086b66cc1e39b83632dd6613205039e80456ba064a2d94f3637797f0649"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/ScriptedSipServer.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/ScriptedSipServer.cs",
+      "sha256": "eb13b9663c333a9746c362e44ce7aabd9ad18dd4536a01013f68e831ad330022"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SessionTimerExchangeTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SessionTimerExchangeTests.cs",
+      "sha256": "ebae382e57ce5701082037b9bce7b9aac56ac026621fb5053e6ce1aa1bc2d974"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SessionTimerTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SessionTimerTests.cs",
+      "sha256": "bc8fd0622c693f83e2f11118141389a9218b6a012265b34cf2b8cb0cbf3aa9b2"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipDialogTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipDialogTests.cs",
+      "sha256": "cee0a19bc1c5e0c4e68de4c03e5c5eae3afe3c0e2970466066154b99848124c0"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipHeadersTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipHeadersTests.cs",
+      "sha256": "75f5a7ae6edc80a79504f6c352db454b4dfc2482795d45e877831640ab677a52"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipMessageFramerTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipMessageFramerTests.cs",
+      "sha256": "9c44df931267308fecb1a8a9d977acb8cda119291abd0c479ef012aa5a8a9422"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipParserTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipParserTests.cs",
+      "sha256": "36fd35994f6330ebaadb36f47a91229c1747e696b169bf024e0a2dde8c4cfee3"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipPrimitiveTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipPrimitiveTests.cs",
+      "sha256": "8e7d0c61e5ddc9897cdbc60b728f5587509bb79ae8a517b7d66aae00ef75b18f"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipTlsPinningTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipTlsPinningTests.cs",
+      "sha256": "1e901de68a14e83e09050996232064cec63da1079cba9eb2e498b1430976eb21"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipUriTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipUriTests.cs",
+      "sha256": "63269cda1e89f04a243ea1f551a0ff62c3c60404787ec0d53b2171a4bbe99a4f"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/SipViaTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/SipViaTests.cs",
+      "sha256": "1a3e9b1dec68492fe7d2b9cc49be412a29c9c95076006e75a1fcf10ea977f5e2"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/TlsTransportTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/TlsTransportTests.cs",
+      "sha256": "ae29aa69ff1ce824baee96ee2a2262b604e121502459fbcbb6dfba691aa46e17"
+    },
+    {
+      "path": "core/tests/EliteSIP.SipCore.Tests/TransferTests.cs",
+      "source_path": "tests/EliteSIP.SipCore.Tests/TransferTests.cs",
+      "sha256": "9ee9b4226b404c22d652a174fff525ecf4af79d9a64e51c11e443dbd50b8ab2a"
+    },
+    {
+      "path": "core/tools/ReleaseKit/Program.cs",
+      "source_path": "tools/ReleaseKit/Program.cs",
+      "sha256": "b22db9319942dbd157a834ffe962a4cc318ff32ce5a84b3513f33c69cde59d1f"
+    },
+    {
+      "path": "core/tools/ReleaseKit/ReleaseKit.csproj",
+      "source_path": "tools/ReleaseKit/ReleaseKit.csproj",
+      "sha256": "0c40db0c3a940652a66708a85d77f8ee8a6bf03a527e529e87d50b8c4c42fd7a"
+    },
+    {
+      "path": "tools/SipCheck/CallProbe.cs",
+      "source_path": "tools/SipCheck/CallProbe.cs",
+      "sha256": "e25d37704a2ac1ddebac1990317bff8c763b14b63568589fea6554e1bfa3e1b8"
+    },
+    {
+      "path": "tools/SipCheck/LatencyProbe.cs",
+      "source_path": "tools/SipCheck/LatencyProbe.cs",
+      "sha256": "9cafa72933e892587f7850876e6927cd307b9ffef551953b90110861c5d10145"
+    },
+    {
+      "path": "tools/SipCheck/LineProbe.cs",
+      "source_path": "tools/SipCheck/LineProbe.cs",
+      "sha256": "5909b54d488aabd2bc1ea786788c81aba088f16fcf835ad7b873d112ac977be0"
+    },
+    {
+      "path": "tools/SipCheck/ProbeAudio.cs",
+      "source_path": "tools/SipCheck/ProbeAudio.cs",
+      "sha256": "2c76e676d8e1e3a05d91b77d7f7ce7e7ff08470bfdb088a37c5c501268d010f6"
+    },
+    {
+      "path": "tools/SipCheck/Program.cs",
+      "source_path": "tools/SipCheck/Program.cs",
+      "sha256": "e28a6607fa79080582fdbaf65178238ec0d45144613d07cdd384de410e583638"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Theme/Palette.Light.xaml",
+      "source_path": "src/EliteSIP.App/Theme/Palette.Light.xaml",
+      "sha256": "cdc85bd6a1ad8d8ada2903246585186a6a0f2a8ed5a747f0d2dc364c59216be5"
+    },
+    {
+      "path": "core/src/EliteSIP.App/Theme/Palette.Dark.xaml",
+      "source_path": "src/EliteSIP.App/Theme/Palette.Dark.xaml",
+      "sha256": "70d0967c4a4422272bc900eb0e5a873b584d5afc96d84a1b5d4cad0f86b2e51d"
+    },
+    {
+      "path": "core/tests/EliteSIP.Updates.Tests/RecoveryTests.cs",
+      "source_path": "tests/EliteSIP.Updates.Tests/RecoveryTests.cs",
+      "sha256": "d97f432a7ea4b10a526c8de001d18fe060c0523087d087ae41855f24c614414b"
+    },
+    {
+      "path": "core/tests/EliteSIP.Updates.Tests/EliteSIP.Updates.Tests.csproj",
+      "source_path": "tests/EliteSIP.Updates.Tests/EliteSIP.Updates.Tests.csproj",
+      "sha256": "1f4efc50b14e0b3d2794ec452f6ef9621f9fe6b83549de00c98a82347d693afb"
+    },
+    {
+      "path": "core/tests/EliteSIP.Updates.Tests/ConsentTests.cs",
+      "source_path": "tests/EliteSIP.Updates.Tests/ConsentTests.cs",
+      "sha256": "57557e8152903654fe7033103afb6c9623d55dcca65d76cbb4225db4c0765fdf"
+    },
+    {
+      "path": "core/tests/Directory.Build.props",
+      "source_path": "tests/Directory.Build.props",
+      "sha256": "54611a5be529daa13ab6423c56042a3a9d9e96589d88a4f96d40b330cc27d5e0"
+    },
+    {
+      "path": "core/tests/Shared/PlatformFacts.cs",
+      "source_path": "tests/Shared/PlatformFacts.cs",
+      "sha256": "8b130ff6522519d4fd9d5693b3ebb7cdffb3aafe8e1c726322fcc2311df616ea"
+    },
+    {
+      "path": "core/.editorconfig",
+      "source_path": ".editorconfig",
+      "sha256": "728aa36b3f604e3a781ee0091eb170ea33df4bb88052dd91ef956dca913dc52d"
+    },
+    {
+      "path": "Directory.Build.props",
+      "source_path": "Directory.Build.props",
+      "sha256": "32bf4ec58ef8a5845e22897e7917654193374f2f7071a8e9986d5520c2de0954"
+    }
+  ]
+}

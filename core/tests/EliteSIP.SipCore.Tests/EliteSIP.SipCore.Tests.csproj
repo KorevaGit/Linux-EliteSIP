@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EliteSIP.SipCore\EliteSIP.SipCore.csproj" />
+
+    <!--
+      Транспорт модульными проверками не покрыт — так решено на W2: сокеты
+      проверяются на стенде, а не в наборе. TLS — исключение: пиннинг
+      сертификата это то место, где ошибка выглядит как «шифрование работает», а
+      на деле принимается чужой сертификат, и на стенде такое не видно вовсе.
+    -->
+    <ProjectReference Include="..\..\src\EliteSIP.SipCore.Udp\EliteSIP.SipCore.Udp.csproj" />
+  </ItemGroup>
+
+</Project>

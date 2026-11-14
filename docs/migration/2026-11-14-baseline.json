@@ -1,0 +1,532 @@
+{
+  "recorded_on": "2026-11-14",
+  "linux": {
+    "commit": "269da4fad20d427215bf2df145d8839b837a579c",
+    "branch": "linux/w-l7-release",
+    "version": "0.1.7"
+  },
+  "shared": {
+    "commit": "d3d9498820704a2faf6c602e87fe91b501b0d391",
+    "branch": "linux/w-l1-storage",
+    "tag": "linux-v0.1.7",
+    "gitlink": "160000 commit d3d9498820704a2faf6c602e87fe91b501b0d391\tshared"
+  },
+  "windows": {
+    "commit": "13bba4436a035f2e62adc79945e2aa0d4c7a1f8e",
+    "branch": "main",
+    "version": "1.0.1"
+  },
+  "windows_changelog": {
+    "path": "Mychanges.md",
+    "sha256": "0cc29a27b7181f1c5a0d76c8662b5f84b8bdb9d4788ac6f48782c7870745ec90"
+  },
+  "comparison": {
+    "EliteSIP.SipCore": [
+      {
+        "path": "src/EliteSIP.SipCore/DialedNumber.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/DigestAuthentication.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/IcmpEcho.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/NameAddress.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/PortKnockSequence.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/PortKnocker.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/QualifyWatch.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipAccount.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipCall.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipDialog.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipEndpoint.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipHeaderName.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipHeaders.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipInviteEvent.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipLexer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipMessage.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipMessageFramer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipMethod.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipParameter.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipParser.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipRegistrationState.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipSessionTimer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTlsPinning.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipToken.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTransactionLayer.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTransfer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTransport.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTransportChannel.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipTransportFailureText.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipUri.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipUserAgent.Calls.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipUserAgent.Inbound.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipUserAgent.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.SipCore/SipVia.cs",
+        "state": "equal_ignoring_crlf"
+      }
+    ],
+    "EliteSIP.SipCore.Udp": [
+      {
+        "path": "src/EliteSIP.SipCore.Udp/AssemblyInfo.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.SipCore.Udp/SipSocketOptions.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.SipCore.Udp/SocketSipTransport.cs",
+        "state": "different"
+      }
+    ],
+    "EliteSIP.MediaCore": [
+      {
+        "path": "src/EliteSIP.MediaCore/AudioCodec.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/AudioDelayEstimator.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/AudioTestSignal.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/Dtmf.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/G711.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/G722.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/InboundStreamWatch.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/JitterBuffer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/PacketLossConcealer.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/RemoteSourceFilter.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/RtcpPacket.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/RtcpSession.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/RtpPacket.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/RtpSession.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/SampleRing.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/SdesCrypto.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/Sdp.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/SdpNegotiator.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/SdpParser.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/Srtp.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.MediaCore/UdpSocketOptions.cs",
+        "state": "different"
+      }
+    ],
+    "EliteSIP.CallHistory": [
+      {
+        "path": "src/EliteSIP.CallHistory/CallHistoryStore.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/CallRecord.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/HistoryFilePrivacy.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/HistoryRecoverySnapshots.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/HistoryWriteJournal.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/NumberSighting.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.CallHistory/Resources/PackageStrings.cs",
+        "state": "equal_ignoring_crlf"
+      }
+    ],
+    "EliteSIP.Diagnostics": [
+      {
+        "path": "src/EliteSIP.Diagnostics/AppendOnlyFile.Unix.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Diagnostics/AppendOnlyFile.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Diagnostics/LogFile.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Diagnostics/LogRedaction.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Diagnostics/SupportArchive.cs",
+        "state": "different"
+      }
+    ],
+    "EliteSIP.PanelLink": [
+      {
+        "path": "src/EliteSIP.PanelLink/MachineConfig.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/MachineIdentity.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/ManagedFields.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/PanelLinkError.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/PresetBundle.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/QrCode.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/ReleaseLine.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/ReleaseManifest.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/Resources/PackageStrings.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/SignedEnvelope.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.PanelLink/WireJson.cs",
+        "state": "equal_ignoring_crlf"
+      }
+    ],
+    "EliteSIP.Audio": [
+      {
+        "path": "src/EliteSIP.Audio/AudioDevice.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioDeviceCatalog.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioDeviceChange.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioDeviceRules.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioDeviceWatch.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioOwnership.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioRestartPolicy.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioRoute.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioSelfTest.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/AudioWorkerBoundary.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/BackgroundVoiceGate.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/CaptureEffects.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/ClockDrift.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/DelayedWorkScheduler.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/DeviceActivityWatch.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/DeviceChangeRelevance.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/MediaSession.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/PlaybackRateController.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/ReceiveTuning.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/Resampler.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/RestartSupervisor.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/SampleBalance.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/SignalSoundPlayer.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/SignalSounds.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/SpeechGainControl.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/VoiceAudioBus.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/VoiceAudioConfiguration.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/VoiceAudioEngine.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/VoiceAudioException.cs",
+        "state": "linux_shared_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/VoiceProcessor.cs",
+        "state": "different"
+      },
+      {
+        "path": "src/EliteSIP.Audio/WasapiVoiceAudioEngine.cs",
+        "state": "windows_only"
+      },
+      {
+        "path": "src/EliteSIP.Audio/WaveFile.cs",
+        "state": "equal_ignoring_crlf"
+      },
+      {
+        "path": "src/EliteSIP.Audio/WindowsCaptureProcessing.cs",
+        "state": "equal_ignoring_crlf"
+      }
+    ]
+  },
+  "solution_projects": [
+    "shared/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj",
+    "shared/src/EliteSIP.App.Core/EliteSIP.App.Core.csproj",
+    "shared/src/EliteSIP.Audio/EliteSIP.Audio.csproj",
+    "shared/src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj",
+    "shared/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj",
+    "shared/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj",
+    "shared/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj",
+    "shared/src/EliteSIP.Lines/EliteSIP.Lines.csproj",
+    "shared/src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj",
+    "shared/src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj",
+    "shared/src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj",
+    "shared/src/EliteSIP.SipCore/EliteSIP.SipCore.csproj",
+    "shared/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj",
+    "shared/tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj",
+    "shared/tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj",
+    "shared/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj",
+    "shared/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj",
+    "shared/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj",
+    "shared/tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj",
+    "shared/tests/EliteSIP.MediaCore.Tests/EliteSIP.MediaCore.Tests.csproj",
+    "shared/tests/EliteSIP.PanelLink.Tests/EliteSIP.PanelLink.Tests.csproj",
+    "shared/tests/EliteSIP.SipCore.Tests/EliteSIP.SipCore.Tests.csproj",
+    "shared/tools/ReleaseKit/ReleaseKit.csproj",
+    "src/EliteSIP.App.Linux/EliteSIP.App.Linux.csproj",
+    "src/EliteSIP.Audio.Pulse/EliteSIP.Audio.Pulse.csproj",
+    "src/EliteSIP.Platform.Linux/EliteSIP.Platform.Linux.csproj",
+    "src/EliteSIP.Updater.Linux/EliteSIP.Updater.Linux.csproj",
+    "tests/EliteSIP.App.Linux.Tests/EliteSIP.App.Linux.Tests.csproj",
+    "tests/EliteSIP.Audio.Pulse.Tests/EliteSIP.Audio.Pulse.Tests.csproj",
+    "tests/EliteSIP.Platform.Linux.Tests/EliteSIP.Platform.Linux.Tests.csproj",
+    "tests/EliteSIP.Updater.Linux.Tests/EliteSIP.Updater.Linux.Tests.csproj",
+    "tools/PulseProbe/PulseProbe.csproj",
+    "tools/ShellProbe/ShellProbe.csproj",
+    "tools/SipCheck/SipCheck.csproj",
+    "tools/WindowProbe/WindowProbe.csproj"
+  ]
+}

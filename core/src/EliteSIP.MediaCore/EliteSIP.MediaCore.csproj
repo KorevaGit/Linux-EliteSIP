@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EliteSIP.Diagnostics\EliteSIP.Diagnostics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Тесты видят внутреннее: в оригинале ту же роль играл @testable import.
+      Проверяются, в частности, референсные формулы G.711 — таблицы сверяются
+      именно с ними, и делать формулы публичными ради теста значило бы
+      предложить продукту два способа кодировать один и тот же отсчёт.
+    -->
+    <InternalsVisibleTo Include="EliteSIP.MediaCore.Tests" />
+
+    <!--
+      Тракт видит внутреннее по той же причине, по какой в оригинале он лежал в
+      одном модуле с этим кодом: SampleRing написан для него и больше ни для
+      кого. Делать кольцо открытым значило бы предложить его приложению, а там
+      оно только навредит — оно без замка, и замок держит тракт.
+    -->
+    <InternalsVisibleTo Include="EliteSIP.Audio" />
+
+    <!--
+      С 20 октября 2026 тракт — это общая часть плюс движок устройства
+      (EliteSIP.Audio.Wasapi на Windows, EliteSIP.Audio.Pulse в Linux-версии), и
+      кольцо держит движок. Причина та же.
+    -->
+    <InternalsVisibleTo Include="EliteSIP.Audio.Wasapi" />
+    <InternalsVisibleTo Include="EliteSIP.Audio.Pulse" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

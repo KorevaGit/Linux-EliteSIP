@@ -5,7 +5,7 @@ using EliteSIP.PanelLink;
 namespace EliteSIP.Updater;
 
 /// <summary>
-/// Один такт обновляльщика: сценарий Windows-версии (<c>shared/tools/Updater</c>)
+/// Один такт обновляльщика: сценарий Windows-версии (<c>исторический Windows tools/Updater</c>)
 /// на Linux-путях.
 /// </summary>
 ///

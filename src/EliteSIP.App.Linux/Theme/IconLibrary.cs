@@ -11,7 +11,7 @@ namespace EliteSIP.App.Theme;
 ///
 /// <remarks>
 /// <para>
-/// <c>shared/src/EliteSIP.App/Theme/Icons.xaml</c> собирает стенд IconGen из
+/// <c>core/src/EliteSIP.App/Theme/Icons.xaml</c> собирает стенд IconGen из
 /// SVG macOS-версии, и правится он там же. Переписывать его под Avalonia —
 /// значит держать второй комплект, который разъедется с первым на первой же
 /// новой иконке. Поэтому сюда он встраивается как есть (ресурс сборки) и

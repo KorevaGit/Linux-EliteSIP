@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\shared\src\EliteSIP.App.Core\EliteSIP.App.Core.csproj" />
+    <ProjectReference Include="..\..\core\src\EliteSIP.App.Core\EliteSIP.App.Core.csproj" />
   </ItemGroup>
 
 </Project>

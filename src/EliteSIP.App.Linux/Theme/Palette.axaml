@@ -1,5 +1,5 @@
 <!--
-    Палитра — числа обеих тем Windows-версии (shared/src/EliteSIP.App/Theme/
+    Палитра — числа обеих тем Windows-версии (исторический Windows EliteSIP.App/Theme/
     Palette.Light.xaml и Palette.Dark.xaml), сведённые в одну с вариантами тем
     Avalonia. Там словарь подменялся целиком при смене темы, здесь тему меняет
     RequestedThemeVariant приложения, и кисти, взятые через DynamicResource,

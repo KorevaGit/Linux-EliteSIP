@@ -5,7 +5,7 @@ using EliteSIP.Diagnostics;
 
 namespace EliteSIP.App.Tests;
 
-/// <summary>Строка запуска и архив поддержки: версия, общий код, сеанс, звук, файлы.</summary>
+/// <summary>Строка запуска и архив поддержки: версия, исходники Linux, сеанс, звук, файлы.</summary>
 public sealed class SupportFactsTests
 {
     private static readonly Dictionary<string, string?> X11 = new()
@@ -16,20 +16,20 @@ public sealed class SupportFactsTests
     };
 
     [Fact]
-    public void Общий_код_вписан_сборкой()
+    public void Ревизия_Linux_вписан_сборкой()
     {
-        // Сборка идёт из git-дерева с подмодулем — значит, git describe есть.
-        Assert.NotEqual("неизвестен", SupportFacts.SharedCode);
-        Assert.Matches("-g[0-9a-f]{7,}", SupportFacts.SharedCode);
+        // Обычный Linux-клон и архив без Git должны собираться самостоятельно.
+        Assert.NotEqual("неизвестен", SupportFacts.SourceRevision);
+        Assert.Matches("^(?:[0-9a-f]{7,40}|source-archive)$", SupportFacts.SourceRevision);
     }
 
     [Fact]
-    public void Строка_запуска_говорит_версию_общий_код_и_сеанс()
+    public void Строка_запуска_говорит_версию_ревизию_Linux_и_сеанс()
     {
         var line = SupportFacts.StartupLine("0.1.2", X11.GetValueOrDefault);
 
         Assert.Contains("EliteSIP 0.1.2 (Linux)", line, StringComparison.Ordinal);
-        Assert.Contains(SupportFacts.SharedCode, line, StringComparison.Ordinal);
+        Assert.Contains(SupportFacts.SourceRevision, line, StringComparison.Ordinal);
         Assert.Contains("X11 (X-Cinnamon", line, StringComparison.Ordinal);
     }
 
@@ -38,7 +38,7 @@ public sealed class SupportFactsTests
     {
         var summary = SupportFacts.Summary("0.1.2", "M-1", "101", new TestAudioPlatform(), X11.GetValueOrDefault);
 
-        Assert.Contains("общий код: " + SupportFacts.SharedCode, summary, StringComparison.Ordinal);
+        Assert.Contains("исходники Linux: " + SupportFacts.SourceRevision, summary, StringComparison.Ordinal);
         Assert.Contains("сеанс: X11", summary, StringComparison.Ordinal);
         Assert.Contains("микрофон по умолчанию: Встроенный микрофон", summary, StringComparison.Ordinal);
         Assert.Contains("выходы: Динамики; LifeChat LX-3000", summary, StringComparison.Ordinal);

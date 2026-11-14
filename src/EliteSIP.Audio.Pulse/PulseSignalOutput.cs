@@ -10,7 +10,7 @@ namespace EliteSIP.Audio.Pulse;
 /// </summary>
 ///
 /// <remarks>
-/// Проигрыватель общий (<see cref="SignalSoundPlayer"/>, shared/), а здесь —
+/// Проигрыватель общий (<see cref="SignalSoundPlayer"/>, core/), а здесь —
 /// ровно то, чем Windows отличалась: устройство и декодер. NAudio разбирает
 /// MP3 системным ACM, которого на Linux нет; NLayer — управляемый декодер, и
 /// рингтон MP3, который оператор выбрал на Windows, звучит так же.

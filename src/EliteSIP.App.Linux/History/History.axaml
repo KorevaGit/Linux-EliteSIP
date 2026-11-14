@@ -1,5 +1,5 @@
 <!--
-    Стили истории — перевод shared/src/EliteSIP.App/History/History.xaml:
+    Стили истории — перевод исторический Windows EliteSIP.App/History/History.xaml:
     «чипы» под календарём и фильтры. ChipButtonStyle → Button.chip,
     FilterChipStyle → RadioButton.chip.
 -->

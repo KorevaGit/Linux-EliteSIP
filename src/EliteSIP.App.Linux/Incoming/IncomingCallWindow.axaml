@@ -1,5 +1,5 @@
 <!--
-    Окно входящего — перевод shared/src/EliteSIP.App/Incoming/IncomingCallWindow.xaml:
+    Окно входящего — перевод исторический Windows EliteSIP.App/Incoming/IncomingCallWindow.xaml:
     320 в ширину, высота по содержимому, без рамки, поверх всех, без
     активации и без кнопки в панели задач. Проверка цифрой (W9) — те же
     кнопки, что на Windows.

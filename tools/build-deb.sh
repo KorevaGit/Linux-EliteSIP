@@ -81,8 +81,7 @@ mkdir -p "$program" "$output"
 # машине — ещё один источник пакетов, который обновляется мимо нашей линии.
 #
 # Версия — ключом для всего дерева, а не только из Directory.Build.props: так
-# её получают и общие проекты из подмодуля (у них свой Directory.Build.props
-# с версией Windows). Версию приложения общий код берёт у входной сборки
+# её получают все локальные библиотеки core/. Версию приложения код берёт у входной сборки
 # (ProductVersion), но у всех сборок в /opt/elitesip она должна быть одна.
 #
 # DisableTransitiveFrameworkReferenceDownloads: иначе публикация под linux-x64
@@ -140,9 +139,9 @@ for unit in elitesip-updater.service elitesip-updater.timer elitesip-updater.pat
     install -D -m 0644 "$root/packaging/systemd/$unit" "$stage/usr/lib/systemd/system/$unit"
 done
 
-# Значок — тот же, что у Windows-версии, всех размеров, что есть.
+# Локальные значки приложения всех поддерживаемых размеров.
 for size in 16 32 128 256 512; do
-    install -D -m 0644 "$root/shared/src/EliteSIP.App/Assets/AppIcon/icon_${size}x${size}.png" \
+    install -D -m 0644 "$root/core/src/EliteSIP.App/Assets/AppIcon/icon_${size}x${size}.png" \
         "$stage/usr/share/icons/hicolor/${size}x${size}/apps/elitesip.png"
 done
 
@@ -158,7 +157,6 @@ install -D -m 0644 "$root/packaging/debian/copyright" "$doc/copyright"
     echo
     echo "  * Выпуск EliteSIP $version для Linux Mint 22 / Ubuntu 24.04."
     echo "  * Коммит: $(git -C "$root" describe --tags --always --dirty 2>/dev/null || echo неизвестен)."
-    echo "  * Общий код: $(git -C "$root/shared" describe --tags --long --always --dirty 2>/dev/null || echo неизвестен)."
     echo
     echo " -- $maintainer  $(LC_ALL=C date -R)"
 } | gzip -9n > "$doc/changelog.gz"

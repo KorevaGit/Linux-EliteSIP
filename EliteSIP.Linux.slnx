@@ -1,44 +1,35 @@
 <Solution>
-  <!--
-    Общие проекты берутся из подмодуля shared/ (Windows-репозиторий) и здесь
-    не правятся: правка общего кода идёт в Win-EliteSIP, а сюда приезжает
-    сдвигом указателя подмодуля (docs/PORT-PLAN.md, «Правила работы с
-    подмодулем»).
-
-    В решение входят только проекты net10.0. Audio, Lines и App.Core — с ветки
-    W-L1 (linux/w-l1-storage): на ней подмодуль стоит, пока эта ветка не
-    выпущена меткой в Windows-репозитории. Lines нужен стенду W-L3
-    (tools/SipCheck), App.Core — оболочке W-L4 (интерфейсы платформы).
-    Updates добавится после выпуска W-L1, вместе со сдвигом указателя на метку.
-  -->
-  <Folder Name="/shared/src/">
-    <Project Path="shared/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj" />
-    <Project Path="shared/src/EliteSIP.App.Core/EliteSIP.App.Core.csproj" />
-    <Project Path="shared/src/EliteSIP.Audio/EliteSIP.Audio.csproj" />
-    <Project Path="shared/src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj" />
-    <Project Path="shared/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj" />
-    <Project Path="shared/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj" />
-    <Project Path="shared/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj" />
-    <Project Path="shared/src/EliteSIP.Lines/EliteSIP.Lines.csproj" />
-    <Project Path="shared/src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj" />
-    <Project Path="shared/src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj" />
-    <Project Path="shared/src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj" />
-    <Project Path="shared/src/EliteSIP.SipCore/EliteSIP.SipCore.csproj" />
+  <!-- Все проекты принадлежат Linux-репозиторию; core/ — обычные локальные исходники. -->
+  <Folder Name="/core/src/">
+    <Project Path="core/src/EliteSIP.Updates/EliteSIP.Updates.csproj" />
+    <Project Path="core/src/EliteSIP.AdminAccess/EliteSIP.AdminAccess.csproj" />
+    <Project Path="core/src/EliteSIP.App.Core/EliteSIP.App.Core.csproj" />
+    <Project Path="core/src/EliteSIP.Audio/EliteSIP.Audio.csproj" />
+    <Project Path="core/src/EliteSIP.Audio.Signals/EliteSIP.Audio.Signals.csproj" />
+    <Project Path="core/src/EliteSIP.CallGuard/EliteSIP.CallGuard.csproj" />
+    <Project Path="core/src/EliteSIP.CallHistory/EliteSIP.CallHistory.csproj" />
+    <Project Path="core/src/EliteSIP.Diagnostics/EliteSIP.Diagnostics.csproj" />
+    <Project Path="core/src/EliteSIP.Lines/EliteSIP.Lines.csproj" />
+    <Project Path="core/src/EliteSIP.MediaCore/EliteSIP.MediaCore.csproj" />
+    <Project Path="core/src/EliteSIP.PanelLink/EliteSIP.PanelLink.csproj" />
+    <Project Path="core/src/EliteSIP.SipCore.Udp/EliteSIP.SipCore.Udp.csproj" />
+    <Project Path="core/src/EliteSIP.SipCore/EliteSIP.SipCore.csproj" />
   </Folder>
-  <Folder Name="/shared/tests/">
-    <Project Path="shared/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.MediaCore.Tests/EliteSIP.MediaCore.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.PanelLink.Tests/EliteSIP.PanelLink.Tests.csproj" />
-    <Project Path="shared/tests/EliteSIP.SipCore.Tests/EliteSIP.SipCore.Tests.csproj" />
+  <Folder Name="/core/tests/">
+    <Project Path="core/tests/EliteSIP.Updates.Tests/EliteSIP.Updates.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.AdminAccess.Tests/EliteSIP.AdminAccess.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.App.Core.Tests/EliteSIP.App.Core.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.Audio.Signals.Tests/EliteSIP.Audio.Signals.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.Audio.Tests/EliteSIP.Audio.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.CallGuard.Tests/EliteSIP.CallGuard.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.CallHistory.Tests/EliteSIP.CallHistory.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.Diagnostics.Tests/EliteSIP.Diagnostics.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.MediaCore.Tests/EliteSIP.MediaCore.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.PanelLink.Tests/EliteSIP.PanelLink.Tests.csproj" />
+    <Project Path="core/tests/EliteSIP.SipCore.Tests/EliteSIP.SipCore.Tests.csproj" />
   </Folder>
-  <Folder Name="/shared/tools/">
-    <Project Path="shared/tools/ReleaseKit/ReleaseKit.csproj" />
+  <Folder Name="/core/tools/">
+    <Project Path="core/tools/ReleaseKit/ReleaseKit.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/EliteSIP.App.Linux/EliteSIP.App.Linux.csproj" />

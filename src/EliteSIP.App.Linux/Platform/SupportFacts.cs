@@ -9,28 +9,19 @@ namespace EliteSIP.App.Platform;
 /// и для архива поддержки.
 /// </summary>
 ///
-/// <remarks>
-/// Первый вопрос поддержки — «какая версия и какая система». У Linux к нему
-/// добавляются два: из какого общего кода собран выпуск (подмодуль
-/// <c>shared/</c> идёт своим ходом, план, «Версия»), и какой сеанс — X11 или
-/// Wayland.
-/// </remarks>
+/// <remarks>Все исходники принадлежат Linux; ревизия берётся из его репозитория.</remarks>
 internal static class SupportFacts
 {
-    /// <summary>
-    /// Общий код выпуска: <c>git describe</c> подмодуля при сборке, например
-    /// <c>linux-v0.1.1-0-g3f963d5</c>. Вписывает сборка
-    /// (<c>EliteSIP.App.Linux.csproj</c>, цель <c>StampSharedCode</c>).
-    /// </summary>
-    internal static string SharedCode { get; } =
+    /// <summary>Ревизия Linux при сборке либо source-archive для архива без Git.</summary>
+    internal static string SourceRevision { get; } =
         typeof(SupportFacts).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
-            .FirstOrDefault(attribute => attribute.Key == "SharedCode")?.Value is { Length: > 0 } code
+            .FirstOrDefault(attribute => attribute.Key == "SourceRevision")?.Value is { Length: > 0 } code
                 ? code
                 : "неизвестен";
 
-    /// <summary>Строка запуска: версия, общий код, сеанс.</summary>
+    /// <summary>Строка запуска: версия, исходники Linux, сеанс.</summary>
     internal static string StartupLine(string version, Func<string, string?> environment) =>
-        $"запуск: EliteSIP {version} (Linux), общий код {SharedCode}, сеанс {GraphicsSession.Describe(environment)}";
+        $"запуск: EliteSIP {version} (Linux), исходники Linux {SourceRevision}, сеанс {GraphicsSession.Describe(environment)}";
 
     /// <summary>
     /// <c>summary.txt</c> архива. Секретов здесь нет: номер и идентификатор
@@ -46,7 +37,7 @@ internal static class SupportFacts
         var lines = new List<string>
         {
             $"EliteSIP {version} (Linux)",
-            $"общий код: {SharedCode}",
+            $"исходники Linux: {SourceRevision}",
             $"машина: {installation}",
             $"добавочный: {number}",
             $"система: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}",

@@ -1,0 +1,1292 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Русские подписи — язык, на котором приложение написано и на котором его
+    читает заказчик. Лежат отдельным каталогом, а не в нейтральном, потому что
+    нейтральный обязан быть английским: см. `Strings.resx`.
+-->
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="PanelWindowTitle" xml:space="preserve">
+    <value>EliteSIP</value>
+  </data>
+  <data name="PanelSettings" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="PanelHistory" xml:space="preserve">
+    <value>История</value>
+  </data>
+  <data name="PanelCall" xml:space="preserve">
+    <value>Позвонить</value>
+  </data>
+  <data name="PanelHangUp" xml:space="preserve">
+    <value>Завершить</value>
+  </data>
+  <data name="PanelNumberPlaceholder" xml:space="preserve">
+    <value>Номер</value>
+  </data>
+  <data name="PanelClearNumber" xml:space="preserve">
+    <value>Очистить номер</value>
+  </data>
+  <data name="PanelHold" xml:space="preserve">
+    <value>Удержать</value>
+  </data>
+  <data name="PanelResume" xml:space="preserve">
+    <value>Вернуть</value>
+  </data>
+  <data name="PanelMicrophone" xml:space="preserve">
+    <value>Микрофон</value>
+  </data>
+  <data name="PanelMicrophoneOff" xml:space="preserve">
+    <value>Микрофон выкл.</value>
+  </data>
+  <data name="PanelTransfer" xml:space="preserve">
+    <value>Перевести</value>
+  </data>
+  <data name="PanelConference" xml:space="preserve">
+    <value>Конференция</value>
+  </data>
+  <data name="PanelTransferNumber" xml:space="preserve">
+    <value>Номер перевода</value>
+  </data>
+  <data name="PanelCancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="PanelOffline" xml:space="preserve">
+    <value>Отключён</value>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="SectionWork" xml:space="preserve">
+    <value>Работа</value>
+  </data>
+  <data name="SectionAudio" xml:space="preserve">
+    <value>Звук</value>
+  </data>
+  <data name="SectionRingtone" xml:space="preserve">
+    <value>Звонок</value>
+  </data>
+  <data name="SectionAppearance" xml:space="preserve">
+    <value>Оформление</value>
+  </data>
+  <data name="SectionSupport" xml:space="preserve">
+    <value>Техподдержка</value>
+  </data>
+  <data name="WorkPlace" xml:space="preserve">
+    <value>Рабочее место</value>
+  </data>
+  <data name="WorkOffice" xml:space="preserve">
+    <value>Офис</value>
+  </data>
+  <data name="WorkRemote" xml:space="preserve">
+    <value>Из дома</value>
+  </data>
+  <data name="WorkPbxAddress" xml:space="preserve">
+    <value>Адрес АТС</value>
+  </data>
+  <data name="WorkSiteNote" xml:space="preserve">
+    <value>Переключение меняет адрес АТС и заново поднимает регистрацию: из дома внутренний адрес недостижим, а из офиса внешний ведёт на тот же сервер длинной дорогой через шлюз.</value>
+  </data>
+  <data name="WorkInCallNote" xml:space="preserve">
+    <value>Идёт разговор — переключить сейчас нельзя.</value>
+  </data>
+  <data name="WorkStartupSection" xml:space="preserve">
+    <value>Запуск</value>
+  </data>
+  <data name="WorkTroubleSection" xml:space="preserve">
+    <value>Если не подключается</value>
+  </data>
+  <data name="WorkRepairNetwork" xml:space="preserve">
+    <value>Исправить сеть</value>
+  </data>
+  <data name="WorkRepairNote" xml:space="preserve">
+    <value>Открывает дорогу до АТС снаружи — один раз и прямо сейчас. Нужно, когда из дома перестало подключаться без видимой причины: у домашнего интернета сменился адрес, а шлюз помнит прежний.</value>
+  </data>
+  <data name="AudioMicrophone" xml:space="preserve">
+    <value>Микрофон</value>
+  </data>
+  <data name="AudioHeadphones" xml:space="preserve">
+    <value>Наушники</value>
+  </data>
+  <data name="AudioGain" xml:space="preserve">
+    <value>Усиление</value>
+  </data>
+  <data name="AudioVolume" xml:space="preserve">
+    <value>Громкость</value>
+  </data>
+  <data name="AudioSystemDefaultInput" xml:space="preserve">
+    <value>Системный по умолчанию</value>
+  </data>
+  <data name="AudioSystemDefaultOutput" xml:space="preserve">
+    <value>Системные по умолчанию</value>
+  </data>
+  <data name="AudioGainAutoNote" xml:space="preserve">
+    <value>Усиление считает система: чтобы поставить его руками, выключите автоматическую регулировку ниже.</value>
+  </data>
+  <data name="AudioAgc" xml:space="preserve">
+    <value>Автоматическая регулировка усиления</value>
+  </data>
+  <data name="AudioRelease" xml:space="preserve">
+    <value>Отпускать наушники между звонками</value>
+  </data>
+  <data name="AudioNoiseSuppression" xml:space="preserve">
+    <value>Шумоподавление</value>
+  </data>
+  <data name="AudioNoiseSuppressionNote" xml:space="preserve">
+    <value>Убирает ровный шум комнаты — гул, вентилятор, шипение. Чужую речь он не трогает: для неё переключатель ниже. Выключайте только на гарнитуре: на динамиках ноутбука он же гасит эхо, которое услышит собеседник. Меняется сразу, и посреди разговора тоже.</value>
+  </data>
+  <data name="AudioReceiveGain" xml:space="preserve">
+    <value>Выравнивать громкость собеседника</value>
+  </data>
+  <data name="AudioReceiveGainNote" xml:space="preserve">
+    <value>Тихую линию поднимает до +10 дБ, громкую убавляет до −6 дБ — по голосу, в паузах прибавка замирает. Громкость выше 100 % и выравнивание работают поверх мягкого ограничителя и не дают хрипа; на очень тихой линии вместе с голосом становится слышнее и её шум.</value>
+  </data>
+  <data name="AudioSelfTestRerun" xml:space="preserve">
+    <value>Настройка применена. Запись проверки сделана с прежними — запустите проверку ещё раз, чтобы услышать разницу.</value>
+  </data>
+  <data name="AudioSelfTestSave" xml:space="preserve">
+    <value>Сохранить запись</value>
+  </data>
+  <data name="AudioSelfTestSaveTitle" xml:space="preserve">
+    <value>Сохранить запись проверки</value>
+  </data>
+  <data name="AudioSelfTestSaved" xml:space="preserve">
+    <value>Запись сохранена: {0}</value>
+  </data>
+  <data name="AudioSelfTestSaveFailed" xml:space="preserve">
+    <value>Запись не сохранилась: {0}</value>
+  </data>
+  <data name="AudioWindowsProcessing" xml:space="preserve">
+    <value>Обработка Windows</value>
+  </data>
+  <data name="AudioWindowsProcessingAuto" xml:space="preserve">
+    <value>Авто</value>
+  </data>
+  <data name="AudioWindowsProcessingOn" xml:space="preserve">
+    <value>Вкл.</value>
+  </data>
+  <data name="AudioWindowsProcessingOff" xml:space="preserve">
+    <value>Выкл.</value>
+  </data>
+  <data name="AudioWindowsProcessingNote" xml:space="preserve">
+    <value>Своя обработка голоса драйвера и Windows — поверх обработки программы. «Авто» выключает её на гарнитуре: там она только мешает, а её усиление в паузах вытягивает голоса соседей. На встроенном микрофоне ноутбука она остаётся: сужает то, что он слышит. Меняется сразу, и посреди разговора тоже — с паузой в полсекунды.</value>
+  </data>
+  <data name="AudioBackgroundVoices" xml:space="preserve">
+    <value>Приглушать голоса вокруг</value>
+  </data>
+  <data name="AudioBackgroundVoicesNote" xml:space="preserve">
+    <value>Всё, что заметно тише вашего голоса, — коллеги рядом, телевизор — в паузах приглушается. Лучше всего работает на гарнитуре с микрофоном у рта; на микрофоне ноутбука громкий сосед рядом всё равно будет слышен. Если собеседник жалуется, что у вас пропадают начала или концы фраз, выключите.</value>
+  </data>
+  <data name="AudioLevelsNote" xml:space="preserve">
+    <value>Уровни появятся здесь в разговоре и во время проверки ниже: по ним видно, что уходит в линию и что приходит из неё.</value>
+  </data>
+  <data name="AudioSelfTestNote" xml:space="preserve">
+    <value>Пять секунд записи и сразу воспроизведение — тем же трактом, что и разговор.</value>
+  </data>
+  <data name="AudioSelfTestStart" xml:space="preserve">
+    <value>Проверить микрофон и звук</value>
+  </data>
+  <data name="AudioSelfTestStop" xml:space="preserve">
+    <value>Остановить</value>
+  </data>
+  <data name="AudioSelfTestBusy" xml:space="preserve">
+    <value>Во время звонка проверка недоступна: она заняла бы микрофон, которым вы говорите. Шкалы ниже показывают разговор.</value>
+  </data>
+  <data name="AudioMeterVoice" xml:space="preserve">
+    <value>Голос</value>
+  </data>
+  <data name="AudioMeterSound" xml:space="preserve">
+    <value>Звук</value>
+  </data>
+  <data name="AudioMeterHint" xml:space="preserve">
+    <value>Шкалы голоса и звука появятся во время проверки и во время разговора. Микрофон открывается только на это время.</value>
+  </data>
+  <data name="AudioAggregateNote" xml:space="preserve">
+    <value>Разные устройства: системного эхоподавления не будет. На колонках собеседник услышит себя, в наушниках — нет.</value>
+  </data>
+  <data name="RingtoneEnabled" xml:space="preserve">
+    <value>Проигрывать рингтон</value>
+  </data>
+  <data name="RingtonePlayIn" xml:space="preserve">
+    <value>Играть в</value>
+  </data>
+  <data name="RingtoneSystemOutput" xml:space="preserve">
+    <value>Системное устройство</value>
+  </data>
+  <data name="RingtoneCallOutput" xml:space="preserve">
+    <value>Устройство разговора</value>
+  </data>
+  <data name="RingtoneOutputNote" xml:space="preserve">
+    <value>Гарнитуру на столе не слышно — тогда звонить должны колонки.</value>
+  </data>
+  <data name="RingtoneSound" xml:space="preserve">
+    <value>Звук</value>
+  </data>
+  <data name="RingtoneDefault" xml:space="preserve">
+    <value>Стандартный</value>
+  </data>
+  <data name="RingtoneChooseFile" xml:space="preserve">
+    <value>Выбрать файл…</value>
+  </data>
+  <data name="RingtonePreview" xml:space="preserve">
+    <value>Прослушать</value>
+  </data>
+  <data name="RingtoneMissingSuffix" xml:space="preserve">
+    <value> — файл не найден</value>
+  </data>
+  <data name="RingtoneUnreadable" xml:space="preserve">
+    <value>файл не воспроизводится — прозвучит стандартный</value>
+  </data>
+  <data name="SupportArchiveNote" xml:space="preserve">
+    <value>Архив с журналом и сведениями о системе: по нему в поддержке разбирают, что случилось со звонком.</value>
+  </data>
+  <data name="SupportCollectLogs" xml:space="preserve">
+    <value>Собрать логи</value>
+  </data>
+  <data name="SupportVersion" xml:space="preserve">
+    <value>Версия</value>
+  </data>
+  <data name="SupportCheckUpdates" xml:space="preserve">
+    <value>Проверить обновления</value>
+  </data>
+  <data name="SupportNewKeySection" xml:space="preserve">
+    <value>Новый ключ</value>
+  </data>
+  <data name="SupportNewKeyNote" xml:space="preserve">
+    <value>Если вам прислали ключ для смены настроек — введите его здесь. Номер и настройки сменятся сами; переустанавливать ничего не нужно.</value>
+  </data>
+  <data name="SupportKey" xml:space="preserve">
+    <value>Ключ</value>
+  </data>
+  <data name="SupportApplyKey" xml:space="preserve">
+    <value>Применить ключ</value>
+  </data>
+  <data name="AppearanceTheme" xml:space="preserve">
+    <value>Тема</value>
+  </data>
+  <data name="AppearanceSystem" xml:space="preserve">
+    <value>Системная</value>
+  </data>
+  <data name="AppearanceLight" xml:space="preserve">
+    <value>Светлая</value>
+  </data>
+  <data name="AppearanceDark" xml:space="preserve">
+    <value>Тёмная</value>
+  </data>
+  <data name="AppearanceLanguage" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="AppearanceLanguageSystem" xml:space="preserve">
+    <value>Системный</value>
+  </data>
+  <data name="AppearanceLanguageNote" xml:space="preserve">
+    <value>«Системный» — как в Windows: русский там, где в системе есть русский, английский во всех остальных случаях.</value>
+  </data>
+  <data name="AppearanceLanguageRestartNote" xml:space="preserve">
+    <value>Переключение перезапускает приложение: язык выбирается при запуске, и поменять его у открытых окон нельзя. Регистрация снимется и поднимется заново, а звонок в этот момент оборвётся.</value>
+  </data>
+  <data name="AppearanceThemeNote" xml:space="preserve">
+    <value>Тема применяется сразу и перезапуска не требует.</value>
+  </data>
+  <data name="AppearanceLanguageQuestion" xml:space="preserve">
+    <value>Сменить язык?</value>
+  </data>
+  <data name="AppearanceLanguageQuestionBody" xml:space="preserve">
+    <value>Язык меняется у всех окон сразу, и для этого приложение перезапустится: регистрация снимется и поднимется заново. Если сейчас идёт разговор, он оборвётся.</value>
+  </data>
+  <data name="AdminModeTitle" xml:space="preserve">
+    <value>Режим администратора</value>
+  </data>
+  <data name="AdminModeNeedsPassword" xml:space="preserve">
+    <value>Требуется пароль</value>
+  </data>
+  <data name="AdminModeOpen" xml:space="preserve">
+    <value>Управление ›</value>
+  </data>
+  <data name="HistoryWindowTitle" xml:space="preserve">
+    <value>История звонков</value>
+  </data>
+  <data name="HistoryWindowTitleWithProfile" xml:space="preserve">
+    <value>История звонков — {0}</value>
+  </data>
+  <data name="HistoryEmpty" xml:space="preserve">
+    <value>Здесь пока ничего нет</value>
+  </data>
+  <data name="HistoryToday" xml:space="preserve">
+    <value>Сегодня</value>
+  </data>
+  <data name="HistoryYesterday" xml:space="preserve">
+    <value>Вчера</value>
+  </data>
+  <data name="HistoryTransferred" xml:space="preserve">
+    <value>переведён</value>
+  </data>
+  <data name="HistoryConsultation" xml:space="preserve">
+    <value>консультация</value>
+  </data>
+  <data name="HistoryConference" xml:space="preserve">
+    <value>конференция</value>
+  </data>
+  <data name="HistoryRedial" xml:space="preserve">
+    <value>Позвонить снова</value>
+  </data>
+  <data name="HistorySnapshot" xml:space="preserve">
+    <value>Снимок списка в буфер обмена</value>
+  </data>
+  <data name="HistorySnapshotDone" xml:space="preserve">
+    <value>Снимок в буфере обмена</value>
+  </data>
+  <data name="AdminUnlockTitle" xml:space="preserve">
+    <value>Управление настройками</value>
+  </data>
+  <data name="AdminUnlockSubtitle" xml:space="preserve">
+    <value>Аккаунты, клавиши, защита от автокликеров и диагностика.</value>
+  </data>
+  <data name="AdminUnlockEnter" xml:space="preserve">
+    <value>Войти</value>
+  </data>
+  <data name="AdminUnlockWarning" xml:space="preserve">
+    <value>Пароль на этой машине не заведён — «Управление» открыто всякому, кто до неё дотянулся. Правки здесь меняют рабочее место целиком.</value>
+  </data>
+  <data name="AdminUnlockWrongPassword" xml:space="preserve">
+    <value>Неверный пароль.</value>
+  </data>
+  <data name="AdminWindowTitle" xml:space="preserve">
+    <value>Управление</value>
+  </data>
+  <data name="AdminGroupMachine" xml:space="preserve">
+    <value>Машина</value>
+  </data>
+  <data name="AdminSectionMacros" xml:space="preserve">
+    <value>Клавиши</value>
+  </data>
+  <data name="AdminSectionHistory" xml:space="preserve">
+    <value>История</value>
+  </data>
+  <data name="AdminSectionAccess" xml:space="preserve">
+    <value>Доступ</value>
+  </data>
+  <data name="AdminSectionDiagnostics" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="AdminSave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="AdminRevert" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="AdminDirtyTitle" xml:space="preserve">
+    <value>Есть несохранённые изменения</value>
+  </data>
+  <data name="AdminDirtyBody" xml:space="preserve">
+    <value>Пока не нажато «Сохранить», на диск не записано ничего.</value>
+  </data>
+  <data name="AdminCleanTitle" xml:space="preserve">
+    <value>Изменений нет</value>
+  </data>
+  <data name="AdminCleanBody" xml:space="preserve">
+    <value>Настройки этой машины задаёт её администратор.</value>
+  </data>
+  <data name="AdminCleanBodyManaged" xml:space="preserve">
+    <value>Настройками этой машины управляет Spark. Сохранённые здесь правки уведут её в оффлайн.</value>
+  </data>
+  <data name="SupportCheckPresets" xml:space="preserve">
+    <value>Проверить обновление предустановок</value>
+  </data>
+  <data name="SupportPresetsNote" xml:space="preserve">
+    <value>Спрашивает панель о настройках рабочего места — клавишах, очередях, адресах. Обычно это происходит само раз в два часа.</value>
+  </data>
+  <data name="SupportKeyChecking" xml:space="preserve">
+    <value>Проверяем ключ…</value>
+  </data>
+  <data name="SupportKeyApplied" xml:space="preserve">
+    <value>Настройки сменились. Приложение перезапустится.</value>
+  </data>
+  <data name="SupportLogsCollected" xml:space="preserve">
+    <value>Архив собран: {0}</value>
+  </data>
+  <data name="SupportLogsFailed" xml:space="preserve">
+    <value>Архив собрать не удалось: {0}</value>
+  </data>
+  <data name="SupportNetworkRepaired" xml:space="preserve">
+    <value>Дорога до АТС открыта заново.</value>
+  </data>
+  <data name="SupportPresetsAsked" xml:space="preserve">
+    <value>Панель опрошена.</value>
+  </data>
+  <data name="FirstRunKeyNoChannel" xml:space="preserve">
+    <value>В это приложение не положена заводская настройка, поэтому проверить ключ негде. Такая машина не получит ни предустановок, ни обновлений: настройте её вручную и сообщите тому, кто выпускал сборку.</value>
+  </data>
+  <data name="AdminResetTitle" xml:space="preserve">
+    <value>Сброс</value>
+  </data>
+  <data name="AdminResetButton" xml:space="preserve">
+    <value>Сбросить машину…</value>
+  </data>
+  <data name="AdminResetInCall" xml:space="preserve">
+    <value>недоступно в разговоре</value>
+  </data>
+  <data name="AdminResetNote" xml:space="preserve">
+    <value>Стирает настройки, историю и журнал — машина станет такой же, как сразу после установки, и пароля администратора на ней не будет. Готовится к передаче рабочего места другому сотруднику.</value>
+  </data>
+  <data name="AdminResetConfirmTitle" xml:space="preserve">
+    <value>Сбросить машину?</value>
+  </data>
+  <data name="AdminResetConfirmBody" xml:space="preserve">
+    <value>Будут стёрты настройки, история звонков и журнал. Профили, пароли, клавиши, очереди и последовательность стука исчезнут; пароля администратора на машине не останется, и закрытые настройки будут открыты всем.</value>
+  </data>
+  <data name="AdminResetConfirmFootnote" xml:space="preserve">
+    <value>Вернуть это нельзя ни «Отменой», ни из архива для поддержки: он собирается из журнала, а журнал стирается вместе со всем остальным.</value>
+  </data>
+  <data name="AdminResetConfirmButton" xml:space="preserve">
+    <value>Сбросить</value>
+  </data>
+  <data name="AdminSaveConfirmTitle" xml:space="preserve">
+    <value>Сохранить настройки?</value>
+  </data>
+  <data name="AdminSaveConfirmBody" xml:space="preserve">
+    <value>Настройки этой машины станут локальными: их задаёт администратор, а не файл конфигурации. Сохранение будет записано в журнал.</value>
+  </data>
+  <data name="AdminMacrosTitle" xml:space="preserve">
+    <value>Клавиши макросов</value>
+  </data>
+  <data name="AdminMacroTitle" xml:space="preserve">
+    <value>Подпись</value>
+  </data>
+  <data name="AdminMacroSequence" xml:space="preserve">
+    <value>Набор</value>
+  </data>
+  <data name="AdminMacroTransfers" xml:space="preserve">
+    <value>Уводит звонок</value>
+  </data>
+  <data name="AdminMacroAdd" xml:space="preserve">
+    <value>Добавить клавишу</value>
+  </data>
+  <data name="AdminMacroRemove" xml:space="preserve">
+    <value>Убрать</value>
+  </data>
+  <data name="AdminMacroUp" xml:space="preserve">
+    <value>Выше</value>
+  </data>
+  <data name="AdminMacroDown" xml:space="preserve">
+    <value>Ниже</value>
+  </data>
+  <data name="AdminMacrosNote" xml:space="preserve">
+    <value>Подпись и набор — ваши: коды набирает АТС этой конторы, и угадывать их приложение не берётся. Порядок клавиш значим — оператор целится в место, а не читает подписи каждый раз.</value>
+  </data>
+  <data name="AdminMacroTransfersNote" xml:space="preserve">
+    <value>«Уводит звонок» помечает разговор переводом в истории. Определять это по началу набора нельзя: у каждой АТС свои коды, а пометка идёт в историю, которую читают как свидетельство.</value>
+  </data>
+  <data name="AdminMacroLayout" xml:space="preserve">
+    <value>Раскладка</value>
+  </data>
+  <data name="AdminMacroColumns" xml:space="preserve">
+    <value>В ряду</value>
+  </data>
+  <data name="AdminMacroHeightAuto" xml:space="preserve">
+    <value>Высота по подписям</value>
+  </data>
+  <data name="AdminMacroHeight" xml:space="preserve">
+    <value>Высота</value>
+  </data>
+  <data name="AdminHistoryTitle" xml:space="preserve">
+    <value>История звонков</value>
+  </data>
+  <data name="AdminHistoryEnabled" xml:space="preserve">
+    <value>Вести историю</value>
+  </data>
+  <data name="AdminHistoryAge" xml:space="preserve">
+    <value>Хранить, дней</value>
+  </data>
+  <data name="AdminHistoryNote" xml:space="preserve">
+    <value>Выключатель административный, а не менеджерский: история — свидетельство при разборе жалобы, и решать, вести ли её, тому, чьи звонки в ней записаны, нельзя.</value>
+  </data>
+  <data name="AdminAccessTitle" xml:space="preserve">
+    <value>Пароль администратора</value>
+  </data>
+  <data name="AdminAccessNewPassword" xml:space="preserve">
+    <value>Новый пароль</value>
+  </data>
+  <data name="AdminAccessRepeatPassword" xml:space="preserve">
+    <value>Ещё раз</value>
+  </data>
+  <data name="AdminAccessSet" xml:space="preserve">
+    <value>Задать пароль</value>
+  </data>
+  <data name="AdminAccessRemove" xml:space="preserve">
+    <value>Снять пароль</value>
+  </data>
+  <data name="AdminAccessMismatch" xml:space="preserve">
+    <value>Пароли не совпадают.</value>
+  </data>
+  <data name="AdminAccessProtected" xml:space="preserve">
+    <value>Пароль заведён. Забывшему смотреть в панель — оттуда пароль и приезжает на машину.</value>
+  </data>
+  <data name="AdminAccessOpen" xml:space="preserve">
+    <value>Пароля нет: «Управление» открыто всякому, кто дотянулся до машины.</value>
+  </data>
+  <data name="AdminAccessApplied" xml:space="preserve">
+    <value>Пароль применяется сразу, а не по «Сохранить»: это ключ от настроек, а не настройка.</value>
+  </data>
+  <data name="AdminDiagnosticsTitle" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="AdminDiagnosticsSettingsPath" xml:space="preserve">
+    <value>Файл настроек</value>
+  </data>
+  <data name="AdminDiagnosticsOpenFolder" xml:space="preserve">
+    <value>Показать папку</value>
+  </data>
+  <data name="AdminDiagnosticsNote" xml:space="preserve">
+    <value>Журнал и настройки лежат рядом. Их прикладывают к обращению в поддержку — там же собирается архив из раздела «Техподдержка».</value>
+  </data>
+  <data name="AppearanceLanguageConfirm" xml:space="preserve">
+    <value>Сменить и перезапустить</value>
+  </data>
+  <data name="AdminRemovePasswordConfirm" xml:space="preserve">
+    <value>Снять пароль</value>
+  </data>
+  <data name="FirstRunAbandonConfirm" xml:space="preserve">
+    <value>Прервать настройку</value>
+  </data>
+  <data name="DialogConfirm" xml:space="preserve">
+    <value>Продолжить</value>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="DialogDiscard" xml:space="preserve">
+    <value>Не сохранять</value>
+  </data>
+  <data name="AdminCloseDirtyTitle" xml:space="preserve">
+    <value>Есть несохранённое</value>
+  </data>
+  <data name="AdminCloseDirtyBody" xml:space="preserve">
+    <value>В этом окне есть несохранённые правки. Сохранить их перед закрытием?</value>
+  </data>
+  <data name="AdminRemovePasswordTitle" xml:space="preserve">
+    <value>Снять пароль?</value>
+  </data>
+  <data name="AdminRemovePasswordBody" xml:space="preserve">
+    <value>После этого «Управление» откроется всякому, кто дотянулся до машины: аккаунты, клавиши и защита от автокликеров окажутся доступны без пароля.</value>
+  </data>
+  <data name="AdminSectionAccount" xml:space="preserve">
+    <value>Аккаунт</value>
+  </data>
+  <data name="AdminSectionPbx" xml:space="preserve">
+    <value>АТС</value>
+  </data>
+  <data name="AdminSectionQueues" xml:space="preserve">
+    <value>Очереди</value>
+  </data>
+  <data name="AdminSectionMaintenance" xml:space="preserve">
+    <value>Обслуживание</value>
+  </data>
+  <data name="AdminGroupCall" xml:space="preserve">
+    <value>Вызов</value>
+  </data>
+  <data name="AdminAccountTitle" xml:space="preserve">
+    <value>Учётная запись</value>
+  </data>
+  <data name="AdminAccountUsername" xml:space="preserve">
+    <value>Добавочный</value>
+  </data>
+  <data name="AdminAccountDisplayName" xml:space="preserve">
+    <value>Отображаемое имя</value>
+  </data>
+  <data name="AdminAccountPassword" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="AdminAccountPasswordSet" xml:space="preserve">
+    <value>Пароль задан. Поле пустое намеренно: прочитать записанный пароль нельзя, а показать его через плечо администратора — можно. Пустое поле оставляет прежний.</value>
+  </data>
+  <data name="AdminAccountPasswordNone" xml:space="preserve">
+    <value>Пароля нет — регистрация не поднимется.</value>
+  </data>
+  <data name="AdminAccountPasswordNote" xml:space="preserve">
+    <value>Пароль шифруется средствами Windows и привязан к этому пользователю: файл настроек, унесённый на другую машину, пароля не отдаёт.</value>
+  </data>
+  <data name="AdminPbxTitle" xml:space="preserve">
+    <value>Адреса АТС</value>
+  </data>
+  <data name="AdminPbxOffice" xml:space="preserve">
+    <value>Из офиса</value>
+  </data>
+  <data name="AdminPbxRemote" xml:space="preserve">
+    <value>Из дома</value>
+  </data>
+  <data name="AdminPbxPort" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="AdminPbxTransport" xml:space="preserve">
+    <value>Транспорт</value>
+  </data>
+  <data name="AdminPbxExpiry" xml:space="preserve">
+    <value>Регистрация, с</value>
+  </data>
+  <data name="AdminPbxAddressNote" xml:space="preserve">
+    <value>Два адреса, между которыми переключается «Работа» в настройках: из дома внутренний адрес недостижим, а из офиса внешний ведёт на тот же сервер длинной дорогой через шлюз.</value>
+  </data>
+  <data name="AdminPbxFeatureTitle" xml:space="preserve">
+    <value>Коды АТС</value>
+  </data>
+  <data name="AdminPbxTransfer" xml:space="preserve">
+    <value>Перевод</value>
+  </data>
+  <data name="AdminPbxConference" xml:space="preserve">
+    <value>Конференция</value>
+  </data>
+  <data name="AdminPbxFeatureNote" xml:space="preserve">
+    <value>Коды свои у каждой установки Asterisk, и угадывать их приложение не берётся: пустой код означает, что кнопка не работает, а не что она сделает что-нибудь наугад.</value>
+  </data>
+  <data name="AdminQueuesTitle" xml:space="preserve">
+    <value>Очереди</value>
+  </data>
+  <data name="AdminQueueNumber" xml:space="preserve">
+    <value>Номер</value>
+  </data>
+  <data name="AdminQueueTitle" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="AdminQueueAdd" xml:space="preserve">
+    <value>Добавить очередь</value>
+  </data>
+  <data name="AdminQueuesNote" xml:space="preserve">
+    <value>На раздаче из очереди номер оператору ничего не говорит. Названия отсюда показываются и в окне входящего, и в истории — вместо цифр.</value>
+  </data>
+  <data name="AdminMaintenanceTitle" xml:space="preserve">
+    <value>Обслуживание</value>
+  </data>
+  <data name="AdminMaintenanceLog" xml:space="preserve">
+    <value>Вести журнал в файл</value>
+  </data>
+  <data name="AdminMaintenanceTrace" xml:space="preserve">
+    <value>Писать трассу SIP</value>
+  </data>
+  <data name="AdminMaintenanceNote" xml:space="preserve">
+    <value>Журнал прикладывают к обращению в поддержку: выключенный означает, что собирать будет нечего. Трасса подробная и в обычной работе не нужна, но при разборе «почему не регистрируется» просят её первой.</value>
+  </data>
+  <data name="TrayShowPanel" xml:space="preserve">
+    <value>Показать панель</value>
+  </data>
+  <data name="TrayHidePanel" xml:space="preserve">
+    <value>Скрыть панель</value>
+  </data>
+  <data name="TrayHistory" xml:space="preserve">
+    <value>История звонков</value>
+  </data>
+  <data name="TraySettings" xml:space="preserve">
+    <value>Настройки…</value>
+  </data>
+  <data name="TrayDoNotDisturb" xml:space="preserve">
+    <value>Не беспокоить</value>
+  </data>
+  <data name="TrayQuit" xml:space="preserve">
+    <value>Завершить EliteSIP</value>
+  </data>
+  <data name="TrayOffline" xml:space="preserve">
+    <value>Отключён</value>
+  </data>
+  <data name="TrayRegistered" xml:space="preserve">
+    <value>На линии</value>
+  </data>
+  <data name="TrayRegistering" xml:space="preserve">
+    <value>Подключение…</value>
+  </data>
+  <data name="TrayFailed" xml:space="preserve">
+    <value>Нет связи</value>
+  </data>
+  <data name="TrayIdle" xml:space="preserve">
+    <value>Не подключён</value>
+  </data>
+  <data name="FirstRunTitle" xml:space="preserve">
+    <value>Настройка рабочего места</value>
+  </data>
+  <data name="FirstRunWelcomeTitle" xml:space="preserve">
+    <value>Добро пожаловать в EliteSIP</value>
+  </data>
+  <data name="FirstRunWelcomeSubtitle" xml:space="preserve">
+    <value>Рабочее место настраивается один раз. Займёт минуту.</value>
+  </data>
+  <data name="FirstRunLanguageNote" xml:space="preserve">
+    <value>Язык интерфейса. Приложение откроется заново на выбранном.</value>
+  </data>
+  <data name="FirstRunUserTitle" xml:space="preserve">
+    <value>Первый пользователь</value>
+  </data>
+  <data name="FirstRunUserSubtitle" xml:space="preserve">
+    <value>Кто будет работать за этой машиной.</value>
+  </data>
+  <data name="FirstRunAdminNote" xml:space="preserve">
+    <value>Административный пароль закрывает «Управление» — аккаунты, клавиши и диагностику. Оставьте пустым, если машина стоит в защищённом месте: пароль можно завести позже.</value>
+  </data>
+  <data name="FirstRunAppearanceSubtitle" xml:space="preserve">
+    <value>Панель висит поверх рабочих окон весь день. Выбирайте то, что не мешает смотреть на них.</value>
+  </data>
+  <data name="FirstRunFinaleTitle" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="FirstRunFinaleNote" xml:space="preserve">
+    <value>Остальное — вторая площадка, клавиши макросов, очереди — настраивается в «Управлении», за административным паролем.</value>
+  </data>
+  <data name="FirstRunBack" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="FirstRunNext" xml:space="preserve">
+    <value>Далее</value>
+  </data>
+  <data name="FirstRunFinish" xml:space="preserve">
+    <value>Начать работу</value>
+  </data>
+  <data name="FirstRunAbandonTitle" xml:space="preserve">
+    <value>Прервать настройку?</value>
+  </data>
+  <data name="FirstRunAbandonBody" xml:space="preserve">
+    <value>Введённое не сохранится, и приложение закроется: ненастроенная машина не звонит и в «Управление» не пускает. Мастер откроется заново при следующем запуске.</value>
+  </data>
+  <data name="HistoryPickDay" xml:space="preserve">
+    <value>Показать звонки за один день</value>
+  </data>
+  <data name="HistoryAllDays" xml:space="preserve">
+    <value>Показать все дни</value>
+  </data>
+  <data name="TroubleNoAccount" xml:space="preserve">
+    <value>Профиль не настроен</value>
+  </data>
+  <data name="TroubleNoPassword" xml:space="preserve">
+    <value>Пароль не читается</value>
+  </data>
+  <data name="TroubleNoMediaAddress" xml:space="preserve">
+    <value>Сервер не сообщил адрес</value>
+  </data>
+  <data name="TroubleChannelClosed" xml:space="preserve">
+    <value>Нет связи с АТС</value>
+  </data>
+  <data name="TroubleNoAudio" xml:space="preserve">
+    <value>Нет звукового устройства</value>
+  </data>
+  <data name="CallStatusDialing" xml:space="preserve">
+    <value>Набор…</value>
+  </data>
+  <data name="CallStatusRinging" xml:space="preserve">
+    <value>Гудки…</value>
+  </data>
+  <data name="CallStatusTalking" xml:space="preserve">
+    <value>разговор</value>
+  </data>
+
+  <data name="IncomingWindowTitle" xml:space="preserve">
+    <value>Входящий вызов</value>
+  </data>
+  <data name="IncomingCaption" xml:space="preserve">
+    <value>Входящий вызов</value>
+  </data>
+  <data name="IncomingNumberCopied" xml:space="preserve">
+    <value>Номер скопирован</value>
+  </data>
+  <data name="IncomingCopyNumber" xml:space="preserve">
+    <value>Скопировать номер</value>
+  </data>
+  <data name="IncomingGuardOn" xml:space="preserve">
+    <value>Защита от автокликеров включена</value>
+  </data>
+  <data name="IncomingAnswer" xml:space="preserve">
+    <value>Ответить</value>
+  </data>
+  <data name="IncomingDecline" xml:space="preserve">
+    <value>Отклонить</value>
+  </data>
+  <data name="IncomingDigitPrompt" xml:space="preserve">
+    <value>Чтобы ответить, нажмите</value>
+  </data>
+  <data name="IncomingDealPrompt" xml:space="preserve">
+    <value>Вы звоните по сделке — примите звонок для начала вызова клиенту.</value>
+  </data>
+  <data name="IncomingDeal" xml:space="preserve">
+    <value>Вызов по сделке</value>
+  </data>
+  <data name="IncomingDistribution" xml:space="preserve">
+    <value>🔥Горячая раздача🔥</value>
+  </data>
+
+  <data name="AdminSectionIncoming" xml:space="preserve">
+    <value>Входящие</value>
+  </data>
+  <data name="AdminGuardTitle" xml:space="preserve">
+    <value>Защита</value>
+  </data>
+  <data name="AdminGuardEnabled" xml:space="preserve">
+    <value>Защита от автокликеров</value>
+  </data>
+  <data name="AdminGuardManagedNote" xml:space="preserve">
+    <value>Значение приезжает из панели предустановкой. Правка здесь действует сразу и держится до следующей выкладки этой предустановки — потом вернётся то, что задано в панели.</value>
+  </data>
+  <data name="AdminGuardOffNote" xml:space="preserve">
+    <value>Выключение фиксируется в журнале: каждый вызов помечается как принятый без защиты.</value>
+  </data>
+  <data name="AdminGuardWhyNote" xml:space="preserve">
+    <value>Автокликер принимает лид быстрее коллег, не находясь за рабочим местом, и лид уходит в тишину.</value>
+  </data>
+  <data name="AdminGuardRandomTitle" xml:space="preserve">
+    <value>Случайность</value>
+  </data>
+  <data name="AdminGuardRandomPosition" xml:space="preserve">
+    <value>Случайная позиция окна</value>
+  </data>
+  <data name="AdminGuardTuning" xml:space="preserve">
+    <value>Расстояния</value>
+  </data>
+  <data name="AdminGuardTuningAuto" xml:space="preserve">
+    <value>Авто</value>
+  </data>
+  <data name="AdminGuardTuningManual" xml:space="preserve">
+    <value>Вручную</value>
+  </data>
+  <data name="AdminGuardMinimumTravel" xml:space="preserve">
+    <value>Минимальное смещение</value>
+  </data>
+  <data name="AdminGuardScreenMargin" xml:space="preserve">
+    <value>Отступ от краёв</value>
+  </data>
+  <data name="AdminGuardRandomNote" xml:space="preserve">
+    <value>Ломает кликеры, которые бьют по постоянным координатам.</value>
+  </data>
+  <data name="AdminGuardTuningNote" xml:space="preserve">
+    <value>На «Авто» стоят проверенные значения, а ползунки заперты: колесо мыши над незапертым ползунком меняет защиту молча, и заметить это потом не по чему. «Вручную» отпирает их и отдаёт числа тому, кто их выставил.</value>
+  </data>
+  <data name="AdminGuardDigitTitle" xml:space="preserve">
+    <value>Подтверждение цифрой</value>
+  </data>
+  <data name="AdminGuardDigitEnabled" xml:space="preserve">
+    <value>Цифровое подтверждение</value>
+  </data>
+  <data name="AdminGuardTargets" xml:space="preserve">
+    <value>Целей на выбор</value>
+  </data>
+  <data name="AdminGuardDigitNote" xml:space="preserve">
+    <value>Вместо кнопки «Ответить» показывается ряд цифр, и вызов принимает только одна из них — названная в подписи. Ломает кликер, который ищет кнопку по картинке. Выключено по умолчанию: это внимание оператора на каждом вызове, а случайная позиция окна обходится ему бесплатно.</value>
+  </data>
+  <data name="AdminGuardLivenessTitle" xml:space="preserve">
+    <value>Признаки живого человека</value>
+  </data>
+  <data name="AdminGuardCursor" xml:space="preserve">
+    <value>Требовать движения курсора</value>
+  </data>
+  <data name="AdminGuardCursorTravel" xml:space="preserve">
+    <value>Нужный путь курсора</value>
+  </data>
+  <data name="AdminGuardCursorNote" xml:space="preserve">
+    <value>SendInput ставит курсор в точку одним событием — пути у такого движения нет.</value>
+  </data>
+  <data name="AdminGuardSynthetic" xml:space="preserve">
+    <value>Отклонять синтетические нажатия</value>
+  </data>
+  <data name="AdminGuardSyntheticNote" xml:space="preserve">
+    <value>Нажатия, сделанные программой, Windows помечает сама, и подделать эту пометку можно только драйвером. По умолчанию она всё равно только пишется в отчёт.</value>
+  </data>
+  <data name="AdminGuardCheckTitle" xml:space="preserve">
+    <value>Проверка</value>
+  </data>
+  <data name="AdminGuardCheckShow" xml:space="preserve">
+    <value>Показать окно для проверки</value>
+  </data>
+  <data name="AdminGuardCheckDeal" xml:space="preserve">
+    <value>Показать вызов по сделке</value>
+  </data>
+  <data name="AdminGuardCheckNote" xml:space="preserve">
+    <value>Вызов по сделке приходит с номера самого менеджера: CRM поднимает его и только потом набирает клиента. Настройки для этого не нужны — номер берётся из активного профиля.</value>
+  </data>
+  <data name="AdminGuardLastCall" xml:space="preserve">
+    <value>Последний вызов</value>
+  </data>
+
+  <!-- Линия панели: этап W10. -->
+  <data name="ActivationNoChannel" xml:space="preserve">
+    <value>Не удалось связаться с сервером: {0}. Проверьте сеть и попробуйте снова.</value>
+  </data>
+  <data name="PresetsLineOff" xml:space="preserve">
+    <value>линия выключена: нет ключа</value>
+  </data>
+  <data name="PresetsManualMode" xml:space="preserve">
+    <value>машина в ручном режиме</value>
+  </data>
+  <data name="PresetsNoChannelKey" xml:space="preserve">
+    <value>у машины нет ключа канала</value>
+  </data>
+  <data name="PresetsChannelDown" xml:space="preserve">
+    <value>канал недоступен</value>
+  </data>
+  <data name="PresetsChannelSaid" xml:space="preserve">
+    <value>канал ответил {0}</value>
+  </data>
+  <data name="PresetsSignatureFailed" xml:space="preserve">
+    <value>файл отброшен: подпись не сошлась</value>
+  </data>
+  <data name="PresetsNoEntry" xml:space="preserve">
+    <value>своей записи в файле нет</value>
+  </data>
+  <data name="PresetsAlreadyFresh" xml:space="preserve">
+    <value>настройки уже свежие</value>
+  </data>
+  <data name="PresetsWaiting" xml:space="preserve">
+    <value>ревизия {0} ждёт конца разговора</value>
+  </data>
+  <data name="PresetsApplied" xml:space="preserve">
+    <value>применена ревизия {0}</value>
+  </data>
+
+  <data name="FirstRunKeyTitle" xml:space="preserve">
+    <value>Ключ активации</value>
+  </data>
+  <data name="FirstRunKeySubtitle" xml:space="preserve">
+    <value>Двенадцать знаков от администратора. Всё остальное — номер, пароль и адрес АТС — приедет вместе с ними.</value>
+  </data>
+  <data name="FirstRunKeyCheck" xml:space="preserve">
+    <value>Проверить ключ</value>
+  </data>
+  <data name="FirstRunKeyChecking" xml:space="preserve">
+    <value>Проверяем…</value>
+  </data>
+  <data name="FirstRunKeyManual" xml:space="preserve">
+    <value>Настроить вручную</value>
+  </data>
+
+  <data name="AdminSectionSupport" xml:space="preserve">
+    <value>Поддержка</value>
+  </data>
+  <data name="AdminSupportTitle" xml:space="preserve">
+    <value>Связь с панелью</value>
+  </data>
+  <data name="AdminSupportMachine" xml:space="preserve">
+    <value>Машина</value>
+  </data>
+  <data name="AdminSupportPreset" xml:space="preserve">
+    <value>Предустановка</value>
+  </data>
+  <data name="AdminSupportRevision" xml:space="preserve">
+    <value>ревизия</value>
+  </data>
+  <data name="AdminSupportLastContact" xml:space="preserve">
+    <value>Канал отвечал</value>
+  </data>
+  <data name="AdminSupportManaged" xml:space="preserve">
+    <value>Слушать панель</value>
+  </data>
+  <data name="AdminSupportManagedNote" xml:space="preserve">
+    <value>Выключено — машина живёт тем, что применила, и новых ревизий не берёт. Включено обратно — просит свою предустановку заново и заменяет местные правки серверными.</value>
+  </data>
+  <data name="AdminSupportCheckNow" xml:space="preserve">
+    <value>Проверить настройки сейчас</value>
+  </data>
+  <data name="AdminSupportReflashTitle" xml:space="preserve">
+    <value>Перепрошивка</value>
+  </data>
+  <data name="AdminSupportReflashKey" xml:space="preserve">
+    <value>Ключ</value>
+  </data>
+  <data name="AdminSupportReflashApply" xml:space="preserve">
+    <value>Применить ключ</value>
+  </data>
+  <data name="AdminSupportReflashNote" xml:space="preserve">
+    <value>Ключ, выписанный на эту машину: он заменяет номер, пароль и предустановку. Ключ сгорает в момент проверки, поэтому в разговоре применить его нельзя.</value>
+  </data>
+  <data name="SupportNeverContacted" xml:space="preserve">
+    <value>ни разу</value>
+  </data>
+  <data name="SupportReflashed" xml:space="preserve">
+    <value>Перепрошито: номер {0}, предустановка «{1}»</value>
+  </data>
+
+  <data name="AdminPbxTlsTitle" xml:space="preserve">
+    <value>Проверка сертификата</value>
+  </data>
+  <data name="AdminPbxTlsFingerprint" xml:space="preserve">
+    <value>Отпечаток SHA-256</value>
+  </data>
+  <data name="AdminPbxTlsFingerprintNote" xml:space="preserve">
+    <value>Пусто — обычная системная проверка. Отпечаток заменяет её и позволяет доверять самоподписанному сертификату, ничего больше не ослабляя. Несколько отпечатков через запятую — это смена сертификата без простоя.</value>
+  </data>
+  <data name="AdminPbxTlsAcceptAny" xml:space="preserve">
+    <value>Принимать любой сертификат</value>
+  </data>
+  <data name="AdminPbxTlsAcceptAnyNote" xml:space="preserve">
+    <value>Это отключает защиту от перехвата целиком: сидящий посередине читает пароль SIP и сам разговор, а TLS при этом показывается включённым. Только для лаборатории на этой же машине.</value>
+  </data>
+
+  <data name="AdminKnockTitle" xml:space="preserve">
+    <value>Стук по портам</value>
+  </data>
+  <data name="AdminKnockNote" xml:space="preserve">
+    <value>Шлюз держит порты закрытыми и открывает их тому, от кого пришла условленная последовательность ICMP-пакетов определённой длины. Это связность, а не защита: стук решает, кого пускают, и ничего не говорит о том, кто может прочитать, — SIP и RTP как шли открытым UDP, так и идут. Пустой список выключает стук.</value>
+  </data>
+  <data name="AdminKnockHost" xml:space="preserve">
+    <value>Адрес (пусто — АТС)</value>
+  </data>
+  <data name="AdminKnockBytes" xml:space="preserve">
+    <value>Байт</value>
+  </data>
+  <data name="AdminKnockCount" xml:space="preserve">
+    <value>Раз</value>
+  </data>
+  <data name="AdminKnockAdd" xml:space="preserve">
+    <value>Добавить шаг</value>
+  </data>
+  <data name="AdminKnockSpacing" xml:space="preserve">
+    <value>Пауза, секунды</value>
+  </data>
+  <data name="AdminKnockRepeat" xml:space="preserve">
+    <value>Повтор, секунды</value>
+  </data>
+  <data name="AdminKnockSummary" xml:space="preserve">
+    <value>{0} пакетов — это {1:0.#} секунд тишины перед первым REGISTER на удалённой машине.</value>
+  </data>
+  <data name="AdminKnockDisabled" xml:space="preserve">
+    <value>Шагов нет — стук выключен.</value>
+  </data>
+
+  <data name="UpdatesLineOff" xml:space="preserve">
+    <value>линия обновлений выключена</value>
+  </data>
+  <data name="UpdatesUpToDate" xml:space="preserve">
+    <value>установлена свежая версия</value>
+  </data>
+  <data name="UpdatesReady" xml:space="preserve">
+    <value>версия {0} скачана и ждёт</value>
+  </data>
+  <data name="UpdatesDownloadFailed" xml:space="preserve">
+    <value>установщик не скачался</value>
+  </data>
+  <data name="UpdateOfferTitle" xml:space="preserve">
+    <value>Обновить до {0}?</value>
+  </data>
+  <data name="UpdateOfferBody" xml:space="preserve">
+    <value>Обновление уже скачано и проверено — установка займёт несколько секунд, приложение запустится само. Отложить не страшно: напоминание вернётся через полчаса.</value>
+  </data>
+  <data name="UpdateOfferInstall" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="AdminDiagnosticsCheckUpdates" xml:space="preserve">
+    <value>Проверить обновления сейчас</value>
+  </data>
+  <data name="AdminDiagnosticsInstallUpdate" xml:space="preserve">
+    <value>Установить обновление</value>
+  </data>
+
+  <data name="UpdatesChecking" xml:space="preserve">
+    <value>Проверяем…</value>
+  </data>
+
+  <data name="AdminMaintenanceAutoStart" xml:space="preserve">
+    <value>Запускать вместе с Windows</value>
+  </data>
+  <data name="AdminMaintenanceAutoStartNote" xml:space="preserve">
+    <value>Софтфон, не поднявшийся после ночной перезагрузки, пропускает первые звонки смены. Автозапуск видно и в диспетчере задач Windows, на вкладке «Автозагрузка».</value>
+  </data>
+  <data name="AudioInputSection" xml:space="preserve">
+    <value>Микрофон</value>
+  </data>
+  <data name="AudioOutputSection" xml:space="preserve">
+    <value>Наушники</value>
+  </data>
+  <data name="AudioDevice" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="AudioProcessingSection" xml:space="preserve">
+    <value>Обработка голоса</value>
+  </data>
+  <data name="AudioSelfTestSection" xml:space="preserve">
+    <value>Проверка звука</value>
+  </data>
+  <data name="SupportLogsSection" xml:space="preserve">
+    <value>Журнал для поддержки</value>
+  </data>
+  <data name="SupportUpdatesSection" xml:space="preserve">
+    <value>Обновления</value>
+  </data>
+  <data name="SupportPresetsSection" xml:space="preserve">
+    <value>Предустановки</value>
+  </data>
+  <data name="SwitchOn" xml:space="preserve">
+    <value>Вкл.</value>
+  </data>
+  <data name="SwitchOff" xml:space="preserve">
+    <value>Откл.</value>
+  </data>
+  <data name="UpdatesDownloading" xml:space="preserve">
+    <value>Скачиваем {0}: {1} из {2} МБ</value>
+  </data>
+  <data name="AdminUnlockCapsLock" xml:space="preserve">
+    <value>Включён Caps Lock</value>
+  </data>
+  <data name="PanelNumberChanged" xml:space="preserve">
+    <value>Администратор сменил номер: {0}</value>
+  </data>
+  <data name="AdminDirtyBodyManaged" xml:space="preserve">
+    <value>«Сохранить» уведёт машину в оффлайн: Spark перестанет присылать ей настройки, пока её не вернут в онлайн (кнопкой, без новой привязки).</value>
+  </data>
+  <data name="AdminSupportLink" xml:space="preserve">
+    <value>Связь</value>
+  </data>
+  <data name="SupportLinkOnline" xml:space="preserve">
+    <value>Spark, онлайн</value>
+  </data>
+  <data name="SupportLinkOffline" xml:space="preserve">
+    <value>оффлайн, вручную</value>
+  </data>
+  <data name="SupportLinkNone" xml:space="preserve">
+    <value>вручную, машина не привязана к Spark</value>
+  </data>
+  <data name="SupportReturnOnline" xml:space="preserve">
+    <value>Вернуться в онлайн</value>
+  </data>
+  <data name="SupportReturnOnlineNote" xml:space="preserve">
+    <value>Машина в оффлайне: здесь сохраняли правки, и Spark её настроек не трогает. Возврат заменит местные правки настройками из Spark, новая привязка не нужна.</value>
+  </data>
+  <data name="SupportSparkSection" xml:space="preserve">
+    <value>Связь со Spark</value>
+  </data>
+  <data name="SupportMachineNotPaired" xml:space="preserve">
+    <value>не привязана к Spark</value>
+  </data>
+  <data name="FirstRunPairTitle" xml:space="preserve">
+    <value>Привязка к Spark</value>
+  </data>
+  <data name="FirstRunPairSubtitle" xml:space="preserve">
+    <value>Продиктуйте код администратору: он введёт его в Spark или отсканирует QR в EliteSIP Connect. Машина настроится сама.</value>
+  </data>
+  <data name="FirstRunPairCodeLabel" xml:space="preserve">
+    <value>Код машины</value>
+  </data>
+  <data name="FirstRunPairNewCode" xml:space="preserve">
+    <value>Это не я — показать новый код</value>
+  </data>
+  <data name="FirstRunPairOpening" xml:space="preserve">
+    <value>Получаю код…</value>
+  </data>
+  <data name="FirstRunPairWaiting" xml:space="preserve">
+    <value>Ждём привязки. Код не меняется, пока машина включена, — можно привязать и через несколько дней.</value>
+  </data>
+  <data name="FirstRunPairSettingUp" xml:space="preserve">
+    <value>Привязали — забираю настройки…</value>
+  </data>
+  <data name="FirstRunPairRetry" xml:space="preserve">
+    <value>Нет связи со Spark ({0}). Повтор через {1} с.</value>
+  </data>
+  <!-- Автоподъём (0.1.61). -->
+  <data name="AdminAutoAnswerTitle" xml:space="preserve">
+    <value>Автоподъём</value>
+  </data>
+  <data name="AdminNumbersTitle" xml:space="preserve">
+    <value>Номера звонящих</value>
+  </data>
+  <data name="AdminMasksMobileNumbers" xml:space="preserve">
+    <value>Скрывать мобильные номера</value>
+  </data>
+  <data name="AdminMasksMobileNumbersNote" xml:space="preserve">
+    <value>Мобильный номер показывается как +7 и звёздочки — в окне входящего, в панели во время разговора и в истории. Городские и внутренние номера видны всегда. Выключайте для отделов, которым номер клиента нужен открытым.</value>
+  </data>
+  <data name="AdminAutoAnswerOff" xml:space="preserve">
+    <value>Выключен — вызов принимает оператор</value>
+  </data>
+  <data name="AdminAutoAnswerAlways" xml:space="preserve">
+    <value>Всегда</value>
+  </data>
+  <data name="AdminAutoAnswerHeader" xml:space="preserve">
+    <value>Когда просит АТС (X-Autoanswer, Call-Info answer-after, Alert-Info)</value>
+  </data>
+  <data name="AdminAutoAnswerList" xml:space="preserve">
+    <value>Для номеров из списка</value>
+  </data>
+  <data name="AdminAutoAnswerNumbers" xml:space="preserve">
+    <value>Номера</value>
+  </data>
+  <data name="AdminAutoAnswerNote" xml:space="preserve">
+    <value>Автоподъём снимает трубку сразу, без мелодии и окна входящего. Номера сравниваются по цифрам, длинные — по последним десяти. Поверх идущего разговора не срабатывает.</value>
+  </data>
+  <data name="AdminAutoAnswerAlwaysNote" xml:space="preserve">
+    <value>Трубка будет сниматься на любой входящий, даже если за рабочим местом никого нет.</value>
+  </data>
+  <data name="StatusConnecting" xml:space="preserve">
+    <value>Подключаюсь…</value>
+  </data>
+  <data name="StatusReconnecting" xml:space="preserve">
+    <value>Переподключаюсь…</value>
+  </data>
+  <data name="StatusFixingNetwork" xml:space="preserve">
+    <value>Правлю сеть…</value>
+  </data>
+  <data name="StatusSwitchingNumber" xml:space="preserve">
+    <value>Меняю номер…</value>
+  </data>
+  <data name="StatusDisconnecting" xml:space="preserve">
+    <value>Отключаюсь…</value>
+  </data>
+  <data name="StatusWaitingServer" xml:space="preserve">
+    <value>Жду ответа сервера…</value>
+  </data>
+  <data name="StatusAudioRestarting" xml:space="preserve">
+    <value>Перезапускаю звук…</value>
+  </data>
+  <data name="StatusAudioLost" xml:space="preserve">
+    <value>Звук пропал</value>
+  </data>
+  <data name="StatusMicSilent" xml:space="preserve">
+    <value>Микрофон молчит</value>
+  </data>
+  <data name="StatusNoInbound" xml:space="preserve">
+    <value>Нет звука собеседника</value>
+  </data>
+  <data name="StatusInboundStalled" xml:space="preserve">
+    <value>Собеседник пропал</value>
+  </data>
+  <data name="StatusPoorNetwork" xml:space="preserve">
+    <value>Плохая связь</value>
+  </data>
+  <data name="StatusMediaNetworkError" xml:space="preserve">
+    <value>Сбой сети звука</value>
+  </data>
+</root>

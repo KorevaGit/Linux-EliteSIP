@@ -5,7 +5,7 @@ namespace EliteSIP.Updater;
 /// <remarks>
 /// <para>
 /// Два каталога, и разница между ними — вся защита здесь, как и на Windows
-/// (<c>Paths</c> в <c>shared/tools/Updater</c>).
+/// (<c>Paths</c> в <c>исторический Windows tools/Updater</c>).
 /// </para>
 /// <para>
 /// <b>Общий</b> (<c>/var/lib/elitesip/updates</c>, <c>1777</c>, как

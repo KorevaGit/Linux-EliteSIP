@@ -13,7 +13,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
 
-    <!-- Подчёркивание разделяет «что проверяем» и «чего ждём» — то же, что в shared/tests. -->
+    <!-- Подчёркивание разделяет «что проверяем» и «чего ждём» — то же, что в core/tests. -->
     <NoWarn>$(NoWarn);CA1707</NoWarn>
   </PropertyGroup>
 

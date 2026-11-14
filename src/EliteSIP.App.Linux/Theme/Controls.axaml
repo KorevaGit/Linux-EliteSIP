@@ -1,5 +1,5 @@
 <!--
-    Стили элементов — перевод shared/src/EliteSIP.App/Theme/Controls.xaml.
+    Стили элементов — перевод исторический Windows EliteSIP.App/Theme/Controls.xaml.
     Почему каждое число такое, сказано там; здесь только как оно выражено в
     Avalonia: стиль с ключом стал классом (SurfaceButtonStyle → Button.surface),
     триггер — псевдоклассом (:pointerover, :pressed, :checked, :disabled).
