@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EliteSIP.App.Linux.Tests" />
+    <InternalsVisibleTo Include="EliteSIP.TrayProbe" />
   </ItemGroup>
 
   <ItemGroup>

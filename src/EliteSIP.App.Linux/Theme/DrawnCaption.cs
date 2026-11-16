@@ -30,9 +30,15 @@ internal static class DrawnCaption
         var heading = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 7, Margin = new Thickness(9,0), VerticalAlignment = VerticalAlignment.Center };
         var crown = new BrandMark { Width = 15, Height = 15 };
         crown.Bind(BrandMark.ForegroundProperty, window.GetResourceObservable("TextPrimaryBrush"));
-        var title = new TextBlock { FontSize = 12, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+        var title = new TextBlock { Name = "ProductCaption", FontSize = 12, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
         title.Bind(TextBlock.TextProperty, window.GetObservable(Window.TitleProperty));
-        title.Bind(TextBlock.ForegroundProperty, window.GetResourceObservable("TextSecondaryBrush"));
+        if (window is Panel.PanelWindow panel)
+        {
+            title.FontSize = 14; title.FontWeight = FontWeight.SemiBold;
+            title.Bind(TextBlock.TextProperty, new Avalonia.Data.Binding(nameof(Panel.PanelViewModel.StatusTitle))
+            { Source = panel.Model, StringFormat = Resources.LinuxStrings.Get("PanelYourNumber") + ": {0}" });
+        }
+        title.Bind(TextBlock.ForegroundProperty, window.GetResourceObservable(window is Panel.PanelWindow ? "TextPrimaryBrush" : "TextSecondaryBrush"));
         heading.Children.Add(crown); heading.Children.Add(title); caption.Children.Add(heading);
         var buttons = new StackPanel { Orientation = Orientation.Horizontal };
         Grid.SetColumn(buttons,1); caption.Children.Add(buttons);

@@ -23,7 +23,7 @@
             </ContextMenu>
           </Button.ContextMenu>
           <Grid VerticalAlignment="Center" ColumnDefinitions="16,Auto,Auto,Auto">
-            <theme:BrandMark Grid.Column="0" Width="16" Height="16" VerticalAlignment="Center" Classes.registering="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registering}" Classes.registered="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registered}" Classes.failed="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Failed}" Classes.offline="{Binding IsOfflineByChoice}"/>
+            <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" Classes.registering="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registering}" Classes.registered="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registered}" Classes.failed="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Failed}" Classes.offline="{Binding IsOfflineByChoice}"/>
             <TextBlock Grid.Column="1" Text="{Binding StatusTitle}" TextTrimming="CharacterEllipsis" Margin="4,0,0,0" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <TextBlock Grid.Column="2" theme:Emoji.Text="{Binding StatusLabel}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextTertiaryBrush}" IsVisible="{Binding StatusLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
             <theme:Icon Grid.Column="3" Glyph="chevron.down" Size="10" Margin="5,1,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextTertiaryBrush}" IsVisible="{Binding CanOpenProfileMenu}"/>
@@ -47,7 +47,7 @@
         </Button>
 
         <Button Grid.Column="2" Classes="surface chrome" Command="{Binding ShowSettings}" ToolTip.Tip="{res:Loc PanelSettings}">
-          <theme:Icon Glyph="gearshape" Size="12"/>
+          <theme:Icon Glyph="slider.horizontal.2" Size="16"/>
         </Button>
       </Grid>
 

@@ -25,12 +25,13 @@ public sealed class BrandMark : Control
         }
     }
     public override void Render(DrawingContext context) => Draw(context, Foreground ?? Brushes.Gray, Math.Min(Bounds.Width, Bounds.Height));
-    internal static WindowIcon TrayIcon(IBrush status)
+    internal static WindowIcon TrayIcon(IBrush status) => new(new MemoryStream(TrayPng(status)));
+    internal static byte[] TrayPng(IBrush status)
     {
         using var bitmap = new RenderTargetBitmap(new PixelSize(64,64), new Vector(96,96));
         using (var drawing = bitmap.CreateDrawingContext()) { Draw(drawing, status, 64); }
         using var png = new MemoryStream();
         bitmap.Save(png, PngBitmapEncoderOptions.Default); png.Position = 0;
-        return new WindowIcon(png);
+        return png.ToArray();
     }
 }

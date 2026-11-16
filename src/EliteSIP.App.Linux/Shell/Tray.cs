@@ -1,8 +1,5 @@
 using System.ComponentModel;
-using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using EliteSIP.App.Panel;
 using EliteSIP.App.Resources;
 
@@ -12,75 +9,54 @@ namespace EliteSIP.App.Shell;
 /// Значок в области уведомлений — Linux-половина <c>Shell/TrayIcon</c>.
 /// </summary>
 ///
-/// <remarks>
-/// <para>
-/// Меню и подсказка те же, что на Windows: состояние словами первой строкой,
-/// «Показать/Скрыть панель», история, настройки, «Не беспокоить», выход. Значок
-/// — корона продукта с цветной точкой состояния снизу, нарисованная тем же
-/// путём и в тех же долях.
-/// </para>
-/// <para>
-/// Сам значок — StatusNotifierItem через <see cref="TrayIcon"/> Avalonia; его
-/// перерегистрацию при перезапуске наблюдателя Avalonia делает сама (W-L4).
-/// Есть ли вообще куда его ставить, говорит <c>TrayAvailability</c>, и по нему
-/// приложение решает, прятать панель при закрытии или сворачивать.
-/// </para>
-/// <para>
-/// Меню пересобирается на каждую смену состояния, а не при открытии: меню
-/// StatusNotifierItem живёт на стороне панели (DBusMenu), и вопроса «сейчас
-/// откроюсь» от неё ждать нельзя.
-/// </para>
-/// </remarks>
+/// <remarks>Own SNI transport dispatches right-clicks to a themed Avalonia window.</remarks>
 internal sealed class Tray : IDisposable
 {
-    /// <summary>Корона — тот же путь, что у Windows-значка.</summary>
-
-
     private readonly PanelViewModel _model;
     private readonly TrayActions _actions;
-    private readonly TrayIcon _icon;
-    private string? _drawnKey;
+    private readonly StatusNotifierIcon _icon;
+    private readonly TrayMenuWindow _menu;
+    private byte[] _pixels = [];
+    private bool? _online;
+    private bool _disposed;
 
-    internal Tray(Application application, PanelViewModel model, TrayActions actions)
+    internal Tray(PanelViewModel model, TrayActions actions, Action<string>? log = null)
     {
-        _model = model;
-        _actions = actions;
-        _icon = new TrayIcon { IsVisible = true };
-        _icon.Clicked += (_, _) => _actions.TogglePanel();
-
-        TrayIcon.SetIcons(application, [_icon]);
-
-        _model.PropertyChanged += OnModelChanged;
-        Refresh();
+        _model=model;_actions=actions;_menu=new TrayMenuWindow(model,actions);
+        _icon=new StatusNotifierIcon(
+            () => Avalonia.Threading.Dispatcher.UIThread.Post(() => { if(!_disposed) { _menu.Hide();_actions.TogglePanel(); } }),
+            (x,y) => Avalonia.Threading.Dispatcher.UIThread.Post(() => { if(!_disposed) { _menu.Refresh(StatusTitle);_menu.OpenAt(x,y); } }),
+            log ?? (_ => { }));
+        _menu.PropertyChanged += (_,e) => { if(e.Property==Avalonia.Controls.Control.IsVisibleProperty) { _icon.SetMenuOpen(_menu.IsVisible); } };
+        _icon.AvailabilityChanged += () => AvailabilityChanged?.Invoke();
+        _model.PropertyChanged+=OnModelChanged;Refresh();_ = _icon.StartAsync();
     }
-
-    internal sealed record TrayActions(
-        Func<bool> IsPanelVisible,
-        Action TogglePanel,
-        Action ShowHistory,
-        Action ShowSettings,
-        Action ToggleOffline,
-        Action Quit);
-
-    /// <summary>Панель спрятали или показали — пункт меню меняет подпись.</summary>
+    internal TrayMenuWindow MenuWindow => _menu;
+    internal bool UsesDesktopMonitor => _icon.UsesDesktopMonitor;
+    internal bool IsAvailable => _icon.IsRegistered;
+    internal event Action? AvailabilityChanged;
+    internal sealed record TrayActions(Func<bool> IsPanelVisible,Action TogglePanel,Action ShowHistory,Action ShowSettings,Action ToggleOffline,Action Quit);
     internal void Refresh()
     {
-        _icon.ToolTipText = StatusTitle;
-        _icon.Menu = BuildMenu();
-
-        var key = !_model.IsOfflineByChoice && _model.Registration == RegistrationState.Registered ? "registered" : "offline";
-        if (key != _drawnKey)
+        var online=!_model.IsOfflineByChoice && _model.Registration==RegistrationState.Registered;
+        if(_online!=online)
         {
-            _drawnKey = key;
-            _icon.Icon = Draw(key == "registered" ? Brushes.Lime : Brushes.Red);
+            _online=online;
+            using var source=SkiaSharp.SKBitmap.Decode(Theme.BrandMark.TrayPng(online?Brushes.Lime:Brushes.Red));
+            _pixels=new byte[64*64*4];
+            for(var y=0;y<64;y++) for(var x=0;x<64;x++)
+            {
+                var color=source.GetPixel(x,y);var at=(y*64+x)*4;
+                _pixels[at]=color.Alpha;_pixels[at+1]=color.Red;_pixels[at+2]=color.Green;_pixels[at+3]=color.Blue;
+            }
         }
+        _icon.Update(StatusTitle,64,_pixels);
+        if(_menu.IsVisible) { _menu.Refresh(StatusTitle); }
     }
-
     public void Dispose()
     {
-        _model.PropertyChanged -= OnModelChanged;
-        _icon.IsVisible = false;
-        _icon.Dispose();
+        if(_disposed) { return; }_disposed=true;
+        _model.PropertyChanged-=OnModelChanged;_icon.Dispose();_menu.ClosePermanently();
     }
 
     private string StatusTitle
@@ -117,37 +93,4 @@ internal sealed class Tray : IDisposable
         }
     }
 
-    private NativeMenu BuildMenu()
-    {
-        NativeMenu menu = [];
-        menu.Items.Add(new NativeMenuItem(StatusTitle) { IsEnabled = false });
-        menu.Items.Add(new NativeMenuItemSeparator());
-
-        Add(menu, Strings.Get(_actions.IsPanelVisible() ? "TrayHidePanel" : "TrayShowPanel"), _actions.TogglePanel);
-        Add(menu, Strings.Get("TrayHistory"), _actions.ShowHistory);
-        Add(menu, Strings.Get("TraySettings"), _actions.ShowSettings);
-        menu.Items.Add(new NativeMenuItemSeparator());
-
-        var offline = Add(menu, Strings.Get("TrayDoNotDisturb"), _actions.ToggleOffline);
-        offline.ToggleType = MenuItemToggleType.CheckBox;
-        offline.IsChecked = _model.IsOfflineByChoice;
-
-        // В разговоре недоступно: уход с линии снимает регистрацию.
-        offline.IsEnabled = !_model.IsInCall;
-
-        menu.Items.Add(new NativeMenuItemSeparator());
-        Add(menu, Strings.Get("TrayQuit"), _actions.Quit);
-        return menu;
-    }
-
-    private static NativeMenuItem Add(NativeMenu menu, string title, Action action)
-    {
-        NativeMenuItem item = new(title);
-        item.Click += (_, _) => action();
-        menu.Items.Add(item);
-        return item;
-    }
-
-    // The full donor crown is lime online and red offline, including active calls.
-    private static WindowIcon Draw(IBrush status) => Theme.BrandMark.TrayIcon(status);
 }

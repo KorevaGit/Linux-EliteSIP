@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using EliteSIP.App.Resources;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -52,6 +53,7 @@ public partial class PanelWindow : Window
         InitializeComponent();
         Model = model;
         DataContext = model;
+        UpdateCaption();
 
         _clock = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Normal, (_, _) => Model.Tick());
 
@@ -218,8 +220,11 @@ public partial class PanelWindow : Window
         }
     }
 
+    private void UpdateCaption() => Title = $"EliteSIP — {LinuxStrings.Get("PanelYourNumber")}: {Model.StatusTitle}";
+
     private void OnModelChanged(object? sender, PropertyChangedEventArgs change)
     {
+        if (change.PropertyName == nameof(PanelViewModel.StatusTitle)) { UpdateCaption(); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible) && !Model.IsTransferEntryVisible)
         { Dispatcher.UIThread.Post(() => DialedField.Focus(), DispatcherPriority.Loaded); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible)

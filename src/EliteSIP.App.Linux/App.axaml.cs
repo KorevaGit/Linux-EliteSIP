@@ -242,13 +242,14 @@ public sealed partial class App : Application, IDisposable
         _panelWindow.Show();
         Mark("панель");
 
-        _tray = new Tray(this, _panel, new Tray.TrayActions(
+        _tray = new Tray(_panel, new Tray.TrayActions(
             IsPanelVisible: () => _panelWindow?.IsVisible is true,
             TogglePanel: TogglePanel,
             ShowHistory: ShowHistory,
             ShowSettings: ShowSettings,
             ToggleOffline: () => _panel.IsOfflineByChoice = !_panel.IsOfflineByChoice,
-            Quit: Quit));
+            Quit: Quit), Log);
+        _tray.AvailabilityChanged += () => Dispatcher.UIThread.Post(ApplyTrayAvailability);
 
         // Прятать панель за значок — только если его есть кому нарисовать.
         // Иначе (GNOME без AppIndicator) закрытие сворачивает: запущенный,
@@ -557,7 +558,7 @@ public sealed partial class App : Application, IDisposable
             return;
         }
 
-        _panelWindow.HidesToTray = _trayAvailability.IsAvailable;
+        _panelWindow.HidesToTray = _tray?.IsAvailable is true && (_tray.UsesDesktopMonitor || _trayAvailability.IsAvailable);
     }
 
     private static CultureInfo? Chosen(LanguageSetting language) => language switch

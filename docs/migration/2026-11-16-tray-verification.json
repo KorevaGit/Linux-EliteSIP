@@ -1,0 +1,55 @@
+{
+  "uiTests": {
+    "total": "83",
+    "executed": "83",
+    "passed": "83",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "nativeCinnamon": {
+    "session": "X11",
+    "scale": 1,
+    "menuClientSize": [
+      280,
+      295
+    ],
+    "menuPosition": [
+      1640,
+      745
+    ],
+    "directXAppRightClick": true,
+    "themeSwitch": "dark to light",
+    "number": "701 (synthetic)",
+    "iconPixmap": [
+      64,
+      64,
+      16384
+    ],
+    "activationSeparatedFromMenu": true,
+    "offlineIconRed": true
+  },
+  "isolatedSni": [
+    "SNI isolated bus: pixmap decoded, ContextMenu/Activate dispatched separately",
+    "SNI watcher restart: unavailable after disappearance; re-registered after return"
+  ],
+  "nativeLog": [
+    "SNI GetAll: busctl parsed properties and composite pixmap/tooltip values",
+    "SNI IconPixmap: 1 images, 64x64, 16384 bytes",
+    "SNI ItemIsMenu: False",
+    "SNI ContextMenu: visible=True, position=1640, 745, size=280, 295",
+    "Cinnamon XApp ButtonPress/Release(3): product menu opened directly, bypassing GTK bridge",
+    "SNI Activate: panel toggled once, menu hidden",
+    "SNI offline: red pixmap exported"
+  ]
+}
