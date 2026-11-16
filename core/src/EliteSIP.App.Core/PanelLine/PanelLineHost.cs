@@ -40,6 +40,9 @@ internal sealed class PanelLineHost : IDisposable
 
     private readonly PresetService _presets;
     private readonly MachineService _machine;
+    private readonly WorkFormatSync _workFormatSync;
+    private readonly MachineRecovery _recovery = new();
+    private bool _disposed;
 
     private readonly IUiTimer _machineTimer;
 
@@ -72,9 +75,11 @@ internal sealed class PanelLineHost : IDisposable
         _reset = reset;
         _log = log;
         _ui = ui;
+        _workFormatSync = new WorkFormatSync(settings.Panel, SendWorkFormatRequestAsync, log);
 
         _presets = new PresetService(() => _settings, ApplyPreset, isBlocked, log);
-        _presets.NoteContact = () => _settings.Panel.LastContactAt = DateTimeOffset.UtcNow;
+        _presets.NoteContact = () => NoteContact(true);
+        _presets.ContactFailed = () => NoteContact(false);
 
         _machine = new MachineService(
             () => _settings,
@@ -83,6 +88,7 @@ internal sealed class PanelLineHost : IDisposable
             log)
         {
             ApplyConfig = config => OnUi(() => ReceiveConfig(config)),
+            ContactResult = success => OnUi(() => NoteContact(success)),
         };
 
         // Пятнадцать минут: столько ждёт правка сотрудника в Spark и столько же
@@ -122,6 +128,13 @@ internal sealed class PanelLineHost : IDisposable
     /// <summary>Сменилось что-то, что показывают окна: онлайн, оффлайн, ревизии.</summary>
     internal event Action? StateChanged;
 
+    private void NoteContact(bool success)
+    {
+        _settings.Panel.ChannelAvailable = success;
+        if (success) { _settings.Panel.LastContactAt = DateTimeOffset.UtcNow; }
+        StateChanged?.Invoke();
+    }
+
     internal void Start()
     {
         _machineTimer.Start();
@@ -153,11 +166,28 @@ internal sealed class PanelLineHost : IDisposable
     internal async Task CheckMachineAsync()
     {
         await _machine.CheckRevocationAsync().ConfigureAwait(true);
+        if (_disposed) { return; }
+        await _recovery.CheckAsync(_settings, _log).ConfigureAwait(true);
+        if (_disposed) { return; }
 
         if (!_settings.Panel.IsOffline)
         {
+            await _workFormatSync.SendAsync().ConfigureAwait(true);
             await _machine.CheckConfigAsync().ConfigureAwait(true);
         }
+    }
+
+    private static async Task<System.Net.HttpStatusCode> SendWorkFormatRequestAsync(WorkFormatSync.Request change, CancellationToken cancellationToken)
+    {
+        var address = new Uri(Provisioning.Current?.PairBase ?? new Uri(Provisioning.DefaultPairUrl), "api/pair/work-format");
+        if (address.Scheme != Uri.UriSchemeHttps) { throw new System.Net.Http.HttpRequestException("Spark requires HTTPS"); }
+        using var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, address);
+        ChannelRequest.Authorize(request, change.InstallationID, change.Key);
+        request.Content = System.Net.Http.Json.JsonContent.Create(new { work_format = change.Format });
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(ChannelRequest.Timeout);
+        using var response = await ChannelRequest.Client.SendAsync(request, deadline.Token).ConfigureAwait(false);
+        return response.StatusCode;
     }
 
     /// <summary>
@@ -179,6 +209,7 @@ internal sealed class PanelLineHost : IDisposable
 
         _settings.Panel.Mode = PanelMode.Managed;
         _settings.Panel.WantsResync = true;
+        _settings.Panel.PendingWorkFormat = string.Empty;
         _settings.Panel.AppliedConfigRevision = 0;
         _log("машина возвращена в онлайн: местные правки заменит Spark");
         StateChanged?.Invoke();
@@ -207,7 +238,11 @@ internal sealed class PanelLineHost : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) { return; }
+        _disposed = true;
         _machineTimer.Stop();
+        _workFormatSync.Dispose();
+        _recovery.Dispose();
     }
 
     private void OnUi(Action action)
@@ -389,6 +424,7 @@ internal sealed class PanelLineHost : IDisposable
     private void ApplyPreset(PresetBundle.Entry entry)
     {
         var wasResync = _settings.Panel.WantsResync;
+        if (wasResync && _settings.Panel.LockedSite is { } locked) { _settings.Account.Site = locked; }
         var domainBefore = _settings.Account.Domain;
 
         _settings.Apply(ManagedFields.Parse(entry.Fields));
@@ -524,6 +560,8 @@ internal static class MachineReset
             "elitesip.log",
             "crash.log",
             ClientEventLog.FileName,
+            ClientEventLog.FileName + ".session",
+            ClientEventLog.FileName + ".tmp",
         })
         {
             try

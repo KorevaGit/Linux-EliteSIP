@@ -40,6 +40,8 @@ public partial class SettingsWindow : Window
         Opened += (_, _) =>
         {
             model.UpdateMeterPolling(windowOpen: true);
+            model.WatchWorkplace(true);
+            model.RefreshWorkplace();
 
             // «Системное по умолчанию» — пункт с Id = null. Avalonia на
             // SelectedValue = null снимает выбор, а не находит такой пункт,
@@ -63,6 +65,7 @@ public partial class SettingsWindow : Window
         {
             Model.Settings.Appearance.PropertyChanged -= OnAppearanceChanged;
             Model.UpdateMeterPolling(windowOpen: false);
+            Model.WatchWorkplace(false);
         }
 
         _sounds?.StopPreview();

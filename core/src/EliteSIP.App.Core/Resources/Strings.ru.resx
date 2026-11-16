@@ -1172,7 +1172,7 @@
     <value>Связь</value>
   </data>
   <data name="SupportLinkOnline" xml:space="preserve">
-    <value>Spark, онлайн</value>
+    <value>Канал настроек доступен</value>
   </data>
   <data name="SupportLinkOffline" xml:space="preserve">
     <value>оффлайн, вручную</value>
@@ -1289,4 +1289,8 @@
   <data name="StatusMediaNetworkError" xml:space="preserve">
     <value>Сбой сети звука</value>
   </data>
+  <data name="SupportLinkUnchecked" xml:space="preserve"><value>Связь не проверена</value></data>
+  <data name="SupportLinkUnavailable" xml:space="preserve"><value>Связь со Spark недоступна</value></data>
+<data name="WorkSiteLocked" xml:space="preserve"><value>Формат работы закреплён Spark. Изменить его можно в Управлении.</value></data>
+<data name="WorkSiteOverride" xml:space="preserve"><value>Смена формата переведёт машину в ручной режим.</value></data>
 </root>

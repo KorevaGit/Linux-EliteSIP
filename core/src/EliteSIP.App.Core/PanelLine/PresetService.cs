@@ -69,6 +69,7 @@ internal sealed class PresetService
     /// нечего, — а это как раз обычный случай.
     /// </remarks>
     internal Action? NoteContact { get; set; }
+    internal Action? ContactFailed { get; set; }
 
     /// <summary>
     /// Доложить, идёт ли проверка и чем кончилась прошлая.
@@ -178,6 +179,7 @@ internal sealed class PresetService
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
+                ContactFailed?.Invoke();
                 // 401 здесь означает, что панель обрубила ключ машины. Это
                 // <b>не</b> повод сбрасываться: сброс запускает только
                 // подписанный отзыв — иначе одна ошибка на стороне канала стёрла
@@ -192,6 +194,7 @@ internal sealed class PresetService
         }
         catch (Exception error) when (error is HttpRequestException or TaskCanceledException)
         {
+            ContactFailed?.Invoke();
             // Нет связи — обычное состояние, а не беда.
             _log($"предустановки: канал недоступен — {error.Message}");
             Report?.Invoke(false, Resources.Strings.Get("PresetsChannelDown"));

@@ -19,3 +19,8 @@ Win-EliteSIP, коммит d3d9498820704a2faf6c602e87fe91b501b0d391 (linux-v0.1.
 13bba4436a035f2e62adc79945e2aa0d4c7a1f8e с адаптацией под Linux.
 Подробности и проверки: [этап 3](../docs/migration/2026-11-16-backend-port.md).
 Исходный import-manifest.json остаётся историей первого импорта.
+
+16 ноября 2026 из того же Windows-коммита однократно перенесены расширение
+ClientEventLog, WorkFormatSync, MachineRecovery, закрепление формата работы
+и связанные проверки. Интеграция UI, отмена и статус связи адаптированы для Linux.
+Подробности: [этап 4](../docs/migration/2026-11-16-spark-port.md).

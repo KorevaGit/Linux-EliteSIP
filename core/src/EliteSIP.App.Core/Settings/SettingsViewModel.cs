@@ -73,7 +73,7 @@ public sealed class SettingsViewModel : Observable
         // объекта — то есть позже. Условие успевало посчитаться на пустом
         // значении, и «Исправить сеть» оставалась серой навсегда: пересчитать
         // его было некому. Проверка вернулась внутрь самого действия.
-        RepairNetwork = new RelayCommand(_ => OnRepairNetwork?.Invoke());
+        RepairNetwork = new RelayCommand(_ => { if (CanRepairNetwork) { OnRepairNetwork?.Invoke(); } });
         CheckPresets = new RelayCommand(_ => OnCheckPresets?.Invoke());
         CollectLogs = new RelayCommand(_ => OnCollectLogs?.Invoke());
         RunSelfTest = new RelayCommand(_ =>
@@ -101,6 +101,131 @@ public sealed class SettingsViewModel : Observable
     }
 
     public AppSettings Settings { get; }
+    internal EliteSIP.AdminAccess.AdminAccessState? Access { get; init; }
+    internal Action? OnWorkplaceWentOffline { get; init; }
+    internal Action? OnWorkplaceChanged { get; init; }
+
+
+    /// <summary>
+    /// Площадка в сегментах «Офис / Из дома».
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Не прямая привязка к <c>Account.Site</c>: выбор здесь — решение, можно ли
+    /// переезжать и чего это стоит, а площадку ту же меняют и конфигурация
+    /// Spark, и «Управление», которым оффлайн не положен.
+    /// </remarks>
+    public WorkplaceSite WorkplaceSite
+    {
+        get => Settings.Account.Site;
+        set => ChooseWorkplaceSite(value);
+    }
+
+    /// <summary>Заперт ли переключатель для того, кто сидит за машиной.</summary>
+    public bool IsWorkplaceSwitchLocked
+        => Settings.Panel.LockedSite is not null && Access?.AllowsAdministration is not true;
+
+    public bool CanSwitchWorkplace => !IsWorkplaceSwitchLocked;
+
+    /// <summary>
+    /// Закрепление снято паролем, а машина ещё под панелью: цену переключения
+    /// надо видеть до нажатия, а не после.
+    /// </summary>
+    public bool IsWorkplaceLockLifted => Settings.Panel.LockedSite is not null && !IsWorkplaceSwitchLocked;
+
+    /// <summary>
+    /// Заперто ли «Исправить сеть» — только при закреплённом офисе.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Из офиса АТС достижима напрямую, и стучаться к ней снаружи незачем.
+    /// Закреплённому дому кнопка остаётся — иначе человек дома не смог бы сам
+    /// починить дорогу, когда у домашнего интернета сменился адрес.
+    /// </remarks>
+    public bool IsNetworkRepairLocked
+        => IsWorkplaceSwitchLocked && Settings.Panel.LockedSite is WorkplaceSite.Office;
+
+    public bool CanRepairNetwork => !IsNetworkRepairLocked;
+
+    private void ChooseWorkplaceSite(WorkplaceSite site)
+    {
+        if (site == Settings.Account.Site)
+        {
+            return;
+        }
+
+        // Сегменты погашены, но погашенная кнопка — не единственный вызывающий
+        // навсегда. Перечитать — чтобы отметка вернулась на место.
+        if (IsWorkplaceSwitchLocked)
+        {
+            RefreshWorkplace();
+            return;
+        }
+
+        // Переключение поверх закрепления — то же, что правка управляемого поля
+        // в «Управлении»: связка рвётся до переезда.
+        if (Settings.Panel.LockedSite is not null)
+        {
+            Settings.Panel.Mode = PanelMode.Manual;
+            Settings.Panel.WantsResync = false;
+            OnWorkplaceWentOffline?.Invoke();
+        }
+
+        Settings.Account.Site = site;
+        if (Settings.Panel.IsManaged && Settings.Panel.LockedSite is null)
+        {
+            Settings.Panel.PendingWorkFormat = site is WorkplaceSite.Remote ? "remote" : "office";
+            OnWorkplaceChanged?.Invoke();
+        }
+        RefreshWorkplace();
+    }
+
+    /// <summary>
+    /// Площадка, закрепление или пароль настроек могли смениться — перечитать
+    /// всё, что от них зависит.
+    /// </summary>
+    internal void RefreshWorkplace()
+    {
+        NotifyChanged(nameof(WorkplaceSite));
+        NotifyChanged(nameof(IsWorkplaceSwitchLocked));
+        NotifyChanged(nameof(CanSwitchWorkplace));
+        NotifyChanged(nameof(IsWorkplaceLockLifted));
+        NotifyChanged(nameof(IsNetworkRepairLocked));
+        NotifyChanged(nameof(CanRepairNetwork));
+        RefreshLink();
+    }
+
+    /// <summary>
+    /// Следить за площадкой и закреплением, пока окно открыто.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Подписка — только на время окна: настройки живут дольше него, и висящий
+    /// обработчик держал бы закрытое окно в памяти.
+    /// </remarks>
+    internal void WatchWorkplace(bool watch)
+    {
+        Settings.Account.PropertyChanged -= OnWorkplaceSettingChanged;
+        Settings.Panel.PropertyChanged -= OnWorkplaceSettingChanged;
+
+        if (watch)
+        {
+            Settings.Account.PropertyChanged += OnWorkplaceSettingChanged;
+            Settings.Panel.PropertyChanged += OnWorkplaceSettingChanged;
+        }
+    }
+
+    private void OnWorkplaceSettingChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(AccountSettings.Site)
+            or nameof(PanelSettings.Mode)
+            or nameof(PanelSettings.LockedWorkFormat))
+        {
+            RefreshWorkplace();
+        }
+    }
+
+
 
     // --- Кнопки, которые прежде были нарисованы и никуда не вели --------------
     //
@@ -349,7 +474,10 @@ public sealed class SettingsViewModel : Observable
 
     /// <summary>Связь словами — та же строка, что в «Управлении».</summary>
     public string LinkState => Strings.Get(
-        Settings.Panel.Mode is PanelMode.Managed && Settings.Panel.HasChannelKey ? "SupportLinkOnline"
+        Settings.Panel.Mode is PanelMode.Managed && Settings.Panel.HasChannelKey
+            ? Settings.Panel.ChannelAvailable is false ? "SupportLinkUnavailable"
+            : Settings.Panel.ChannelAvailable is true && Settings.Panel.LastContactAt >= DateTimeOffset.UtcNow.AddMinutes(-30)
+                ? "SupportLinkOnline" : "SupportLinkUnchecked"
         : Settings.Panel.IsOffline ? "SupportLinkOffline"
         : "SupportLinkNone");
 

@@ -110,13 +110,13 @@ public sealed partial class App : Application, IDisposable
         {
             if (failure.ExceptionObject is Exception error)
             {
-                Record(error);
+                Record(error, survived: !failure.IsTerminating);
             }
         };
 
         TaskScheduler.UnobservedTaskException += (_, failure) =>
         {
-            Record(failure.Exception);
+            Record(failure.Exception, survived: true);
             failure.SetObserved();
         };
 
@@ -410,6 +410,8 @@ public sealed partial class App : Application, IDisposable
         Mark("линия панели");
 
         ClientEventLog.Shared.Start(() => _settings!, Log);
+        ClientEventLog.Shared.BeginSession();
+        _phone!.RecoverConnection = () => Reconnect("канал закрыт");
 
         _updates = new UpdateService(
             isBusy: () => panel.IsInCall,
@@ -562,6 +564,7 @@ public sealed partial class App : Application, IDisposable
             return;
         }
 
+        ClientEventLog.Shared.NoteConnection($"Переподключение: {reason}{(_panel.IsInCall ? "; отложено до окончания разговора" : string.Empty)}");
         if (_panel.IsInCall)
         {
             _reconnectAfterCall = reason;
@@ -706,7 +709,7 @@ public sealed partial class App : Application, IDisposable
             await Task.WhenAny(leaving, Task.Delay(limit));
         }
 
-        ClientEventLog.Shared.Dispose();
+        await ClientEventLog.Shared.FinishSessionAsync();
 
         if (_panelWindow is not null)
         {
@@ -743,6 +746,8 @@ public sealed partial class App : Application, IDisposable
 
     internal static void Record(Exception failure, bool? survived = null)
     {
+        try { ClientEventLog.Shared.NoteCrash(failure, survived is true); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }
         try
         {
             var outcome = survived switch
@@ -766,6 +771,8 @@ public sealed partial class App : Application, IDisposable
 
     public void Dispose()
     {
+        ClientEventLog.Shared.EndSession();
+        ClientEventLog.Shared.Dispose();
         _appearance?.Dispose();
         _appearance = null;
         _desktopAppearance?.Dispose();

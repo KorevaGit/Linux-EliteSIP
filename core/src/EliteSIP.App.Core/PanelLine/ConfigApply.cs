@@ -36,12 +36,15 @@ internal static class ConfigApply
 
         // Площадка одна на все номера сотрудника: формат работы — его, а не
         // номера. Неизвестное значение площадку не трогает.
-        WorkplaceSite? site = config.WorkFormat switch
+        var site = PanelSettings.SiteOf(config.WorkFormat);
+        if (config.WorkFormatLocked && site is not null)
         {
-            "office" => WorkplaceSite.Office,
-            "remote" => WorkplaceSite.Remote,
-            _ => null,
-        };
+            settings.Panel.PendingWorkFormat = string.Empty;
+        }
+        else if (settings.Panel.PendingWorkFormat.Length > 0)
+        {
+            site = settings.Account.Site;
+        }
 
         var lines = config.EffectiveLines;
         if (lines.Count > 0)
@@ -78,6 +81,7 @@ internal static class ConfigApply
         }
 
         ApplyAdminPassword(settings, config.AdminPassword, adminAccess, log);
+        NoteWorkFormatLock(settings, config.WorkFormatLocked && PanelSettings.SiteOf(config.WorkFormat) is not null ? config.WorkFormat : string.Empty, log);
 
         settings.Panel.Mode = PanelMode.Managed;
         settings.Panel.AppliedConfigRevision = config.Revision;
@@ -233,6 +237,36 @@ internal static class ConfigApply
             : null;
 
         return (registrationChanged, newNumber);
+    }
+
+    /// <summary>
+    /// Запоминает закрепление формата работы и пишет в журнал, только если оно
+    /// сменилось: конфигурация приезжает на любую правку сотрудника.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Незнакомый формат не закрепляется — запрет без площадки, к которой он
+    /// привязан, запер бы менеджера неизвестно где.
+    /// </remarks>
+    private static void NoteWorkFormatLock(AppSettings settings, string format, Action<string> log)
+    {
+        if (settings.Panel.LockedWorkFormat == format)
+        {
+            return;
+        }
+
+        settings.Panel.LockedWorkFormat = format;
+
+        if (format.Length == 0)
+        {
+            log("Spark разрешил менять формат работы");
+            ClientEventLog.Shared.Record(ClientEventLog.Kind.Config, ClientEventLog.Level.Info, "Смена формата работы разрешена");
+            return;
+        }
+
+        var title = format == "remote" ? "из дома" : "офис";
+        log($"Spark закрепил формат работы: {title}");
+        ClientEventLog.Shared.Record(ClientEventLog.Kind.Config, ClientEventLog.Level.Info, $"Формат работы закреплён: {title}");
     }
 
     private static string AddressFor(AppSettings settings, WorkplaceSite site)

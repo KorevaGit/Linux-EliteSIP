@@ -81,6 +81,9 @@ public sealed class PhoneService : IDisposable
     /// первым, и софтфон показывал регистрацию, которой нет.
     /// </remarks>
     private readonly SemaphoreSlim _connection = new(1, 1);
+    private long _connectionRequest;
+    private bool _disposed;
+    internal Action? RecoverConnection { get; set; }
 
     // BYE может прийти во время запуска звука после 200 OK. Очистка ждёт
     // завершения запуска, иначе тот заведёт линию уже после её снятия.
@@ -318,9 +321,12 @@ public sealed class PhoneService : IDisposable
     /// </param>
     public async Task ConnectAsync(string? statusKey = null)
     {
+        var request = Interlocked.Increment(ref _connectionRequest);
         await _connection.WaitAsync().ConfigureAwait(true);
         try
         {
+            if (_disposed || request != Interlocked.Read(ref _connectionRequest)) { return; }
+            _panel.CanPlaceCall = false;
             if (_agent is not null)
             {
                 ShowStatus(StatusSlot.Connection, "StatusDisconnecting", "clock");
@@ -490,6 +496,7 @@ public sealed class PhoneService : IDisposable
     /// <summary>Снимает регистрацию и отпускает всё, что держит.</summary>
     public async Task DisconnectAsync()
     {
+        Interlocked.Increment(ref _connectionRequest);
         await _connection.WaitAsync().ConfigureAwait(true);
         try
         {
@@ -604,7 +611,7 @@ public sealed class PhoneService : IDisposable
         // разговора вполне реально.
         _history.Begin(record);
         _records[call.CallId] = record;
-        ClientEventLog.Shared.CallStarted(call.CallId, incoming: false);
+        ClientEventLog.Shared.CallStarted(call.CallId, incoming: false, record.Number, record.DisplayName);
 
         // Панель узнаёт о вызове сейчас, а не по «ответили»: до этой строки она
         // выглядела свободной всё время гудков, и «Позвонить» нажималась
@@ -658,7 +665,7 @@ public sealed class PhoneService : IDisposable
 
         _history.Begin(record);
         _records[call.CallId] = record;
-        ClientEventLog.Shared.CallStarted(call.CallId, incoming: true);
+        ClientEventLog.Shared.CallStarted(call.CallId, incoming: true, record.Number, record.DisplayName);
 
         // Следим за завершением и при автоподъёме: его ветка ниже выходит
         // без окна. Иначе BYE/CANCEL закрывает SIP-диалог, но линия, звук
@@ -1088,6 +1095,7 @@ public sealed class PhoneService : IDisposable
                     case SipUserAgentEvent.ChannelClosed closed:
                         await _ui.InvokeAsync(() => Trouble("TroubleChannelClosed", opensSettings: false));
                         _log($"канал закрыт: {closed.Reason}");
+                        _ = RecoverClosedChannelAsync(agent, token);
                         break;
 
                     default:
@@ -1098,6 +1106,26 @@ public sealed class PhoneService : IDisposable
         catch (OperationCanceledException)
         {
             // Обычный выход: регистрацию снимают, поток событий закрывают.
+        }
+    }
+
+    /// <summary>Повторно открыть неожиданно закрытый канал, если агент ещё актуален.</summary>
+    private async Task RecoverClosedChannelAsync(SipUserAgent agent, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
+            await _ui.InvokeAsync(() =>
+            {
+                if (!token.IsCancellationRequested && !_disposed && ReferenceEquals(_agent, agent) && _connection.CurrentCount != 0)
+                {
+                    RecoverConnection?.Invoke();
+                }
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Старый агент уже заменён или приложение закрывается.
         }
     }
 
@@ -2141,6 +2169,9 @@ public sealed class PhoneService : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) { return; }
+        _disposed = true;
+        Interlocked.Increment(ref _connectionRequest);
         // Синхронно: приложение закрывается, и ждать снятия регистрации дольше
         // мгновения нельзя — иначе выход выглядит зависанием.
         _settings.Audio.PropertyChanged -= OnAudioSettingsChanged;

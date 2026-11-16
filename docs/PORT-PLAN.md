@@ -7,6 +7,7 @@
 > Действующее решение и порядок отделения: [ADR-0001](adr/0001-independent-linux-codebase.md).
 > Отделение исходников выполнено: [отчёт этапа 2](migration/2026-11-14-independent-code.md).
 > Backend перенесён и проверен: [отчёт этапа 3](migration/2026-11-16-backend-port.md).
+> Клиентская часть Spark перенесена: [отчёт этапа 4](migration/2026-11-16-spark-port.md).
 > Действующие инструкции сборки и структура: [README](../README.md).
 > Этап 1 выполнен: [исходные версии и матрица переноса](migration/2026-11-14-windows-parity.md).
 

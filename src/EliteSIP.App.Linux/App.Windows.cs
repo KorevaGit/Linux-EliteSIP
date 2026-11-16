@@ -39,6 +39,9 @@ public sealed partial class App
         SettingsViewModel? model = null;
         model = new SettingsViewModel(_settings!, _ui, _audioPlatform, _autoStart)
         {
+            Access = _access,
+            OnWorkplaceChanged = () => _ = _panelLine?.CheckMachineAsync(),
+            OnWorkplaceWentOffline = () => Log("формат работы изменён поверх закрепления: машина в ручном режиме"),
             Updates = _updates is null ? null : new UpdatesViewModel(_updates),
             OnRepairNetwork = () =>
             {

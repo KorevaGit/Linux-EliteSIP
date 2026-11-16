@@ -22,7 +22,7 @@ public sealed class ClientEventLogTests : IDisposable
     public void Dispose() => Directory.Delete(_directory, recursive: true);
 
     [Fact]
-    public void AnsweredCallCarriesDurationAndNoNumber()
+    public void AnsweredCallCarriesDurationAndOptionalPeer()
     {
         var log = Make();
 
@@ -60,6 +60,52 @@ public sealed class ClientEventLogTests : IDisposable
         log.CallFinished("never-started", "отбой", failed: false);
 
         Assert.Empty(log.Pending);
+    }
+
+    [Fact]
+    public void Call_peer_fields_survive_restart_and_use_server_names()
+    {
+        var log = Make();
+        log.CallStarted("c1", incoming: true, "+79991234567", "Иван Петров");
+        log.CallAnswered("c1");
+        log.CallFinished("c1", "отбой", failed: false);
+        var item = Assert.Single(Make().Pending);
+        Assert.Equal("+79991234567", item.PeerNumber);
+        Assert.Equal("Иван Петров", item.PeerName);
+        using var data = JsonDocument.Parse(File.ReadAllText(FilePath));
+        Assert.Equal("Иван Петров", data.RootElement[0].GetProperty("peer_name").GetString());
+    }
+
+    [Fact]
+    public void Crash_survives_restart_and_unclean_exit_is_reported_without_claiming_cause()
+    {
+        using var log = Make();
+        log.BeginSession();
+        log.NoteCrash(new InvalidOperationException("injected crash"), survived: false);
+        log.EndSession();
+        using var restarted = Make();
+        restarted.BeginSession();
+        Assert.Single(restarted.Pending, item => item.Kind == ClientEventLog.Kind.Crash);
+        Assert.Contains(restarted.Pending, item => item.Kind == ClientEventLog.Kind.Connection
+            && item.Message.Contains("без штатного выхода", StringComparison.Ordinal));
+        restarted.EndSession();
+        using var next = Make();
+        var before = next.Pending.Count;
+        next.BeginSession();
+        Assert.Equal(before + 1, next.Pending.Count);
+        next.EndSession();
+    }
+
+    [Fact]
+    public void Survived_error_does_not_mark_clean_shutdown_as_crash_and_secrets_are_redacted()
+    {
+        using var log = Make();
+        log.BeginSession();
+        log.NoteCrash(new IOException("password=sample-secret"), survived: true);
+        log.EndSession();
+        var crash = Assert.Single(log.Pending, item => item.Kind == ClientEventLog.Kind.Crash);
+        Assert.DoesNotContain("sample-secret", crash.Message, StringComparison.Ordinal);
+        Assert.False(File.Exists(FilePath + ".session"));
     }
 
     [Fact]
@@ -246,5 +292,42 @@ public sealed class ClientEventLogTests : IDisposable
 
         Assert.Equal(0, calls);
         Assert.Single(log.Pending);
+    }
+
+    [Fact]
+    public async Task Exit_flush_has_bounded_wait_and_preserves_events_when_transport_ignores_cancellation()
+    {
+        var completion = new TaskCompletionSource<ClientEventLog.SendResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var settings = new EliteSIP.App.Settings.AppSettings();
+        settings.Panel.InstallationID = "test-machine";
+        settings.Panel.SetChannelKey("test-key");
+        using var log = new ClientEventLog(FilePath)
+        {
+            LogsAddress = () => new Uri("https://channel.test/logs"),
+            Transport = (_, _) => completion.Task,
+        };
+        log.Start(() => settings, _ => { });
+        log.BeginSession();
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        await log.FinishSessionAsync().WaitAsync(TimeSpan.FromSeconds(3));
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(3));
+        Assert.Contains(Make().Pending, item => item.Message.StartsWith("Приложение закрыто", StringComparison.Ordinal));
+        completion.SetResult(new(HttpStatusCode.ServiceUnavailable, null));
+    }
+
+    [Fact]
+    public void Legacy_events_keep_absent_peer_fields_and_peer_values_are_redacted()
+    {
+        File.WriteAllText(FilePath, "[{\"ts\":\"2026-10-01T00:00:00Z\",\"kind\":\"call\",\"level\":\"info\",\"message\":\"legacy\"}]");
+        using var log = Make();
+        Assert.Null(Assert.Single(log.Pending).PeerNumber);
+        log.CallStarted("new", true, "123\r\n456", "password=hidden-secret");
+        log.CallFinished("new", "done", false);
+        Assert.DoesNotContain("hidden-secret", File.ReadAllText(FilePath));
+        Assert.Equal("123  456", log.Pending[^1].PeerNumber);
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite, File.GetUnixFileMode(FilePath));
+        }
     }
 }

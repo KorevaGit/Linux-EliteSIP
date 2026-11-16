@@ -32,6 +32,7 @@
     <InternalsVisibleTo Include="EliteSIP.App.Tests" />
     <InternalsVisibleTo Include="EliteSIP.App.Core.Tests" />
     <InternalsVisibleTo Include="EliteSIP.App.Linux" />
+    <InternalsVisibleTo Include="EliteSIP.App.Linux.Tests" />
   </ItemGroup>
 
 </Project>

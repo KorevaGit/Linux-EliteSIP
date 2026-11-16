@@ -6,7 +6,9 @@ namespace EliteSIP.App.Tests;
 /// <summary>Звук без сервера: два устройства в каждую сторону и немые сигналы.</summary>
 internal sealed class TestAudioPlatform : IAudioPlatform
 {
-    public IVoiceAudioEngine CreateEngine(VoiceAudioConfiguration configuration) => throw new NotSupportedException();
+    internal Func<VoiceAudioConfiguration, IVoiceAudioEngine>? EngineFactory { get; init; }
+    public IVoiceAudioEngine CreateEngine(VoiceAudioConfiguration configuration)
+        => EngineFactory?.Invoke(configuration) ?? throw new NotSupportedException();
 
     public ISignalSounds CreateSignalSounds(Action<string> log) => new SilentSounds();
 

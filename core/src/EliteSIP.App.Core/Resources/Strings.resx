@@ -1194,7 +1194,7 @@
     <value>Link</value>
   </data>
   <data name="SupportLinkOnline" xml:space="preserve">
-    <value>Spark, online</value>
+    <value>Settings channel available</value>
   </data>
   <data name="SupportLinkOffline" xml:space="preserve">
     <value>offline, manual</value>
@@ -1311,4 +1311,8 @@
   <data name="StatusMediaNetworkError" xml:space="preserve">
     <value>Audio network error</value>
   </data>
+  <data name="SupportLinkUnchecked" xml:space="preserve"><value>Connection not checked</value></data>
+  <data name="SupportLinkUnavailable" xml:space="preserve"><value>Spark connection unavailable</value></data>
+<data name="WorkSiteLocked" xml:space="preserve"><value>Work format is fixed by Spark. Change it in Administration.</value></data>
+<data name="WorkSiteOverride" xml:space="preserve"><value>Changing this choice switches the machine to manual mode.</value></data>
 </root>

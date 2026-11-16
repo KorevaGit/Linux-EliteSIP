@@ -85,15 +85,15 @@
           <StackPanel IsVisible="{Binding ShowsWork}">
             <theme:SettingsSection Header="{res:Loc WorkPlace}">
               <theme:SettingsRow Header="{res:Loc SectionWork}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding CanSwitchWorkplace}">
                   <RadioButton Classes="segment"
                                GroupName="Site"
                                Content="{res:Loc WorkOffice}"
-                               IsChecked="{Binding Settings.Account.Site, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Office}" />
+                               IsChecked="{Binding WorkplaceSite, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Office}" />
                   <RadioButton Classes="segment"
                                GroupName="Site"
                                Content="{res:Loc WorkRemote}"
-                               IsChecked="{Binding Settings.Account.Site, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Remote}" />
+                               IsChecked="{Binding WorkplaceSite, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Remote}" />
                 </StackPanel>
               </theme:SettingsRow>
 
@@ -103,6 +103,8 @@
               </theme:SettingsRow>
 
               <theme:SettingsNote Text="{res:Loc WorkSiteNote}" />
+              <theme:SettingsNote IsVisible="{Binding IsWorkplaceSwitchLocked}" Text="{res:Loc WorkSiteLocked}" />
+              <theme:SettingsNote IsVisible="{Binding IsWorkplaceLockLifted}" Text="{res:Loc WorkSiteOverride}" />
             </theme:SettingsSection>
 
             <theme:SettingsSection Header="{res:Loc WorkTroubleSection}">
@@ -117,7 +119,7 @@
                 <Button Classes="settings"
                         HorizontalAlignment="Left"
                         Content="{res:Loc WorkRepairNetwork}"
-                        Command="{Binding RepairNetwork}" />
+                        IsEnabled="{Binding CanRepairNetwork}" Command="{Binding RepairNetwork}" />
               </theme:SettingsIndented>
 
               <!-- Итог — здесь, под своей кнопкой: прежде он уходил на страницу

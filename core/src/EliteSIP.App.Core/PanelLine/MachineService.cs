@@ -33,6 +33,7 @@ internal sealed class MachineService
     /// </remarks>
     internal static readonly TimeSpan RevocationInterval = TimeSpan.FromMinutes(15);
 
+    internal Action<bool>? ContactResult { get; init; }
     private readonly Func<AppSettings> _settings;
     private readonly Action<MachineAccess> _applyAccess;
     private readonly Action<Revocation> _reset;
@@ -195,6 +196,7 @@ internal sealed class MachineService
                 .SendAsync(request, deadline.Token)
                 .ConfigureAwait(false);
 
+            ContactResult?.Invoke(response.StatusCode is HttpStatusCode.OK or HttpStatusCode.NotFound);
             switch (response.StatusCode)
             {
                 case HttpStatusCode.NotFound:
@@ -222,6 +224,7 @@ internal sealed class MachineService
         }
         catch (Exception error) when (error is HttpRequestException or TaskCanceledException)
         {
+            ContactResult?.Invoke(false);
             // Нет связи — обычное состояние, а не беда.
             _log($"{prefix}: канал недоступен — {error.Message}");
         }

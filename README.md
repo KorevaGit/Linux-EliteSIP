@@ -39,3 +39,4 @@ GUI-тесты используют Avalonia Headless, аудиопроверк�
 План функционального переноса: [матрица требований](docs/migration/2026-11-14-windows-parity.md).
 Результат отделения: [отчёт этапа 2](docs/migration/2026-11-14-independent-code.md).
 Результат переноса backend: [отчёт этапа 3](docs/migration/2026-11-16-backend-port.md).
+Результат переноса Spark: [отчёт этапа 4](docs/migration/2026-11-16-spark-port.md).
