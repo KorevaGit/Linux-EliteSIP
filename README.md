@@ -38,3 +38,4 @@ GUI-тесты используют Avalonia Headless, аудиопроверк�
 Архитектурное решение: [ADR-0001](docs/adr/0001-independent-linux-codebase.md).
 План функционального переноса: [матрица требований](docs/migration/2026-11-14-windows-parity.md).
 Результат отделения: [отчёт этапа 2](docs/migration/2026-11-14-independent-code.md).
+Результат переноса backend: [отчёт этапа 3](docs/migration/2026-11-16-backend-port.md).

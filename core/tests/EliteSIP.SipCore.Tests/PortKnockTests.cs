@@ -236,12 +236,12 @@ public sealed class PortKnockTests
     /// журнале, и она же — то, чем удалённый запуск отличается от офисного.
     /// </summary>
     [Fact]
-    public void Оценка_длительности_считает_промежутки_а_не_пакеты()
+    public void Оценка_длительности_учитывает_последнее_ожидание_эха()
     {
-        Assert.Equal(TimeSpan.FromSeconds(7), PortKnockSequence.Production.EstimatedDuration);
+        Assert.Equal(TimeSpan.FromSeconds(8), PortKnockSequence.Production.EstimatedDuration);
 
         PortKnockSequence single = new() { Steps = [new PortKnockStep(100)] };
-        Assert.Equal(TimeSpan.Zero, single.EstimatedDuration);
+        Assert.Equal(TimeSpan.FromSeconds(single.SpacingSeconds), single.EstimatedDuration);
     }
 
     // MARK: - Когда пропускать
@@ -345,7 +345,7 @@ public sealed class PortKnockTests
         var empty = JsonSerializer.Deserialize<PortKnockSequence>("{}")!;
 
         Assert.Equal(PortKnockSequence.Production.Steps.Count, empty.Steps.Count);
-        Assert.Equal(600, empty.RepeatIntervalSeconds);
+        Assert.Equal(3600, empty.RepeatIntervalSeconds);
 
         var disabled = JsonSerializer.Deserialize<PortKnockSequence>("""{"Steps":[]}""")!;
 
@@ -437,5 +437,19 @@ public sealed class PortKnockTests
         }
 
         public void Dispose() => Disposed = true;
+    }
+    [Fact]
+    public void Часовой_интервал_не_блокирует_аварийное_восстановление()
+    {
+        var throttle = new PortKnockThrottle(TimeSpan.FromHours(1));
+        var start = DateTimeOffset.UtcNow;
+        throttle.RecordKnock(start);
+        Assert.False(throttle.ShouldKnock(SipPathOpenReason.Periodic, start.AddMinutes(10)));
+        Assert.False(throttle.ShouldKnock(SipPathOpenReason.Registration, start.AddMinutes(59)));
+        Assert.True(throttle.ShouldKnock(SipPathOpenReason.Periodic, start.AddHours(1)));
+        Assert.True(throttle.ShouldKnock(SipPathOpenReason.Retry, start.AddSeconds(1)));
+        Assert.True(throttle.ShouldKnock(SipPathOpenReason.Recovery, start.AddSeconds(1)));
+        throttle.Invalidate();
+        Assert.True(throttle.ShouldKnock(SipPathOpenReason.Registration, start.AddSeconds(1)));
     }
 }

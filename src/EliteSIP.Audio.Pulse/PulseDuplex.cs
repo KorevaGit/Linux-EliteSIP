@@ -469,7 +469,12 @@ internal sealed unsafe class PulseDuplex : IDisposable
 
         frames = Math.Min(frames, (int)bytes / frameBytes);
         Span<float> mono = _mono.AsSpan(0, frames);
-        _render(mono);
+        try { _render(mono); }
+        catch (Exception error) when (AudioWorkerBoundary.IsRecoverableManaged(error))
+        {
+            mono.Clear();
+            ReportCallbackFailure(error);
+        }
 
         var destination = new Span<float>(data, frames * _outputChannels);
         for (int i = 0; i < frames; i++)
@@ -509,17 +514,35 @@ internal sealed unsafe class PulseDuplex : IDisposable
         }
     }
 
+    private void ReportCallbackFailure(Exception error) =>
+        AudioWorkerBoundary.Run(() => _failed($"callback PulseAudio: {error.GetType().Name}: {error.Message}"), _ => { });
+
     private static PulseDuplex? Of(nint userdata) =>
         userdata == 0 ? null : GCHandle.FromIntPtr(userdata).Target as PulseDuplex;
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void OnRead(nint stream, nuint bytes, nint userdata) => Of(userdata)?.Read(stream);
+    private static void OnRead(nint stream, nuint bytes, nint userdata)
+    {
+        var duplex = Of(userdata);
+        try { duplex?.Read(stream); }
+        catch (Exception error) when (AudioWorkerBoundary.IsRecoverableManaged(error)) { duplex?.ReportCallbackFailure(error); }
+    }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void OnWrite(nint stream, nuint bytes, nint userdata) => Of(userdata)?.Write(stream, bytes);
+    private static void OnWrite(nint stream, nuint bytes, nint userdata)
+    {
+        var duplex = Of(userdata);
+        try { duplex?.Write(stream, bytes); }
+        catch (Exception error) when (AudioWorkerBoundary.IsRecoverableManaged(error)) { duplex?.ReportCallbackFailure(error); }
+    }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static void OnState(nint stream, nint userdata) => Of(userdata)?.StateChanged(stream);
+    private static void OnState(nint stream, nint userdata)
+    {
+        var duplex = Of(userdata);
+        try { duplex?.StateChanged(stream); }
+        catch (Exception error) when (AudioWorkerBoundary.IsRecoverableManaged(error)) { duplex?.ReportCallbackFailure(error); }
+    }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void OnUnderflow(nint stream, nint userdata)

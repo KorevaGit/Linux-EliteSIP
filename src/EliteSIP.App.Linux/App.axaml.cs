@@ -173,7 +173,7 @@ public sealed partial class App : Application, IDisposable
         _history = new CallHistoryStore(new CallHistoryStore.Settings(
             Path.Combine(
                 Path.GetDirectoryName(AppSettings.DefaultPath)!,
-                args.Contains("--demo") ? "history-demo.db" : "history.db")));
+                args.Contains("--demo") ? "history-demo.db" : "history.db")), Log);
         Mark("история");
 
         _panel = new PanelViewModel

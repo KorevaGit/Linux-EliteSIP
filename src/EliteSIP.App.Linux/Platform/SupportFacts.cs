@@ -49,6 +49,51 @@ internal static class SupportFacts
         return string.Join(Environment.NewLine, lines);
     }
 
+    internal static string Configuration(EliteSIP.App.Settings.AppSettings? settings)
+    {
+        if (settings is null) { return "настройки не загружены"; }
+        // Только явный список безопасных полей; Credentials и ключи канала не сериализуются.
+        return string.Join(Environment.NewLine,
+            $"площадка: {settings.Account.Site}",
+            $"АТС: офис={settings.Pbx.OfficeAddress}; порт={settings.Pbx.Port}; транспорт={settings.Pbx.Transport}; expires={settings.Pbx.RegistrationExpirySeconds}",
+            $"TLS принимает любой сертификат: {settings.Pbx.AcceptsAnyTlsCertificate}",
+            $"звук: микрофон={settings.Audio.InputDeviceId}; выход={settings.Audio.OutputDeviceId}; усиление={settings.Audio.MicrophoneGain}; громкость={settings.Audio.PlaybackVolume}",
+            $"обработка: шум={settings.Audio.NoiseSuppression}; голоса вокруг={settings.Audio.BackgroundVoiceSuppression}; АРУ={settings.Audio.AutomaticGainControl}; приём={settings.Audio.ReceiveGainControl}",
+            $"рингтон: выход={settings.Ringtone.Output}; громкость={settings.Ringtone.Volume}",
+            $"журнал: файл={settings.Maintenance.LogToFile}; SIP-трасса={settings.Maintenance.LogsSipTrace}",
+            $"стук: интервал={settings.PortKnock.RepeatIntervalSeconds}; пауза={settings.PortKnock.SpacingSeconds}");
+    }
+
+    internal static string EnvironmentSummary()
+    {
+        var lines = new List<string>
+        {
+            $"машина: {Environment.MachineName}",
+            $"ОС: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}",
+            $"архитектура: {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}; процесс: {System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture}",
+            $"CLR: {Environment.Version}; CPU: {Environment.ProcessorCount}; память процесса: {Environment.WorkingSet}; PID: {Environment.ProcessId}",
+            $"часовой пояс: {TimeZoneInfo.Local.Id}; время ОС: {Environment.TickCount64} мс",
+        };
+        foreach (var path in new[] { "/proc/cpuinfo", "/proc/meminfo", "/sys/class/dmi/id/sys_vendor", "/sys/class/dmi/id/product_name" })
+        {
+            try { lines.Add(path + Environment.NewLine + File.ReadAllText(path)); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException) { lines.Add(path + ": недоступно"); }
+        }
+        try
+        {
+            foreach (var item in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                lines.Add($"сеть: {item.Name}; {item.Description}; {item.Id}; {item.NetworkInterfaceType}; {item.OperationalStatus}; MAC={item.GetPhysicalAddress()}; скорость={item.Speed}");
+                var properties = item.GetIPProperties();
+                lines.Add("адреса: " + string.Join(", ", properties.UnicastAddresses.Select(address => address.Address.ToString())));
+                lines.Add("DNS: " + string.Join(", ", properties.DnsAddresses));
+                lines.Add("шлюзы: " + string.Join(", ", properties.GatewayAddresses.Select(address => address.Address.ToString())));
+            }
+        }
+        catch (Exception error) when (error is System.Net.NetworkInformation.NetworkInformationException or PlatformNotSupportedException) { lines.Add("сеть: " + error.Message); }
+        return string.Join(Environment.NewLine, lines);
+    }
+
     /// <summary>
     /// Файлы журнала и <c>crash.log</c> — пути, а не строки: архив копирует
     /// файлы сам (<see cref="EliteSIP.Diagnostics.SupportArchive.Make"/>).

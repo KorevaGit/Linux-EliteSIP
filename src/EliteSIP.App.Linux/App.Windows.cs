@@ -304,39 +304,43 @@ public sealed partial class App
     /// русском Mint), а не <c>~/Desktop</c>: .NET берёт его из
     /// <c>user-dirs.dirs</c> сам.
     /// </remarks>
-    private void CollectSupportArchive(SettingsViewModel model)
+    private bool _collectingSupport;
+
+    private async void CollectSupportArchive(SettingsViewModel model)
     {
+        if (_collectingSupport) { return; }
+        _collectingSupport = true;
         try
         {
-            _logFile?.Flush();
-
+            var version = SettingsViewModel.Version;
+            var installation = _settings?.Panel.InstallationID;
+            var number = _settings?.Account.Username;
+            var log = _logFile;
+            var history = _history;
+            var configuration = SupportFacts.Configuration(_settings);
+            var directory = Path.GetDirectoryName(AppSettings.DefaultPath)!;
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            if (desktop.Length == 0 || !Directory.Exists(desktop))
+            if (desktop.Length == 0 || !Directory.Exists(desktop)) { desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); }
+            var destination = Path.Combine(desktop, SupportArchive.SuggestedName());
+            var made = await Task.Run(async () =>
             {
-                desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-
-            // Пути файлов, а не их строки: SupportArchive.Make копирует файлы
-            // сам. Перевод Windows-версии передавал строки журнала как пути —
-            // архив уезжал с одним summary.txt, а пустая строка журнала
-            // роняла сборку ArgumentException.
-            var files = SupportFacts.Files(
-                _logFile?.Files() ?? [], Path.GetDirectoryName(AppSettings.DefaultPath)!);
-
-            var summary = SupportFacts.Summary(
-                SettingsViewModel.Version,
-                _settings?.Panel.InstallationID,
-                _settings?.Account.Username,
-                _audioPlatform,
-                Environment.GetEnvironmentVariable);
-
-            var made = SupportArchive.Make(files, summary, Path.Combine(desktop, SupportArchive.SuggestedName()));
+                var summary = SupportFacts.Summary(version, installation, number, _audioPlatform, Environment.GetEnvironmentVariable);
+                var extras = new Dictionary<string, byte[]>
+                {
+                    ["environment.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.EnvironmentSummary()),
+                    ["configuration.txt"] = System.Text.Encoding.UTF8.GetBytes(configuration),
+                    ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync().ConfigureAwait(false)),
+                    ["history-status.txt"] = System.Text.Encoding.UTF8.GetBytes(history?.DiagnosticSummary() ?? "история не открыта"),
+                };
+                return SupportArchive.MakeFromDirectory(directory, summary, destination, log, extras);
+            });
             model.ReportSupport(Strings.Format("SupportLogsCollected", Path.GetFileName(made)), SupportArea.Logs);
         }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             model.ReportSupport(Strings.Format("SupportLogsFailed", error.Message), SupportArea.Logs);
         }
+        finally { _collectingSupport = false; }
     }
 
     /// <summary>

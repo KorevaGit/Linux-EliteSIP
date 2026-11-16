@@ -45,8 +45,12 @@ internal sealed class PingUtilityEcho : IIcmpEcho
         _ping = path ?? Candidates.FirstOrDefault(File.Exists) ?? Candidates[0];
     }
 
-    public async Task SendAsync(string host, int payloadBytes, TimeSpan timeout)
+    public Task SendAsync(string host, int payloadBytes, TimeSpan timeout) =>
+        SendAsync(host, payloadBytes, timeout, CancellationToken.None);
+
+    public async Task SendAsync(string host, int payloadBytes, TimeSpan timeout, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
         using Process process = new() { StartInfo = StartInfo(_ping, host, payloadBytes, timeout) };
 
         try
@@ -62,19 +66,23 @@ internal sealed class PingUtilityEcho : IIcmpEcho
 
         // Сводку ping вычитываем и бросаем: не прочитанный до конца канал
         // однажды заполнится и остановит процесс на записи.
-        _ = process.StandardOutput.ReadToEndAsync();
-        var errors = process.StandardError.ReadToEndAsync();
+        _ = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
+        var errors = process.StandardError.ReadToEndAsync(CancellationToken.None);
 
         // Запас сверх тайм-аута самого ping: процесс ещё надо запустить и
         // разобрать адрес. Без него зависший DNS держал бы стук бесконечно.
-        using CancellationTokenSource deadline = new(timeout + TimeSpan.FromSeconds(5));
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        deadline.CancelAfter(timeout + TimeSpan.FromSeconds(5));
         try
         {
             await process.WaitForExitAsync(deadline.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
-            process.Kill();
+            try { process.Kill(entireProcessTree: true); }
+            catch (InvalidOperationException) { }
+            await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
             throw new PingException($"ping {host}: не уложился в {timeout.TotalSeconds:0.#} с");
         }
 

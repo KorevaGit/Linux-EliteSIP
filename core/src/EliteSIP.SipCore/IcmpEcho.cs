@@ -40,6 +40,12 @@ public interface IIcmpEcho : IDisposable
     /// <see cref="PingException"/>, как у <see cref="Ping"/>.
     /// </remarks>
     public Task SendAsync(string host, int payloadBytes, TimeSpan timeout);
+
+    public Task SendAsync(string host, int payloadBytes, TimeSpan timeout, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        return SendAsync(host, payloadBytes, timeout);
+    }
 }
 
 /// <summary>Эхо через <see cref="Ping"/> — путь Windows и прежнее поведение стука.</summary>

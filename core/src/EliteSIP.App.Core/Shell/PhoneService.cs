@@ -383,7 +383,7 @@ public sealed class PhoneService : IDisposable
             RegistrationExpires = pbx.RegistrationExpirySeconds,
         };
 
-        _transport = new SocketSipTransport(sipAccount.SignalingEndpoint, transport, TrustOf(pbx));
+        _transport = new SocketSipTransport(sipAccount.SignalingEndpoint, transport, TrustOf(pbx)) { Diagnostics = _log };
 
         // Трасса SIP — по переключателю в «Обслуживании».
         //
@@ -613,6 +613,7 @@ public sealed class PhoneService : IDisposable
         _panel.PendingNumber = number;
         _panel.CallStatus = Strings.Get("CallStatusDialing");
 
+        await ConfirmHistoryAsync(call.CallId).ConfigureAwait(true);
         _ = Task.Run(() => FollowCallAsync(call, offer, reservation, number));
     }
 
@@ -761,6 +762,8 @@ public sealed class PhoneService : IDisposable
             return;
         }
 
+        await ConfirmHistoryAsync(call.CallId).ConfigureAwait(true);
+
         if (!await agent.AnswerIncomingCallAsync(call.CallId, answer.EncodedData()).ConfigureAwait(true))
         {
             reservation.Release();
@@ -768,6 +771,7 @@ public sealed class PhoneService : IDisposable
             return;
         }
 
+        await PersistAnswerBeforeAudioAsync(call.CallId).ConfigureAwait(true);
         try
         {
             var session = OpenSession(call.CallId, negotiated, reservation);
@@ -777,7 +781,7 @@ public sealed class PhoneService : IDisposable
                 .ConfigureAwait(true);
             WatchMedia(call.CallId, session);
 
-            MarkAnswered(call.CallId);
+            MarkAnsweredCore(call.CallId, confirmedBeforeMedia: true);
 
             SyncLines();
         }
@@ -1114,6 +1118,7 @@ public sealed class PhoneService : IDisposable
                 switch (value)
                 {
                     case SipCallEvent.Answered response:
+                        await PersistAnswerBeforeAudioAsync(call.CallId).ConfigureAwait(false);
                         MediaSession? early;
                         lock (_preAnswerGate)
                         {
@@ -1149,7 +1154,7 @@ public sealed class PhoneService : IDisposable
                         answered = true;
                         await _ui.InvokeAsync(() =>
                         {
-                            MarkAnswered(call.CallId);
+                            MarkAnsweredCore(call.CallId, confirmedBeforeMedia: true);
 
                             // Ответили — вызов перестал быть ожидаемым и стал
                             // линией; дальше состояние держит `SyncLines`.
@@ -1647,16 +1652,41 @@ public sealed class PhoneService : IDisposable
     /// собеседника» не срабатывал никогда. Время одно на оба места — то, что
     /// записано в истории, и то, что идёт на панели, обязаны совпадать.
     /// </remarks>
-    private void MarkAnswered(string callId)
+    private async Task ConfirmHistoryAsync(string callId)
+    {
+        Task<bool>? confirmation = null;
+        await _ui.InvokeAsync(() =>
+        {
+            confirmation = _records.TryGetValue(callId, out var record)
+                ? _history.EnsureDurableAsync(record) : _history.FlushAsync();
+        }).ConfigureAwait(false);
+        if (await confirmation!.ConfigureAwait(false)) { return; }
+        const string message = "история: запись вызова не подтверждена; проверьте доступ к диску и history-status.txt";
+        _log(message);
+        ClientEventLog.Shared.NoteError(message);
+    }
+
+    private async Task PersistAnswerBeforeAudioAsync(string callId)
+    {
+        await _ui.InvokeAsync(() =>
+        {
+            if (!_records.TryGetValue(callId, out var record)) { return; }
+            record.AnsweredAt ??= DateTimeOffset.Now;
+            _history.MarkAnswered(record.Id, record.AnsweredAt);
+        }).ConfigureAwait(false);
+        await ConfirmHistoryAsync(callId).ConfigureAwait(false);
+    }
+
+    private void MarkAnsweredCore(string callId, bool confirmedBeforeMedia)
     {
         if (!_records.TryGetValue(callId, out var record))
         {
             return;
         }
 
-        var firstAnswer = record.AnsweredAt is null;
+        var firstAnswer = record.AnsweredAt is null || confirmedBeforeMedia;
         record.AnsweredAt ??= DateTimeOffset.Now;
-        _history.MarkAnswered(record.Id, record.AnsweredAt);
+        if (!confirmedBeforeMedia) { _history.MarkAnswered(record.Id, record.AnsweredAt); }
         ClientEventLog.Shared.CallAnswered(callId);
 
         // Оба направления приходят сюда уже с поднятым медиа. Повторный

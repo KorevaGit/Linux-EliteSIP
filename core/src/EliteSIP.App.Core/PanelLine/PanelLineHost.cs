@@ -506,9 +506,9 @@ internal static class MachineReset
     /// Ключи машины и канала уходят вместе с настройками и <c>pairing.json</c>:
     /// после сброса машина показывает новый код и привязывается заново.
     /// </remarks>
-    internal static IReadOnlyList<string> Wipe()
+    internal static IReadOnlyList<string> Wipe(string? directory = null)
     {
-        var directory = Path.GetDirectoryName(AppSettings.DefaultPath)!;
+        directory ??= Path.GetDirectoryName(AppSettings.DefaultPath)!;
         var failures = new List<string>();
 
         foreach (var name in new[]
@@ -518,6 +518,8 @@ internal static class MachineReset
             "history.db",
             "history.db-wal",
             "history.db-shm",
+            "history.db.pending",
+            "history.db.pending.tmp",
             "activation-draft.dat",
             "elitesip.log",
             "crash.log",
@@ -553,6 +555,25 @@ internal static class MachineReset
         {
             failures.Add("elitesip-*.log");
         }
+
+        var recovery = Path.Combine(directory, "history.db.recovery");
+        try
+        {
+            if (Directory.Exists(recovery))
+            {
+                foreach (var path in Directory.GetFiles(recovery))
+                {
+                    var extension = Path.GetExtension(path);
+                    if (extension is ".json" or ".tmp")
+                    {
+                        try { File.Delete(path); }
+                        catch (Exception error) when (error is IOException or UnauthorizedAccessException) { failures.Add(Path.GetFileName(path)); }
+                    }
+                }
+                if (!Directory.EnumerateFileSystemEntries(recovery).Any()) { Directory.Delete(recovery); }
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException) { failures.Add("history.db.recovery"); }
 
         return failures;
     }

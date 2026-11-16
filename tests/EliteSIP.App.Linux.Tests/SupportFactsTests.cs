@@ -70,7 +70,7 @@ public sealed class SupportFactsTests
 
             using var zip = ZipFile.OpenRead(archive);
             Assert.Equal(
-                ["crash.log", "elitesip.log", "summary.txt"],
+                ["collection.txt", "crash.log", "elitesip.log", "summary.txt"],
                 zip.Entries.Select(entry => entry.FullName).Order(StringComparer.Ordinal));
         }
         finally

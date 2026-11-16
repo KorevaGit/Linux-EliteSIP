@@ -108,16 +108,7 @@ internal sealed partial class AppendOnlyFile : IDisposable
         return written;
     }
 
-    public void Flush()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            FlushUnix();
-            return;
-        }
-
-        _ = FlushFileBuffers(_handle);
-    }
+    public bool Flush() => OperatingSystem.IsWindows() ? FlushFileBuffers(_handle) : FlushUnix();
 
     public void Dispose()
     {

@@ -7,6 +7,23 @@ namespace EliteSIP.Audio.Tests;
 public sealed class AudioSelfTestTests
 {
     [Fact]
+    public async Task Отказ_запуска_возвращает_причину_и_отпускает_устройство()
+    {
+        const string failure = "нет микрофона";
+        FakeVoiceAudioEngine engine = new() { StartFailure = new VoiceAudioException(failure) };
+        using AudioSelfTest test = new(_ => engine);
+
+        AudioSelfTestResult result = await test.RunAsync(new VoiceAudioConfiguration());
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(failure, result.Summary);
+        Assert.False(test.IsRunning);
+        Assert.False(test.HasRecording);
+        Assert.Equal(1, engine.StopCount);
+        Assert.Equal(1, engine.DisposeCount);
+    }
+
+    [Fact]
     public async Task Снятие_возвращается_только_после_отпускания_устройства()
     {
         FakeVoiceAudioEngine engine = new();
@@ -76,6 +93,13 @@ public sealed class AudioSelfTestTests
         Assert.Equal(frame, played.Value.Payload.ToArray());
         Assert.True((await running).IsSuccess);
         Assert.Equal(1, engine.DisposeCount);
+        var recording = test.ReadLastRecording();
+        Assert.NotNull(recording);
+        Assert.Equal(8000, recording.Value.SampleRate);
+        Assert.Equal(frame.Length, recording.Value.Samples.Length);
+        var first = recording.Value.Samples[0];
+        recording.Value.Samples[0] = 0;
+        Assert.Equal(first, test.ReadLastRecording()!.Value.Samples[0]);
     }
 
     private static async Task<bool> WaitUntilAsync(Func<bool> condition)

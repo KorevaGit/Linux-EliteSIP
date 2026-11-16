@@ -116,13 +116,16 @@ internal sealed partial class AppendOnlyFile
         return written;
     }
 
-    private void FlushUnix()
+    private bool FlushUnix()
     {
         bool added = false;
         try
         {
             _handle.DangerousAddRef(ref added);
-            _ = fsync((int)_handle.DangerousGetHandle());
+            int result;
+            do { result = fsync((int)_handle.DangerousGetHandle()); }
+            while (result != 0 && Marshal.GetLastPInvokeError() == EINTR);
+            return result == 0;
         }
         finally
         {

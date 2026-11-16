@@ -6,6 +6,23 @@ namespace EliteSIP.Platform.Linux.Tests;
 public sealed class PingUtilityEchoTests
 {
     [Fact]
+    public async Task Cancellation_stops_the_active_ping_process()
+    {
+        var directory = Directory.CreateTempSubdirectory("elitesip-ping-cancel-");
+        try
+        {
+            var executable = Path.Combine(directory.FullName, "ping");
+            await File.WriteAllTextAsync(executable, "#!/bin/sh\nexec sleep 30\n");
+            if (!OperatingSystem.IsWindows()) { File.SetUnixFileMode(executable, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
+            using var echo = new PingUtilityEcho(executable);
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                echo.SendAsync("127.0.0.1", 228, TimeSpan.FromSeconds(30), cancellation.Token).WaitAsync(TimeSpan.FromSeconds(3)));
+        }
+        finally { directory.Delete(recursive: true); }
+    }
+
+    [Fact]
     public void Длина_данных_уходит_ключом_s_и_адрес_не_становится_ключом()
     {
         var info = PingUtilityEcho.StartInfo("/usr/bin/ping", "-f", 228, TimeSpan.FromSeconds(1));

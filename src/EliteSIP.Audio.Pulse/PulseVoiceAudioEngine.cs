@@ -78,6 +78,16 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> SilentInputs = new();
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> VirtualSubstitutes = new();
 
+    internal Action? BuildOverride { get; init; }
+    private readonly Lock _failureGate = new();
+    private AudioRouteBinding? _failedBinding;
+    private DateTimeOffset _lastWorkerFailure;
+    private int _workerFailures;
+    private int _brokenReported;
+    private bool _retiringWorkers;
+    private long _workerGeneration;
+    private bool _wakeDisposed;
+
     private readonly Lock _control = new();
     private readonly Lock _ring = new();
     private readonly Lock _processing = new();
@@ -298,6 +308,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
             }
 
             Volatile.Write(ref _stopRequested, false);
+            Interlocked.Exchange(ref _brokenReported, 0);
 
             for (int attempt = 1; ; attempt++)
             {
@@ -322,6 +333,17 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
             _running = true;
             StartWatching();
+            if (ReferenceEquals(Volatile.Read(ref _binding), Volatile.Read(ref _failedBinding)))
+            {
+                if (Volatile.Read(ref _brokenReported) != 0)
+                {
+                    _running = false;
+                    StopWatching();
+                    Teardown();
+                    throw new VoiceAudioException("аудиопоток отказал во время запуска");
+                }
+                _supervisor?.Notify("аудиопоток отказал во время запуска");
+            }
         }
     }
 
@@ -448,7 +470,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
     private void StartWatching()
     {
-        _supervisor = new RestartSupervisor(reason => Restart(reason));
+        _supervisor = new RestartSupervisor(RunSupervisedRestart);
 
         try
         {
@@ -476,12 +498,24 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
     {
         SilentInputs.Clear();
 
-        if (!DeviceChangeRelevance.AffectsRoute(change, Volatile.Read(ref _binding)))
-        {
-            return;
-        }
+        var binding = Volatile.Read(ref _binding);
+        if (!DeviceChangeRelevance.AffectsRoute(change, binding)) { return; }
+        var key = change.Kind == AudioDeviceChangeKind.DefaultChanged ? $"default:{change.Direction}" : null;
+        _supervisor?.Notify(Describe(change),
+            () => !Volatile.Read(ref _stopRequested)
+                && DeviceChangeRelevance.StillRequiresRebuild(change, binding, Volatile.Read(ref _binding)), key);
+    }
 
-        _supervisor?.Notify(Describe(change));
+    private void RunSupervisedRestart(string reason) => AudioWorkerBoundary.Run(
+        () => Restart(reason), error => HandleWorkerFailure("пересборка", error));
+
+    internal void AcknowledgeRouteBuild()
+    {
+        var binding = Volatile.Read(ref _binding);
+        lock (_failureGate)
+        {
+            if (!ReferenceEquals(binding, _failedBinding)) { Volatile.Write(ref _binding, binding with { }); }
+        }
     }
 
     private static string Describe(AudioDeviceChange change) => change.Kind switch
@@ -511,7 +545,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
             _disposed = true;
             _running = false;
             Teardown();
-            _feedWake.Dispose();
+            if (!_retiringWorkers) { DisposeWake(); }
         }
     }
 
@@ -617,6 +651,8 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
     private void Build()
     {
+        if (_retiringWorkers) { throw new VoiceAudioException("предыдущий аудиопоток ещё завершается"); }
+        if (BuildOverride is not null) { BuildOverride(); AcknowledgeRouteBuild(); return; }
         _connection = PulseConnection.Connect("EliteSIP", out string? failure)
             ?? throw new PulseFailure("сервер звука недоступен: " + failure, transient: true);
 
@@ -704,8 +740,11 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
         // приходит сразу, и всё, что он читает, уже должно стоять.
         _duplex = PulseDuplex.Open(_connection, input, output, Render, reason => FailFromThread(reason));
 
+        Interlocked.Increment(ref _workerGeneration);
         _captureThread = StartThread("elitesip-capture", () => CaptureLoop(token));
         _feedThread = StartThread("elitesip-feed", () => FeedLoop(token));
+
+        AcknowledgeRouteBuild();
 
         Diagnostic(
             $"тракт поднят: микрофон «{input.DisplayName}» ({InputOrigin(input)}), "
@@ -740,9 +779,13 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
                 + $"запас кольца {targetFill} отсчётов"));
     }
 
-    private static Thread StartThread(string name, Action body)
+    private Thread StartThread(string name, Action body)
     {
-        Thread thread = new(() => body())
+        var generation = Volatile.Read(ref _workerGeneration);
+        Thread thread = new(() => AudioWorkerBoundary.Run(body, error =>
+        {
+            if (generation == Volatile.Read(ref _workerGeneration)) { HandleWorkerFailure(name, error); }
+        }))
         {
             Priority = ThreadPriority.Highest,
             IsBackground = true,
@@ -755,38 +798,58 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
     private void Teardown()
     {
+        if (_retiringWorkers) { return; }
         _stop?.Cancel();
+        _feedWake.Set();
+        _duplex?.CaptureReady.Set();
+        var capture = _captureThread;
+        var feed = _feedThread;
+        var captureStopped = JoinThread(capture);
+        var feedStopped = JoinThread(feed);
+        if (!captureStopped || !feedStopped)
+        {
+            _retiringWorkers = true;
+            // Владельцы сохраняют события, APM и libpulse до своего выхода.
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                capture?.Join();
+                feed?.Join();
+                lock (_control)
+                {
+                    CompleteTeardown();
+                    _retiringWorkers = false;
+                    if (_disposed) { DisposeWake(); }
+                }
+            });
+            return;
+        }
+        CompleteTeardown();
+    }
 
-        JoinThread(_captureThread);
-        JoinThread(_feedThread);
+    private void CompleteTeardown()
+    {
         _captureThread = _feedThread = null;
-
-        // Потоки сервера — после своих: поток обработки ждёт на событии
-        // захвата, и закрыть его раньше значит уронить поток на закрытом
-        // событии.
         _duplex?.Dispose();
         _duplex = null;
-
         _connection?.Dispose();
         _connection = null;
-
         _stop?.Dispose();
         _stop = null;
-
         _processor?.Dispose();
         _processor = null;
-
         _input = _output = null;
         _uptime.Stop();
     }
 
-    private static void JoinThread(Thread? thread)
+    private void DisposeWake()
     {
-        if (thread is not null && !thread.Join(TimeSpan.FromSeconds(1)))
-        {
-            Debug.Fail($"поток {thread.Name} не остановился за секунду");
-        }
+        if (_wakeDisposed) { return; }
+        _wakeDisposed = true;
+        _feedWake.Dispose();
     }
+
+    private static bool JoinThread(Thread? thread) =>
+        thread is null || (thread != Thread.CurrentThread && thread.Join(TimeSpan.FromSeconds(1)));
 
     /// <summary>
     /// Устройство из настроек, а если его нет — системное: правило перенесено
@@ -1339,10 +1402,38 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
     /// он склеит его с уведомлениями о том же событии и пересоберёт тракт один
     /// раз. Зовётся на потоке цикла libpulse.
     /// </summary>
-    private void FailFromThread(string reason)
+    private void FailFromThread(string reason) =>
+        HandleWorkerFailure("PulseAudio", new PulseFailure(reason, transient: true));
+
+    private void HandleWorkerFailure(string stage, Exception error)
     {
-        Diagnostic(reason);
-        _supervisor?.Notify(reason);
+        if (Volatile.Read(ref _stopRequested)) { return; }
+        var binding = Volatile.Read(ref _binding);
+        bool recoverable;
+        lock (_failureGate)
+        {
+            if (ReferenceEquals(_failedBinding, binding)) { return; }
+            var now = DateTimeOffset.UtcNow;
+            if (now - _lastWorkerFailure > TimeSpan.FromSeconds(30)) { _workerFailures = 0; }
+            _lastWorkerFailure = now;
+            _failedBinding = binding;
+            _workerFailures++;
+            recoverable = _workerFailures <= 3 && error is PulseFailure or VoiceAudioException
+                or IOException or ObjectDisposedException or System.Runtime.InteropServices.COMException;
+        }
+        _stop?.Cancel();
+        AudioWorkerBoundary.Run(() => Diagnostic($"аудиопоток {stage}: {error}"), _ => { });
+        if (!recoverable)
+        {
+            _supervisor?.Dispose();
+            if (Interlocked.Exchange(ref _brokenReported, 1) == 0)
+            {
+                AudioWorkerBoundary.Run(() => Report(new VoiceAudioEvent.Broken($"сбой аудиопотока {stage}: {error.GetType().Name}")), _ => { });
+            }
+            return;
+        }
+        _supervisor?.Notify($"{stage}: {error.Message}",
+            () => !Volatile.Read(ref _stopRequested) && ReferenceEquals(binding, Volatile.Read(ref _binding)), $"stream:{stage}");
     }
 
     private void Diagnostic(string text) => Handlers.Diagnostic?.Invoke(text);

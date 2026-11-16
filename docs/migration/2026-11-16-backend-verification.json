@@ -1,0 +1,129 @@
+{
+  "date": "2026-11-16",
+  "source_windows_commit": "13bba4436a035f2e62adc79945e2aa0d4c7a1f8e",
+  "merge_base": "5e0cd3ac7d77ef92665cb67a245275dd6c22932e",
+  "linux_base": "be8a2ea",
+  "suites": [
+    {
+      "suite": "EliteSIP.AdminAccess.Tests",
+      "total": 22,
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.CallHistory.Tests",
+      "total": 37,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "suite": "EliteSIP.CallGuard.Tests",
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Diagnostics.Tests",
+      "total": 39,
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.PanelLink.Tests",
+      "total": 94,
+      "passed": 94,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Updates.Tests",
+      "total": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.MediaCore.Tests",
+      "total": 201,
+      "passed": 200,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "suite": "EliteSIP.Audio.Pulse.Tests",
+      "total": 37,
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.SipCore.Tests",
+      "total": 357,
+      "passed": 357,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Updater.Linux.Tests",
+      "total": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Audio.Tests",
+      "total": 260,
+      "passed": 260,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Audio.Signals.Tests",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.Platform.Linux.Tests",
+      "total": 51,
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.App.Linux.Tests",
+      "total": 64,
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "EliteSIP.App.Core.Tests",
+      "total": 93,
+      "passed": 93,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "summary": {
+    "total": 1339,
+    "passed": 1337,
+    "failed": 0,
+    "skipped": 2
+  },
+  "package": {
+    "version": "0.0.0",
+    "architecture": "amd64",
+    "size_bytes": 62249584,
+    "sha256": "18c398db5ecf7c3bf4678e1afcfb9152480e25b725c9204314e54d01f0a7aa81",
+    "isolated_source_build": true,
+    "contents_verified": true,
+    "installed": false,
+    "provisioning": "test stub"
+  }
+}
