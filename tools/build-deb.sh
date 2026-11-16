@@ -27,6 +27,7 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
 
 version=
+configuration=Release
 provisioning=
 output="$root/artifacts"
 source=
@@ -39,7 +40,7 @@ jobs=${ELITESIP_BUILD_JOBS:-2}
 
 usage() {
     sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
-    echo "ключи: --version X.Y.Z --provisioning ФАЙЛ [--output КАТАЛОГ] [--source ИСТОЧНИК_NUGET] [--maintainer ИМЯ]"
+    echo "ключи: --version X.Y.Z --provisioning ФАЙЛ [--output КАТАЛОГ] [--source ИСТОЧНИК_NUGET] [--maintainer ИМЯ] [--configuration Release|Debug]"
     exit 2
 }
 
@@ -51,6 +52,7 @@ fail() {
 while [ $# -gt 0 ]; do
     case "$1" in
         --version) version=$2; shift 2 ;;
+        --configuration) configuration=$2; shift 2 ;;
         --provisioning) provisioning=$2; shift 2 ;;
         --output) output=$2; shift 2 ;;
         --source) source=$2; shift 2 ;;
@@ -61,6 +63,9 @@ done
 
 [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || usage
 [ -n "$provisioning" ] || usage
+[[ $configuration == Release || $configuration == Debug ]] || usage
+ready_to_run=true
+[ "$configuration" != Debug ] || ready_to_run=false
 
 # Заводская настройка обязательна, как и в release.ps1: собранный без неё
 # пакет ставится и работает, а мёртвую линию панели видно только на чистой
@@ -94,7 +99,7 @@ publish() {
     local project=$1
     local args=(
         publish "$root/$project"
-        --configuration Release
+        --configuration "$configuration"
         --runtime linux-x64
         --self-contained true
         --output "$program"
@@ -102,7 +107,7 @@ publish() {
         --disable-build-servers
         -maxcpucount:"$jobs"
         -p:Version="$version"
-        -p:PublishReadyToRun=true
+        -p:PublishReadyToRun="$ready_to_run"
         -p:DisableTransitiveFrameworkReferenceDownloads=true
         -p:NuGetAudit=false
     )
@@ -156,6 +161,7 @@ install -D -m 0644 "$root/packaging/debian/copyright" "$doc/copyright"
     echo "elitesip ($version) noble; urgency=medium"
     echo
     echo "  * Выпуск EliteSIP $version для Linux Mint 22 / Ubuntu 24.04."
+    echo "  * Конфигурация: $configuration; ReadyToRun: $ready_to_run."
     echo "  * Коммит: $(git -C "$root" describe --tags --always --dirty 2>/dev/null || echo неизвестен)."
     echo
     echo " -- $maintainer  $(LC_ALL=C date -R)"
@@ -180,6 +186,7 @@ sed -e "s/@VERSION@/$version/" -e "s/@MAINTAINER@/$maintainer/" -e "s/@SIZE@/$si
     "$root/packaging/debian/control" > "$stage/DEBIAN/control"
 
 package="$output/EliteSIP-$version.deb"
+[ "$configuration" != Debug ] || package="$output/EliteSIP-$version-Debug.deb"
 
 # --root-owner-group: всё в пакете — root, без fakeroot. xz: пакет едет по
 # каналу конторы на каждую машину, и каждый мегабайт там — секунды.
