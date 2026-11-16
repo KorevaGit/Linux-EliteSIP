@@ -112,6 +112,9 @@ public sealed class WindowBackgroundTests
             app.TryFindResource("TextSecondaryBrush",app.ActualThemeVariant,out var text);
             var channel=Assert.IsAssignableFrom<Avalonia.Media.ISolidColorBrush>(text).Color.R;
             Assert.True(dark?channel>=225:channel<=65);
+            app.TryFindResource("AccentBrush",app.ActualThemeVariant,out var accent);
+            var focus=Assert.IsAssignableFrom<Avalonia.Media.ISolidColorBrush>(accent).Color;
+            Assert.True(focus.R>=140&&focus.G>=140&&focus.B>=140);
         }
         finally {app.RequestedThemeVariant=old;dir.Delete(true);}
     }

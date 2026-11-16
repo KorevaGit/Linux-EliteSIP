@@ -83,6 +83,11 @@ internal sealed class WindowBackgroundService : IDisposable
             Color Tint(Color color)
             {
                 var mixed = wallpaper ? WallpaperColor(color, _dominant, dark) : color;
+                if (wallpaper && key is "AccentBrush" or "ThemeAccentBrush")
+                {
+                    // Windows keeps the focus accent bright against tinted dark surfaces.
+                    mixed = Color.FromRgb((byte)(140+_dominant.R*.4),(byte)(140+_dominant.G*.4),(byte)(140+_dominant.B*.4));
+                }
                 if (surface && alpha < 1) { mixed = Mix(mixed, _dominant, dark ? .12 : .06); }
                 return Color.FromArgb((byte)Math.Round(color.A * (surface ? alpha : 1)), mixed.R, mixed.G, mixed.B);
             }
