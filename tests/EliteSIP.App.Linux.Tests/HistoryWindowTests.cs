@@ -73,6 +73,33 @@ public sealed class HistoryWindowTests
         deferred.Data!.Dispose();
     }
 
+    [AvaloniaFact]
+    public async Task Snapshot_keeps_all_corners_at_two_times_screen_size()
+    {
+        var clipboard=System.Reflection.DispatchProxy.Create<Avalonia.Input.Platform.IClipboard,DeferredClipboard>();
+        var deferred=(DeferredClipboard)(object)clipboard;
+        var window=new CallHistoryWindow();
+        window.ListSurface.Child=new Grid {Children={
+            new Border {Width=24,Height=24,Background=Brushes.Cyan,HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left,VerticalAlignment=Avalonia.Layout.VerticalAlignment.Top},
+            new Border {Width=24,Height=24,Background=Brushes.Magenta,HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right,VerticalAlignment=Avalonia.Layout.VerticalAlignment.Bottom},
+            new Border {Width=24,Height=24,Background=Brushes.Yellow,HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right,VerticalAlignment=Avalonia.Layout.VerticalAlignment.Top},
+            new Border {Width=24,Height=24,Background=Brushes.Lime,HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Left,VerticalAlignment=Avalonia.Layout.VerticalAlignment.Bottom}}};
+        window.Show();Dispatcher.UIThread.RunJobs();
+        try
+        {
+            await window.CopySnapshotAsync(clipboard);
+            using var bitmap=await deferred.Data!.TryGetBitmapAsync();
+            using var png=new MemoryStream();bitmap!.Save(png,Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+            using var pixels=SkiaSharp.SKBitmap.Decode(png.ToArray());
+            Snapshot.Save(bitmap,"history-capture-corners");
+            Assert.Equal(new SkiaSharp.SKColor(0,255,255),pixels.GetPixel(24,104+24));
+            Assert.Equal(new SkiaSharp.SKColor(255,0,255),pixels.GetPixel(pixels.Width-24,pixels.Height-24));
+            Assert.Equal(new SkiaSharp.SKColor(255,255,0),pixels.GetPixel(pixels.Width-24,104+24));
+            Assert.Equal(new SkiaSharp.SKColor(0,255,0),pixels.GetPixel(24,pixels.Height-24));
+        }
+        finally {window.Close();deferred.Data?.Dispose();}
+    }
+
     public class DeferredClipboard : System.Reflection.DispatchProxy
     {
         public Avalonia.Input.IAsyncDataTransfer? Data { get; private set; }

@@ -72,18 +72,23 @@ internal sealed class WindowBackgroundService : IDisposable
         _paletteKey = paletteKey; PaletteBuildCount++;
         foreach (var key in _overrides) { _app.Resources.Remove(key); } _overrides.Clear();
         if (_source is null) { return; }
-        var hue = _settings.Theme == Appearance.Wallpaper ? _dominant : (dark ? Color.Parse("#30343A") : Color.Parse("#F3F2EF"));
-        var amount = _settings.Theme == Appearance.Wallpaper ? 0.16 : 0;
-        var alpha = _settings.BackgroundTransparency switch { BackgroundTransparency.Light => 246, BackgroundTransparency.Medium => 232, BackgroundTransparency.Strong => 218, _ => 255 };
-        // Clone the palette's actual gradient. Wallpaper tint/opacity must not
-        // flatten the raised surfaces into solid rectangles.
-        foreach (var key in new[] { "SurfaceBrush", "ControlBackgroundBrush", "ControlHoverBrush", "ControlPressedBrush", "MacroBrush", "MacroHoverBrush", "CallFieldBrush", "ProfileBrush", "ProfileHoverBrush", "SelectedBrush" })
+        var wallpaper = _settings.Theme == Appearance.Wallpaper;
+        var alpha = _settings.BackgroundTransparency switch { BackgroundTransparency.Light => .96, BackgroundTransparency.Medium => .90, BackgroundTransparency.Strong => .82, _ => 1 };
+        // Tint the whole neutral palette, preserving semantic status/call colors,
+        // the gradient geometry and the original alpha of borders/hover layers.
+        foreach (var key in new[] { "SurfaceBrush", "ControlBackgroundBrush", "ControlHoverBrush", "ControlPressedBrush", "MacroBrush", "MacroHoverBrush", "CallFieldBrush", "ProfileBrush", "ProfileHoverBrush", "SelectedBrush", "HistoryFilterBackgroundBrush", "HistoryFilterHoverBrush", "NavHoverBrush", "FieldBrush", "SettingsTrackBrush", "SettingsLineBrush", "ControlBorderBrush", "SelectionBrush", "AccentBrush", "ThemeAccentBrush" })
         {
             if (!_app.TryFindResource(key, _app.ActualThemeVariant, out var value)) { continue; }
-            Color Tint(Color color) { var mixed = Mix(color, hue, amount); return Color.FromArgb((byte)alpha, mixed.R, mixed.G, mixed.B); }
+            var surface = key is not ("FieldBrush" or "SettingsTrackBrush" or "SettingsLineBrush" or "ControlBorderBrush" or "HistoryFilterHoverBrush" or "NavHoverBrush" or "SelectionBrush" or "AccentBrush" or "ThemeAccentBrush");
+            Color Tint(Color color)
+            {
+                var mixed = wallpaper ? WallpaperColor(color, _dominant, dark) : color;
+                if (surface && alpha < 1) { mixed = Mix(mixed, _dominant, dark ? .12 : .06); }
+                return Color.FromArgb((byte)Math.Round(color.A * (surface ? alpha : 1)), mixed.R, mixed.G, mixed.B);
+            }
             IBrush? brush = value switch
             {
-                LinearGradientBrush gradient => new LinearGradientBrush
+                ILinearGradientBrush gradient => new LinearGradientBrush
                 {
                     StartPoint = gradient.StartPoint, EndPoint = gradient.EndPoint,
                     GradientStops = [ .. gradient.GradientStops.Select(stop => new GradientStop(Tint(stop.Color), stop.Offset)) ],
@@ -91,8 +96,21 @@ internal sealed class WindowBackgroundService : IDisposable
                 ISolidColorBrush solid => new SolidColorBrush(Tint(solid.Color)),
                 _ => null,
             };
-            if (brush is not null) { Put(key, brush); _overrides.Add(key); }
+            if (brush is not null) { Override(key, brush); }
         }
+        Override("TextPrimaryBrush", new SolidColorBrush(Color.Parse(dark ? "#FFFFFF" : "#161616")));
+        Override("TextSecondaryBrush", new SolidColorBrush(Color.Parse(dark ? "#E1E1E1" : "#414141")));
+        Override("TextTertiaryBrush", new SolidColorBrush(Color.Parse(dark ? "#C3C3C3" : "#575757")));
+    }
+    private void Override(string key, IBrush value) { Put(key, value); _overrides.Add(key); }
+    internal static Color WallpaperColor(Color color, Color hue, bool dark)
+    {
+        if (!dark) { return Mix(color, hue, .15); }
+        // Same channel-normalized neutral tint as Windows Wallpaper mode.
+        var level = Math.Clamp((color.R + color.G + color.B) / 3d, 28, 90);
+        var max = Math.Max(1, (int)Math.Max(hue.R, Math.Max(hue.G, hue.B)));
+        byte Channel(byte value) => (byte)Math.Clamp(level * (.35 + 1.1 * value / max), 0, 150);
+        return Color.FromArgb(color.A, Channel(hue.R), Channel(hue.G), Channel(hue.B));
     }
     private void Put(string key, IBrush value) => _app.Resources[key] = value;
     private Bitmap Compose(SKBitmap source, bool dark)
@@ -112,13 +130,21 @@ internal sealed class WindowBackgroundService : IDisposable
         using var stream = new MemoryStream(data.ToArray());
         return new Bitmap(stream);
     }
-    private static Color Sample(SKBitmap source)
+    internal static Color Sample(SKBitmap source)
     {
-        long red=0,green=0,blue=0; var count=0;
+        // Dominant quantized color, alpha-weighted. A mean washes out colorful
+        // wallpaper into gray and lets transparent pixel RGB affect the palette.
+        var groups = new Dictionary<int,(long R,long G,long B,long Weight)>();
         for(var y=0;y<source.Height;y+=Math.Max(1,source.Height/32))
         for(var x=0;x<source.Width;x+=Math.Max(1,source.Width/32))
-        { var pixel=source.GetPixel(x,y); red+=pixel.Red;green+=pixel.Green;blue+=pixel.Blue;count++; }
-        return Color.FromRgb((byte)(red/count),(byte)(green/count),(byte)(blue/count));
+        {
+            var pixel=source.GetPixel(x,y);var alpha=pixel.Alpha;
+            var key=(pixel.Red/32<<6)|(pixel.Green/32<<3)|pixel.Blue/32;
+            groups.TryGetValue(key,out var group);
+            groups[key]=(group.R+pixel.Red*alpha,group.G+pixel.Green*alpha,group.B+pixel.Blue*alpha,group.Weight+alpha);
+        }
+        var dominant=groups.Values.OrderByDescending(group=>group.Weight).FirstOrDefault();
+        return dominant.Weight==0?Colors.Gray:Color.FromRgb((byte)(dominant.R/dominant.Weight),(byte)(dominant.G/dominant.Weight),(byte)(dominant.B/dominant.Weight));
     }
     private static Color Mix(Color a,Color b,double t) => Color.FromRgb((byte)(a.R+(b.R-a.R)*t),(byte)(a.G+(b.G-a.G)*t),(byte)(a.B+(b.B-a.B)*t));
     public void Dispose()

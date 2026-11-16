@@ -16,7 +16,7 @@ internal sealed class AppearanceService : IDisposable
         get=>_appearance;
         set { if(_applied && _appearance==value) { return; }_appearance=value;Apply(); }
     }
-    internal bool IsDark=>_appearance switch { Appearance.Dark=>true,Appearance.Light=>false,_=>_desktop.PrefersDark };
+    internal bool IsDark=>_appearance switch { Appearance.Dark or Appearance.Wallpaper=>true,Appearance.Light=>false,_=>_desktop.PrefersDark };
     internal void Apply()
     {
         var variant=IsDark?ThemeVariant.Dark:ThemeVariant.Light;

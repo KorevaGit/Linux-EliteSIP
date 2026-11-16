@@ -139,16 +139,21 @@ public partial class CallHistoryWindow : Window
 
         _noticeTimer.Stop();
         Notice.IsVisible = false;
-        using RenderTargetBitmap list = new(new PixelSize((int)Math.Ceiling(size.Width*scale),(int)Math.Ceiling(size.Height*scale)),new Vector(96*scale,96*scale));
+        // Avalonia 12's immediate high-DPI renderer clips nested visuals. Capture
+        // the full viewport at 96 DPI, then enlarge it once in the export.
+        using RenderTargetBitmap list = new(new PixelSize((int)Math.Ceiling(size.Width),(int)Math.Ceiling(size.Height)),new Vector(96,96));
         list.Render(ListSurface);
-        using RenderTargetBitmap image = new(new PixelSize((int)Math.Ceiling(size.Width*scale),(int)Math.Ceiling((size.Height+52)*scale)),new Vector(96*scale,96*scale));
+        using RenderTargetBitmap image = new(new PixelSize((int)Math.Ceiling(size.Width*scale),(int)Math.Ceiling((size.Height+52)*scale)),new Vector(96,96));
         using(var context=image.CreateDrawingContext())
         {
+            // One explicit DIP-to-pixel transform. Avalonia's bitmap source
+            // rectangle is in pixels, even when Bitmap.Size is in DIPs.
+            using var scaled = context.PushTransform(Matrix.CreateScale(scale, scale));
             context.DrawRectangle(Background ?? Brushes.White,null,new Rect(0,0,size.Width,size.Height+52));
             var stamp=$"EliteSIP · {Model?.ProfileTitle} · {DateTimeOffset.Now:dd.MM.yyyy HH:mm:ss zzz} · UTC {DateTimeOffset.UtcNow:HH:mm:ss}";
             var text=new FormattedText(stamp,System.Globalization.CultureInfo.CurrentCulture,FlowDirection.LeftToRight,new Typeface("sans-serif"),12,Foreground ?? Brushes.Black);
             context.DrawText(text,new Point(10,16));
-            context.DrawImage(list,new Rect(0,52,size.Width,size.Height));
+            context.DrawImage(list,new Rect(0,0,list.PixelSize.Width,list.PixelSize.Height),new Rect(0,52,size.Width,size.Height));
         }
         // X11 reads lazily, possibly after this window closes. The clipboard
         // owns the transfer; each request decodes an independent bitmap.

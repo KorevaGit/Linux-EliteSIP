@@ -213,7 +213,9 @@ public sealed partial class App
     private bool RunFirstRun()
     {
         var model = new FirstRunViewModel(_settings!, _access!) { Log = Log };
-        if (!new FirstRunWindow(model).Run())
+        var window = new FirstRunWindow(model);
+        _startupSplash?.DismissWhenShown(window);
+        if (!window.Run())
         {
             return false;
         }

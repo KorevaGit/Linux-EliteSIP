@@ -76,6 +76,7 @@ public sealed partial class App : Application, IDisposable
     private LogFile? _logFile;
     private string? _reconnectAfterCall;
     private bool _quitting;
+    private StartupSplash? _startupSplash;
 
     /// <summary>Одна копия — её занимает <see cref="Program"/> до Avalonia, а держит приложение.</summary>
     internal SingleInstance? Instance { get; set; }
@@ -122,7 +123,11 @@ public sealed partial class App : Application, IDisposable
             failure.SetObserved();
         };
 
-        Start(desktop.Args ?? []);
+        _startupSplash = StartupSplash.Begin(() =>
+        {
+            try { Start(desktop.Args ?? []); }
+            catch (Exception error) { Record(error, survived: false); desktop.Shutdown(1); }
+        });
     }
 
     private void Mark(string stage)
@@ -158,10 +163,7 @@ public sealed partial class App : Application, IDisposable
         _settings.Appearance.PropertyChanged += (_, change) => { if (change.PropertyName == nameof(AppearanceSettings.Theme)) { _appearance.Appearance = _settings.Appearance.Theme; } };
         Mark("настройки и палитра");
 
-        var splash = new StartupSplash();
-        splash.Show();
-        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
-        Dispatcher.UIThread.Post(splash.Close, DispatcherPriority.Background);
+        _startupSplash?.UseWallpaper();
 
         Log(SupportFacts.StartupLine(SettingsViewModel.Version, Environment.GetEnvironmentVariable));
         Log($"запуск: настройки {AppSettings.DefaultPath}"
@@ -239,6 +241,7 @@ public sealed partial class App : Application, IDisposable
             () => Log($"запуск: панель на экране через {(int)(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalMilliseconds} мс от старта процесса"),
             DispatcherPriority.Background);
 
+        _startupSplash?.DismissWhenShown(_panelWindow);
         _panelWindow.Show();
         Mark("панель");
 
@@ -782,6 +785,7 @@ public sealed partial class App : Application, IDisposable
 
     public void Dispose()
     {
+        if (_startupSplash?.IsVisible is true) { _startupSplash.Close(); }
         ClientEventLog.Shared.EndSession();
         ClientEventLog.Shared.Dispose();
         _recordingPreview?.Cancel();

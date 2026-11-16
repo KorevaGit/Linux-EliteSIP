@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using EliteSIP.App.History;
+using EliteSIP.App.Theme;
 using EliteSIP.App.Incoming;
 using EliteSIP.CallGuard;
 using EliteSIP.App.Panel;
@@ -25,6 +26,12 @@ internal static partial class Program
         {
             try
             {
+                var initialized=false;
+                using var splash=StartupSplash.Begin(()=>initialized=true,"{\"Appearance\":{\"Theme\":\"Light\"}}",false);
+                if(initialized) {throw new InvalidOperationException("Startup work ran before the splash was shown");}
+                for(var wait=0;wait<20&&!initialized;wait++) {await Task.Delay(50);}
+                Capture(splash,"startup-splash");
+                if(!initialized||!splash.IsVisible) {throw new InvalidOperationException($"Splash state: initialized={initialized}, visible={splash.IsVisible}");}
                 using var store = new CallHistoryStore(new CallHistoryStore.Settings(Path.Combine(Output,"fixture.db")));
                 var profile = Guid.NewGuid();
                 foreach(var (name,outcome,direction) in new[] { ("Отдел продаж",CallOutcome.Completed,CallDirection.Outgoing), ("Юрист",CallOutcome.Missed,CallDirection.Incoming), ("Приёмная",CallOutcome.Busy,CallDirection.Outgoing) })
@@ -37,7 +44,9 @@ internal static partial class Program
                 }
                 store.Flush();
                 var window = new CallHistoryWindow(new CallHistoryViewModel(store,profile,"701",true,()=>30));
-                window.Show();
+                splash.DismissWhenShown(window);window.Show();
+                if(splash.IsVisible) {throw new InvalidOperationException("Splash stayed visible after the first window opened");}
+                Console.WriteLine("Splash: visible before initialization, dismissed when the first window opened");
                 for(var variant=0;variant<2;variant++)
                 {
                     var dark=variant==1;
@@ -58,7 +67,8 @@ internal static partial class Program
                 {
                     var start=new ProcessStartInfo("/usr/bin/python3") { RedirectStandardOutput=true,RedirectStandardError=true };
                     start.ArgumentList.Add("-c");
-                    start.ArgumentList.Add("import gi; gi.require_version('Gtk','3.0'); from gi.repository import Gtk,Gdk; p=Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).wait_for_image(); assert p is not None; print(str(p.get_width())+'x'+str(p.get_height()))");
+                    start.ArgumentList.Add("import gi; gi.require_version('Gtk','3.0'); from gi.repository import Gtk,Gdk; p=Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).wait_for_image(); assert p is not None; p.savev(__import__('sys').argv[1],'png',[],[]); print(str(p.get_width())+'x'+str(p.get_height()))");
+                    start.ArgumentList.Add(Path.Combine(Output,"clipboard-history.png"));
                     using var child=Process.Start(start)!;
                     using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(10));
                     var output=await child.StandardOutput.ReadToEndAsync(timeout.Token);
@@ -69,13 +79,36 @@ internal static partial class Program
                 var model=new PanelViewModel { StatusTitle="701",Registration=RegistrationState.Registered };
                 var panel=new PanelWindow(model) { AllowsClosing=true };panel.Show();model.GoOffline.Execute(null);await Task.Delay(100);Capture(panel,"profile-offline");panel.Close();
                 Console.WriteLine("History closed; repeated external clipboard reads succeeded; offline panel captured");
+                var wallpaper=Environment.GetEnvironmentVariable("ELITESIP_TEST_WALLPAPER")=="1";
+                var settings=new EliteSIP.App.Settings.AppearanceSettings();
+                if(wallpaper)
+                {
+                    var path=Path.Combine(Output,"wallpaper.png");
+                    using var pixels=new SkiaSharp.SKBitmap(800,600);using var canvas=new SkiaSharp.SKCanvas(pixels);
+                    canvas.Clear(new SkiaSharp.SKColor(35,110,175));
+                    using var paint=new SkiaSharp.SKPaint {Color=new SkiaSharp.SKColor(210,95,65)};canvas.DrawCircle(550,300,180,paint);
+                    using var png=pixels.Encode(SkiaSharp.SKEncodedImageFormat.Png,100);using var output=File.Create(path);png.SaveTo(output);
+                    settings.BackgroundImagePath=path;settings.BackgroundTransparency=EliteSIP.App.Settings.BackgroundTransparency.Strong;
+                }
+                using var backgrounds=new WindowBackgroundService(Application.Current!,settings,()=>Application.Current!.RequestedThemeVariant==ThemeVariant.Dark);
+                for(var mode=0;mode<(wallpaper?3:1);mode++)
+                {
+                var label=wallpaper?mode==0?"-light":mode==1?"-dark":"-wallpaper":"";
+                if(wallpaper)
+                {
+                    Application.Current!.RequestedThemeVariant=mode==0?ThemeVariant.Light:ThemeVariant.Dark;
+                    settings.Theme=mode==0?EliteSIP.App.Theme.Appearance.Light:mode==1?EliteSIP.App.Theme.Appearance.Dark:EliteSIP.App.Theme.Appearance.Wallpaper;
+                    backgrounds.Apply();
+                    var photoPanel=new PanelWindow(new PanelViewModel {StatusTitle="701"}) {AllowsClosing=true};photoPanel.Show();await Task.Delay(100);Capture(photoPanel,"wallpaper-panel"+label);photoPanel.Close();
+                    using var photoSplash=new StartupSplash();photoSplash.UseWallpaper();photoSplash.Show();await Task.Delay(100);Capture(photoSplash,"wallpaper-splash"+label);photoSplash.Close();
+                }
                 for(var kind=0;kind<2;kind++)
                 {
                     var deal=kind==1;
                     var subject=IncomingCallSubject.Classify(deal?"701":"79161234567","Тест",!deal,"701",true);
                     var incoming=new IncomingCallWindow(new IncomingCallViewModel(subject,CallGuardChallenge.Build(new CallGuardPolicy {TargetCount=1}.Normalized(),new Random(7)),false,_=>{},()=>{}));
                     incoming.Show();await Task.Delay(150);
-                    var name=deal?"incoming-deal":"incoming-hot";
+                    var name=(deal?"incoming-deal":"incoming-hot")+label;
                     var start=new ProcessStartInfo("/usr/bin/python3") {RedirectStandardError=true};
                     start.ArgumentList.Add("-c");
                     start.ArgumentList.Add("import gi,sys; gi.require_version('Gtk','3.0'); gi.require_version('GdkX11','3.0'); from gi.repository import Gdk,GdkX11; w=GdkX11.X11Window.foreign_new_for_display(Gdk.Display.get_default(),int(sys.argv[1])); p=Gdk.pixbuf_get_from_window(w,0,0,w.get_width(),w.get_height()); assert p is not None; p.savev(sys.argv[2],'png',[],[])");
@@ -85,6 +118,7 @@ internal static partial class Program
                     if(child.ExitCode!=0) {throw new InvalidOperationException(await child.StandardError.ReadToEndAsync());}
                     Console.WriteLine("Native X11 incoming capture: "+name+", decorations="+incoming.WindowDecorations+", size="+incoming.ClientSize);
                     incoming.Close();
+                }
                 }
             }
             catch(Exception error) { Console.WriteLine(error);Environment.ExitCode=1; }

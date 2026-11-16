@@ -86,6 +86,58 @@ public sealed class WindowBackgroundTests
         }
         finally { app.RequestedThemeVariant=oldTheme;dir.Delete(true); }
     }
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Wallpaper_reaches_incoming_and_tints_fields_with_stronger_text(bool dark)
+    {
+        var dir=Directory.CreateTempSubdirectory("elitesip-wallpaper-regression-");
+        var app=Application.Current!;var old=app.RequestedThemeVariant;
+        app.RequestedThemeVariant=dark?ThemeVariant.Dark:ThemeVariant.Light;
+        try
+        {
+            var path=Path.Combine(dir.FullName,"photo.png");Image(path);
+            var settings=new AppearanceSettings {BackgroundImagePath=path,Theme=Appearance.Wallpaper};
+            using var service=new WindowBackgroundService(app,settings,()=>dark);
+            var subject=EliteSIP.App.Incoming.IncomingCallSubject.Classify("712","Test",false,"701",true);
+            var challenge=EliteSIP.CallGuard.CallGuardChallenge.Build(new EliteSIP.CallGuard.CallGuardPolicy().Normalized(),new Random(7));
+            var window=new EliteSIP.App.Incoming.IncomingCallWindow(new(subject,challenge,false,_=>{},()=>{}));window.Show();Dispatcher.UIThread.RunJobs();
+            try {Assert.IsType<Avalonia.Media.ImageBrush>(Assert.IsType<Border>(window.Content).Background);}
+            finally {window.Close();}
+            app.TryFindResource("FieldBrush",app.ActualThemeVariant,out var before);
+            using(var red=new SKBitmap(32,32)) {red.Erase(new SKColor(220,40,40));using var encoded=red.Encode(SKEncodedImageFormat.Png,100);using var output=File.Create(Path.Combine(dir.FullName,"red.png"));encoded.SaveTo(output);}
+            settings.BackgroundImagePath=Path.Combine(dir.FullName,"red.png");service.Apply();
+            app.TryFindResource("FieldBrush",app.ActualThemeVariant,out var after);
+            Assert.NotEqual(Assert.IsAssignableFrom<Avalonia.Media.ISolidColorBrush>(before).Color,Assert.IsAssignableFrom<Avalonia.Media.ISolidColorBrush>(after).Color);
+            app.TryFindResource("TextSecondaryBrush",app.ActualThemeVariant,out var text);
+            var channel=Assert.IsAssignableFrom<Avalonia.Media.ISolidColorBrush>(text).Color.R;
+            Assert.True(dark?channel>=225:channel<=65);
+        }
+        finally {app.RequestedThemeVariant=old;dir.Delete(true);}
+    }
+
+    [Fact]
+    public void Wallpaper_uses_dominant_color_instead_of_averaging_different_colors()
+    {
+        using var pixels=new SKBitmap(100,100);using var canvas=new SKCanvas(pixels);
+        canvas.Clear(new SKColor(30,100,180));using var accent=new SKPaint {Color=new SKColor(230,80,30)};
+        canvas.DrawRect(70,0,30,100,accent);
+        var dominant=WindowBackgroundService.Sample(pixels);
+        Assert.Equal(Avalonia.Media.Color.FromRgb(30,100,180),dominant);
+    }
+
+    [AvaloniaFact]
+    public void Wallpaper_mode_selects_the_dark_color_palette_even_on_a_light_desktop()
+    {
+        var app=Application.Current!;var old=app.RequestedThemeVariant;
+        try
+        {
+            using var appearance=new AppearanceService(app,new EliteSIP.Platform.Linux.DesktopAppearance(_=>{})) {Appearance=Appearance.Wallpaper};
+            Assert.True(appearance.IsDark);Assert.Equal(ThemeVariant.Dark,app.RequestedThemeVariant);
+        }
+        finally {app.RequestedThemeVariant=old;}
+    }
+
     [Fact]
     public void Automatic_choices_and_explicit_choices_are_independent_and_survive_restart()
     {
