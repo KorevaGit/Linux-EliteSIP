@@ -65,7 +65,7 @@ public sealed class IncomingWindowTests
         window.Show();
         Dispatcher.UIThread.RunJobs();
 
-        Assert.Equal(320, measured.Width);
+        Assert.Equal(360, measured.Width);
         Assert.Equal(measured.Height, Math.Ceiling(window.ClientSize.Height), 0.5);
         window.Close();
     }

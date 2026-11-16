@@ -62,6 +62,7 @@ public sealed partial class App
             OnRunSelfTest = () => _ = RunAudioSelfTestAsync(model!),
             OnStopSelfTest = () => _phone?.SelfTest.Abort(),
             OnSaveRecording = () => _ = SaveSelfTestRecordingAsync(model!),
+            OnReplayRecording = () => ReplaySelfTest(model!),
             ReadMeters = () => _phone is null
                 ? default
                 : new AudioMeterReading(
@@ -76,6 +77,7 @@ public sealed partial class App
             RestartRequested = RestartApplication,
         };
         _settingsWindow.AdministrationRequested += ShowAdministration;
+        _settingsWindow.Closed += (_, _) => _recordingPreview?.Cancel();
 
         Action refreshLink = model.RefreshLink;
         if (_panelLine is not null)
@@ -128,6 +130,7 @@ public sealed partial class App
         var administration = new AdministrationViewModel(_settings!, _access, PreviewIncomingCall)
         {
             Support = support,
+            PostToUi = _ui.Post,
             Updates = _updates is null ? null : new UpdatesViewModel(_updates),
             LastGuardReport = _incoming?.LastReport?.Summary(),
             ResetMachine = ResetMachine,
@@ -228,15 +231,10 @@ public sealed partial class App
     {
         ShowPanel();
 
-        var answer = Dialog.Ask(
-            _panelWindow,
-            Strings.Format("UpdateOfferTitle", version.ToString(3)),
-            Strings.Get("UpdateOfferBody"),
-            confirmTitle: Strings.Get("UpdateOfferInstall"));
-
-        return answer is DialogAnswer.Confirm;
+        return new UpdateOffer(EliteSIP.App.Platform.ProductVersion.Current, version, _updates?.ReadyNotes ?? string.Empty).Ask(_panelWindow);
     }
 
+    private long _selfTestGeneration;
     private async Task RunAudioSelfTestAsync(SettingsViewModel model)
     {
         if (_phone is not { } phone || phone.IsCallActive)
@@ -245,13 +243,17 @@ public sealed partial class App
         }
 
         var test = phone.SelfTest;
-        void OnProgress(string value) => Dispatcher.UIThread.Post(() => model.ReportSelfTest(value));
+        var generation=++_selfTestGeneration;
+        void OnProgress(string value) => Dispatcher.UIThread.Post(() => { if (generation==_selfTestGeneration) { model.ReportSelfTest(value); } });
 
         test.Progress += OnProgress;
         try
         {
+            model.ReportSelfTestRunning(true);
             model.ReportSelfTest("готовлю тракт");
             var outcome = await test.RunAsync(phone.AudioConfiguration()).ConfigureAwait(true);
+            ++_selfTestGeneration;
+            model.ReportSelfTestRunning(false);
             model.ReportSelfTest(outcome.Summary);
             model.ReportRecording(test.HasRecording);
             Log($"самопроверка звука: {outcome.Summary}");
@@ -259,6 +261,7 @@ public sealed partial class App
         finally
         {
             test.Progress -= OnProgress;
+            model.ReportSelfTestRunning(false);
         }
     }
 
@@ -307,12 +310,37 @@ public sealed partial class App
     /// русском Mint), а не <c>~/Desktop</c>: .NET берёт его из
     /// <c>user-dirs.dirs</c> сам.
     /// </remarks>
+    private CancellationTokenSource? _recordingPreview;
+    private async void ReplaySelfTest(SettingsViewModel model)
+    {
+        if (_phone is not { IsCallActive: false } phone || phone.SelfTest.ReadLastRecording() is not { } recording) { return; }
+        _recordingPreview?.Cancel();
+        using var cancellation = new CancellationTokenSource();
+        _recordingPreview = cancellation;
+        try
+        {
+            await Task.Run(async () =>
+            {
+                using var output = EliteSIP.Audio.Pulse.PulseSignalSounds.Outputs.Open(_settings?.Audio.OutputDeviceId);
+                cancellation.Token.ThrowIfCancellationRequested();
+                output.Play(new RecordingSamples(recording.Samples, recording.SampleRate));
+                try { await Task.Delay(TimeSpan.FromSeconds((double)recording.Samples.Length / recording.SampleRate + .15), cancellation.Token); }
+                finally { output.Stop(); }
+            });
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception error) when (error is InvalidOperationException or IOException)
+        { model.ReportSelfTest(Strings.Get("AudioReplayFailed")); }
+        finally { if (ReferenceEquals(_recordingPreview, cancellation)) { _recordingPreview = null; } }
+    }
     private bool _collectingSupport;
 
     private async void CollectSupportArchive(SettingsViewModel model)
     {
         if (_collectingSupport) { return; }
         _collectingSupport = true;
+        model.IsCollectingLogs = true;
+        model.ReportSupport(Strings.Get("SupportLogsCollecting"), SupportArea.Logs);
         try
         {
             var version = SettingsViewModel.Version;
@@ -343,7 +371,7 @@ public sealed partial class App
         {
             model.ReportSupport(Strings.Format("SupportLogsFailed", error.Message), SupportArea.Logs);
         }
-        finally { _collectingSupport = false; }
+        finally { _collectingSupport = false; model.IsCollectingLogs = false; }
     }
 
     /// <summary>

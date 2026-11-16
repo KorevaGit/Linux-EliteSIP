@@ -380,6 +380,7 @@ public sealed class PanelViewModel : Observable
             Set(ref _activeLine, value);
             NotifyCallControls();
             NotifyChanged(nameof(CallTitle));
+            NotifyChanged(nameof(IsOutgoingPending));
         }
     }
 
@@ -408,10 +409,14 @@ public sealed class PanelViewModel : Observable
             Set(ref _pendingNumber, value);
             NotifyCallControls();
             NotifyChanged(nameof(CallTitle));
+            NotifyChanged(nameof(IsOutgoingPending));
         }
     }
 
     private string? _pendingNumber;
+
+    /// <summary>Исходящий вызов до ответа: номер и статус занимают всю высоту шапки.</summary>
+    public bool IsOutgoingPending => ActiveLine is null && PendingNumber is not null;
 
     /// <summary>Что показывать в шапке: собеседник или набираемый номер.</summary>
     public string CallTitle => ActiveLine?.Title ?? _pendingNumber ?? string.Empty;
@@ -607,7 +612,7 @@ public sealed class PanelViewModel : Observable
         {
             var columns = Math.Max(1, _macroColumns);
             var rows = (Macros.Count + columns - 1) / columns;
-            return rows == 0 ? 0 : rows * (EffectiveMacroHeight + 4) - 4;
+            return rows == 0 ? 0 : rows * (EffectiveMacroHeight + 8) - 8;
         }
     }
 
@@ -618,7 +623,7 @@ public sealed class PanelViewModel : Observable
     /// разметки бесконечную высоту: сама подпись не узнает, что вылезла. Предел
     /// приходит отсюда — высота клавиши за вычетом полей, не больше двух строк.
     /// </remarks>
-    public double MacroLabelMaxHeight => Math.Max(16, Math.Min(54, EffectiveMacroHeight - 8));
+    public double MacroLabelMaxHeight => Math.Max(16, Math.Min(54, EffectiveMacroHeight - 10));
 
     // --- Неподвижный низ --------------------------------------------------
 

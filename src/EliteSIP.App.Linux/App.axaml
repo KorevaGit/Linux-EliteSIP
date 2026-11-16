@@ -13,5 +13,6 @@
     <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/Controls.axaml" />
     <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/SettingsKit.axaml" />
     <StyleInclude Source="avares://EliteSIP.App.Linux/History/History.axaml" />
+    <StyleInclude Source="avares://EliteSIP.App.Linux/Theme/Graphite.axaml" />
   </Application.Styles>
 </Application>

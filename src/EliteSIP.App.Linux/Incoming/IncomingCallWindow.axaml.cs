@@ -62,6 +62,7 @@ public partial class IncomingCallWindow : Window
         _moveSettle = new DispatcherTimer { Interval = MoveSettle };
         _moveSettle.Tick += (_, _) => EndUserMove();
         Header.PointerPressed += OnHeaderPressed;
+        Opened += (_, _) => AcceptPulse.Attach(this);
         NumberBlock.PointerReleased += OnNumberReleased;
 
         _copiedNotice = new DispatcherTimer { Interval = CopiedNoticeTime };

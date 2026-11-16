@@ -30,6 +30,7 @@ public partial class FirstRunWindow : Window
     {
         Model = model;
         DataContext = model;
+        model.Begin();
     }
 
     public FirstRunViewModel? Model { get; }
@@ -74,6 +75,8 @@ public partial class FirstRunWindow : Window
     private void OnBackClick(object? sender, RoutedEventArgs e) => Model?.Back();
 
     private void OnNewCodeClick(object? sender, RoutedEventArgs e) => Model?.RequestNewCode();
+
+    private void OnSparkSetupClick(object? sender, RoutedEventArgs e) => Model?.UseSparkSetup();
 
     private void OnManualSetupClick(object? sender, RoutedEventArgs e) => Model?.UseManualSetup();
 

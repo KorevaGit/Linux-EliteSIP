@@ -11,4 +11,5 @@ public enum Appearance
     System,
     Light,
     Dark,
+    Wallpaper,
 }

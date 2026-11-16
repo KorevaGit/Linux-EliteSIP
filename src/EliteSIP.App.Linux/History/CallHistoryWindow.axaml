@@ -1,18 +1,4 @@
-<Window x:Class="EliteSIP.App.History.CallHistoryWindow"
-        xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:theme="using:EliteSIP.App.Theme"
-        xmlns:history="using:EliteSIP.App.History"
-        xmlns:historycore="using:EliteSIP.App.History"
-        xmlns:res="using:EliteSIP.App.Resources"
-        xmlns:calls="using:EliteSIP.CallHistory"
-        x:DataType="historycore:CallHistoryViewModel"
-        Width="640"
-        Height="520"
-        MinWidth="600"
-        MinHeight="380"
-        WindowStartupLocation="CenterScreen"
-        UseLayoutRounding="True">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:history="using:EliteSIP.App.History" xmlns:historycore="using:EliteSIP.App.History" xmlns:res="using:EliteSIP.App.Resources" xmlns:calls="using:EliteSIP.CallHistory" x:Class="EliteSIP.App.History.CallHistoryWindow" x:DataType="historycore:CallHistoryViewModel" Width="720" Height="480" MinWidth="600" MinHeight="380" WindowStartupLocation="CenterScreen" UseLayoutRounding="True">
 
   <!--
       Отдельным окном, а не вкладкой панели: панель шириной 270 точек — это
@@ -29,29 +15,26 @@
 
   <Grid Margin="12">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="8" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
     <!-- Фильтры и снимок одним рядом по центру. -->
-    <Grid Grid.Row="0">
-      <ItemsControl ItemsSource="{Binding Filters}" HorizontalAlignment="Center">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto">
+      <ItemsControl ItemsSource="{Binding Filters}" HorizontalAlignment="Left">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
-            <StackPanel Orientation="Horizontal" />
+            <StackPanel Orientation="Horizontal"/>
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="historycore:HistoryFilterItem">
-            <RadioButton Classes="chip"
-                         GroupName="HistoryFilter"
-                         Tag="{Binding Filter}"
-                         IsCheckedChanged="OnFilterChosen">
+            <RadioButton Classes="chip" GroupName="HistoryFilter" Tag="{Binding Filter}" IsCheckedChanged="OnFilterChosen">
               <RadioButton.IsChecked>
                 <MultiBinding Converter="{x:Static history:HistoryConverters.Equality}" Mode="OneWay">
-                  <Binding Path="Filter" />
-                  <Binding Path="$parent[ItemsControl].DataContext.Filter" />
+                  <Binding Path="Filter"/>
+                  <Binding Path="$parent[ItemsControl].DataContext.Filter"/>
                 </MultiBinding>
               </RadioButton.IsChecked>
               <StackPanel Orientation="Horizontal">
@@ -60,12 +43,8 @@
                     кнопка обязана показывать ровно ту фигуру, которую человек
                     будет искать глазами в списке.
                 -->
-                <history:OutcomeBadge Size="14"
-                                      VerticalAlignment="Center"
-                                      IsIncoming="{Binding IsIncoming}"
-                                      IsCompleted="{Binding IsCompleted}"
-                                      Outcome="{Binding Outcome}" />
-                <TextBlock Text="{Binding Title}" Margin="4,0,0,0" VerticalAlignment="Center" />
+                <history:OutcomeBadge Size="14" VerticalAlignment="Center" IsIncoming="{Binding IsIncoming}" IsCompleted="{Binding IsCompleted}" Outcome="{Binding Outcome}"/>
+                <TextBlock Text="{Binding Title}" Margin="4,0,0,0" VerticalAlignment="Center"/>
               </StackPanel>
             </RadioButton>
           </DataTemplate>
@@ -77,83 +56,42 @@
           день — такой же отбор, как направление звонка, и разводить их по
           разным местам окна значило бы делить один вопрос надвое.
       -->
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,34,0">
-        <Button x:Name="CalendarButton"
-                AutomationProperties.AutomationId="CalendarButton"
-                AutomationProperties.Name="{res:Loc HistoryPickDay}"
-                ToolTip.Tip="{res:Loc HistoryPickDay}"
-                Classes="chip"
-                Classes.bold="{Binding Calendar.HasSelectedDay}"
-                Click="OnCalendarClick">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0,4,0" Grid.Column="1">
+        <Button x:Name="CalendarButton" AutomationProperties.AutomationId="CalendarButton" AutomationProperties.Name="{res:Loc HistoryPickDay}" ToolTip.Tip="{res:Loc HistoryPickDay}" Classes="chip" Classes.bold="{Binding Calendar.HasSelectedDay}" Click="OnCalendarClick">
           <StackPanel Orientation="Horizontal">
-            <theme:Icon Glyph="clock" Size="12" VerticalAlignment="Center" />
+            <theme:Icon Glyph="clock" Size="12" VerticalAlignment="Center"/>
             <!-- Дата не ужимается: «04.08.20…» — это дата, по которой нельзя
                  сказать, какой год выбран. -->
-            <TextBlock Text="{Binding Calendar.SelectedDayTitle}"
-                       Margin="4,0,0,0"
-                       VerticalAlignment="Center"
-                       IsVisible="{Binding Calendar.HasSelectedDay}" />
+            <TextBlock Text="{Binding Calendar.SelectedDayTitle}" Margin="4,0,0,0" VerticalAlignment="Center" IsVisible="{Binding Calendar.HasSelectedDay}"/>
           </StackPanel>
         </Button>
 
         <!-- Крестик снимает отбор, не открывая того, что его поставило. -->
-        <Button Classes="surface chrome"
-                Margin="2,0,0,0"
-                ToolTip.Tip="{res:Loc HistoryAllDays}"
-                Click="OnClearDayClick"
-                IsVisible="{Binding Calendar.HasSelectedDay}">
-          <theme:Icon Glyph="xmark.circle.fill" Size="12" />
+        <Button Classes="surface chrome" Margin="2,0,0,0" ToolTip.Tip="{res:Loc HistoryAllDays}" Click="OnClearDayClick" IsVisible="{Binding Calendar.HasSelectedDay}">
+          <theme:Icon Glyph="xmark.circle.fill" Size="12"/>
         </Button>
       </StackPanel>
 
-      <Popup x:Name="CalendarPopup"
-             PlacementTarget="{Binding #CalendarButton}"
-             Placement="Bottom"
-             IsLightDismissEnabled="True"
-             Opened="OnCalendarOpened">
-        <Border Background="{DynamicResource SurfaceBrush}"
-                BorderBrush="{DynamicResource SeparatorBrush}"
-                BorderThickness="1"
-                CornerRadius="12"
-                Padding="12"
-                DataContext="{Binding Calendar}"
-                x:DataType="historycore:HistoryCalendar">
+      <Popup x:Name="CalendarPopup" PlacementTarget="{Binding #CalendarButton}" Placement="Bottom" IsLightDismissEnabled="True" Opened="OnCalendarOpened">
+        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1" CornerRadius="12" Padding="12" DataContext="{Binding Calendar}" x:DataType="historycore:HistoryCalendar">
           <StackPanel>
             <Grid>
-              <Button Classes="surface chrome"
-                      HorizontalAlignment="Left"
-                      Content="‹"
-                      FontSize="17"
-                      IsEnabled="{Binding CanShowPreviousMonth}"
-                      Click="OnPreviousMonthClick" />
+              <Button Classes="surface chrome" HorizontalAlignment="Left" Content="‹" FontSize="17" IsEnabled="{Binding CanShowPreviousMonth}" Click="OnPreviousMonthClick"/>
 
-              <TextBlock Text="{Binding MonthTitle}"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         FontSize="14"
-                         FontWeight="SemiBold" />
+              <TextBlock Text="{Binding MonthTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
 
-              <Button Classes="surface chrome"
-                      HorizontalAlignment="Right"
-                      Content="›"
-                      FontSize="17"
-                      IsEnabled="{Binding CanShowNextMonth}"
-                      Click="OnNextMonthClick" />
+              <Button Classes="surface chrome" HorizontalAlignment="Right" Content="›" FontSize="17" IsEnabled="{Binding CanShowNextMonth}" Click="OnNextMonthClick"/>
             </Grid>
 
             <ItemsControl ItemsSource="{Binding WeekdayTitles}" Margin="0,6,0,2">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                  <UniformGrid Columns="7" />
+                  <UniformGrid Columns="7"/>
                 </ItemsPanelTemplate>
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="x:String">
-                  <TextBlock Text="{Binding}"
-                             Width="28"
-                             FontSize="12"
-                             TextAlignment="Center"
-                             Foreground="{DynamicResource TextSecondaryBrush}" />
+                  <TextBlock Text="{Binding}" Width="28" FontSize="12" TextAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -164,28 +102,16 @@
                   <ItemsControl ItemsSource="{Binding Days}">
                     <ItemsControl.ItemsPanel>
                       <ItemsPanelTemplate>
-                        <UniformGrid Columns="7" />
+                        <UniformGrid Columns="7"/>
                       </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="historycore:CalendarDay">
-                        <Button Width="28"
-                                Height="28"
-                                Classes="surface day"
-                                Classes.selected="{Binding IsSelected}"
-                                IsEnabled="{Binding IsAvailable}"
-                                Click="OnDayClick">
+                        <Button Width="28" Height="28" Classes="surface day" Classes.selected="{Binding IsSelected}" IsEnabled="{Binding IsAvailable}" Click="OnDayClick">
                           <StackPanel>
-                            <TextBlock Text="{Binding Number}"
-                                       FontSize="13"
-                                       TextAlignment="Center" />
+                            <TextBlock Text="{Binding Number}" FontSize="13" TextAlignment="Center"/>
                             <!-- Точка под числом: «в этот день были звонки». -->
-                            <Ellipse Width="4"
-                                     Height="4"
-                                     Margin="0,1,0,0"
-                                     HorizontalAlignment="Center"
-                                     Fill="{DynamicResource TextSecondaryBrush}"
-                                     IsVisible="{Binding HasCalls}" />
+                            <Ellipse Width="4" Height="4" Margin="0,1,0,0" HorizontalAlignment="Center" Fill="{DynamicResource TextSecondaryBrush}" IsVisible="{Binding HasCalls}"/>
                           </StackPanel>
                         </Button>
                       </DataTemplate>
@@ -203,12 +129,8 @@
           Прежде снимок был кнопкой настроек со своей рамкой и полями и
           выходил меньше соседа, стоя с ним в одном ряду.
       -->
-      <Button HorizontalAlignment="Right"
-              Classes="chip"
-              Click="OnSnapshotClick"
-              IsEnabled="{Binding HasRecords}"
-              ToolTip.Tip="{res:Loc HistorySnapshot}">
-        <theme:Icon Glyph="camera.fill" Size="12" VerticalAlignment="Center" />
+      <Button HorizontalAlignment="Right" Classes="chip" Click="OnSnapshotClick" IsEnabled="{Binding HasRecords}" ToolTip.Tip="{res:Loc HistorySnapshot}" Grid.Column="2">
+        <theme:Icon Glyph="camera.fill" Size="12" VerticalAlignment="Center"/>
       </Button>
     </Grid>
 
@@ -218,23 +140,11 @@
         фильтра на пустой набор меняло бы не содержимое окна, а его форму, — и
         это читается как поломка, а не как «здесь ничего нет».
     -->
-    <Border Grid.Row="2"
-            x:Name="ListSurface"
-            Background="{DynamicResource ControlBackgroundBrush}"
-            CornerRadius="12">
+    <Border Grid.Row="2" x:Name="ListSurface" Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="10" ClipToBounds="True">
       <Grid>
-        <TextBlock Text="{res:Loc HistoryEmpty}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Foreground="{DynamicResource TextSecondaryBrush}"
-                   IsVisible="{Binding IsEmpty}" />
+        <TextBlock Text="{res:Loc HistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" IsVisible="{Binding IsEmpty}"/>
 
-        <ScrollViewer x:Name="Scroller"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="0,8"
-                      ScrollChanged="OnScrollChanged"
-                      IsVisible="{Binding !IsEmpty}">
+        <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,8" ScrollChanged="OnScrollChanged" IsVisible="{Binding !IsEmpty}">
           <ItemsControl ItemsSource="{Binding Days}">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="historycore:HistoryDay">
@@ -244,10 +154,7 @@
                       подписью: день это то, по чему в списке ориентируются, и
                       вторым планом ему стоять нельзя.
                   -->
-                  <TextBlock Text="{Binding Title}"
-                             Margin="8,12,8,4"
-                             FontSize="14"
-                             FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Title}" Margin="8,12,8,4" FontSize="14" FontWeight="SemiBold"/>
 
                   <!--
                       Разделительных линий между звонками нет: строка
@@ -261,18 +168,13 @@
                       <DataTemplate x:DataType="calls:CallRecord">
                         <Grid Margin="8,6">
                           <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="124" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="124"/>
+                            <ColumnDefinition Width="Auto"/>
                           </Grid.ColumnDefinitions>
 
-                          <history:OutcomeBadge Grid.Column="0"
-                                                Size="22"
-                                                VerticalAlignment="Center"
-                                                Outcome="{Binding Outcome}"
-                                                IsCompleted="{Binding IsAnswered}"
-                                                IsIncoming="{Binding Converter={x:Static history:HistoryConverters.IsIncoming}}" />
+                          <history:OutcomeBadge Grid.Column="0" Size="22" VerticalAlignment="Center" Outcome="{Binding Outcome}" IsCompleted="{Binding IsAnswered}" IsIncoming="{Binding Converter={x:Static history:HistoryConverters.IsIncoming}}"/>
 
                           <StackPanel Grid.Column="1" Margin="8,0" VerticalAlignment="Center">
                             <!--
@@ -284,21 +186,18 @@
                             <TextBlock TextTrimming="CharacterEllipsis">
                               <TextBlock.Text>
                                 <MultiBinding Converter="{x:Static history:HistoryConverters.CallTitle}">
-                                  <Binding />
-                                  <Binding Path="$parent[Window].DataContext.OwnNumber" />
-                                  <Binding Path="$parent[Window].DataContext.MasksMobileNumbers" />
+                                  <Binding/>
+                                  <Binding Path="$parent[Window].DataContext.OwnNumber"/>
+                                  <Binding Path="$parent[Window].DataContext.MasksMobileNumbers"/>
                                 </MultiBinding>
                               </TextBlock.Text>
                             </TextBlock>
-                            <TextBlock Margin="0,2,0,0"
-                                       FontSize="12"
-                                       TextTrimming="CharacterEllipsis"
-                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                            <TextBlock Margin="0,2,0,0" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextSecondaryBrush}">
                               <TextBlock.Text>
                                 <MultiBinding Converter="{x:Static history:HistoryConverters.CallSubtitle}">
-                                  <Binding />
-                                  <Binding Path="$parent[Window].DataContext.OwnNumber" />
-                                  <Binding Path="$parent[Window].DataContext.MasksMobileNumbers" />
+                                  <Binding/>
+                                  <Binding Path="$parent[Window].DataContext.OwnNumber"/>
+                                  <Binding Path="$parent[Window].DataContext.MasksMobileNumbers"/>
                                 </MultiBinding>
                               </TextBlock.Text>
                             </TextBlock>
@@ -311,16 +210,9 @@
                               одной вертикали.
                           -->
                           <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Converter={x:Static history:HistoryConverters.OutcomeText}}"
-                                       TextAlignment="Right"
-                                       Classes="outcome"
-                                       Classes.missed="{Binding IsMissed}" />
+                            <TextBlock Text="{Binding Converter={x:Static history:HistoryConverters.OutcomeText}}" TextAlignment="Right" Classes="outcome" Classes.missed="{Binding IsMissed}"/>
 
-                            <TextBlock Text="{Binding StartedAt, Converter={x:Static history:HistoryConverters.CallStamp}}"
-                                       Margin="0,2,0,0"
-                                       FontSize="12"
-                                       TextAlignment="Right"
-                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Text="{Binding StartedAt, Converter={x:Static history:HistoryConverters.CallStamp}}" Margin="0,2,0,0" FontSize="12" TextAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}"/>
                           </StackPanel>
 
                           <!--
@@ -349,15 +241,8 @@
             картинка собирается в момент нажатия, до того как сообщение
             появилось.
         -->
-        <Border x:Name="Notice"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Center"
-                Margin="0,0,0,12"
-                Padding="12,6"
-                CornerRadius="14"
-                IsVisible="False"
-                Background="{DynamicResource SurfaceBrush}">
-          <TextBlock x:Name="NoticeText" FontSize="12" />
+        <Border x:Name="Notice" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,12" Padding="12,6" CornerRadius="14" IsVisible="False" Background="{DynamicResource SurfaceBrush}">
+          <TextBlock x:Name="NoticeText" FontSize="12"/>
         </Border>
       </Grid>
     </Border>
@@ -365,19 +250,19 @@
 
   <Window.Styles>
     <Style Selector="Button.chip.bold">
-      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style Selector="Button.day">
-      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Background" Value="Transparent"/>
     </Style>
     <Style Selector="Button.day.selected">
-      <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+      <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
     </Style>
     <Style Selector="TextBlock.outcome">
-      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
     </Style>
     <Style Selector="TextBlock.outcome.missed">
-      <Setter Property="Foreground" Value="{DynamicResource OutcomeMissedBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource OutcomeMissedBrush}"/>
     </Style>
   </Window.Styles>
 </Window>

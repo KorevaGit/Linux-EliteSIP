@@ -57,12 +57,12 @@ public sealed class SettingsViewModel : Observable
         [
             new(SettingsSectionKind.Work, Strings.Get("SectionWork"), "person.crop.circle"),
             new(SettingsSectionKind.Audio, Strings.Get("SectionAudio"), "mic.fill"),
-            new(SettingsSectionKind.Ringtone, Strings.Get("SectionRingtone"), "bell"),
+
             // Своего значка у оформления в комплекте нет. `gearshape` — не
             // «тема», а «настройка вообще», и это признанная неточность: раздел
             // опознаётся подписью, а значок держит строку в колонке с прочими.
             new(SettingsSectionKind.Appearance, Strings.Get("SectionAppearance"), "gearshape"),
-            new(SettingsSectionKind.Support, Strings.Get("SectionSupport"), "stethoscope"),
+            new(SettingsSectionKind.Support, Strings.Get("SettingsSystem"), "settings.monitor"),
         ];
 
         ReloadDevices();
@@ -88,6 +88,7 @@ public sealed class SettingsViewModel : Observable
             }
         });
         SaveRecording = new RelayCommand(_ => OnSaveRecording?.Invoke());
+        ReplayRecording = new RelayCommand(_ => { if (CanReplayRecording) { OnReplayRecording?.Invoke(); } });
 
         ReturnOnline = new RelayCommand(async _ =>
         {
@@ -323,6 +324,12 @@ public sealed class SettingsViewModel : Observable
     /// есть и проверка не идёт.
     /// </summary>
     public RelayCommand SaveRecording { get; }
+    public RelayCommand ReplayRecording { get; }
+    internal Action? OnReplayRecording { get; init; }
+    public bool CanReplayRecording => _hasRecording && !_isSelfTestRunning && !_isInCall;
+    private bool _isCollectingLogs;
+    public bool IsCollectingLogs { get => _isCollectingLogs; internal set => Set(ref _isCollectingLogs, value); }
+
 
     internal Action? OnSaveRecording { get; init; }
 
@@ -334,6 +341,7 @@ public sealed class SettingsViewModel : Observable
     {
         _hasRecording = available;
         NotifyChanged(nameof(CanSaveRecording));
+        NotifyChanged(nameof(CanReplayRecording));
     }
 
     // --- Шкалы «Голос» и «Звук» ---------------------------------------------
@@ -354,6 +362,12 @@ public sealed class SettingsViewModel : Observable
     private double _soundLevel;
 
     public bool IsSelfTestRunning => _isSelfTestRunning;
+    internal void ReportSelfTestRunning(bool running)
+    {
+        _isSelfTestRunning=running;
+        if (!running) { _voiceLevel=0; _soundLevel=0; }
+        foreach(var name in new[] { nameof(IsSelfTestRunning),nameof(CanRunSelfTest),nameof(SelfTestButtonText),nameof(ShowsMeters),nameof(CanSaveRecording),nameof(CanReplayRecording),nameof(VoiceLevel),nameof(SoundLevel) }) { NotifyChanged(name); }
+    }
 
     /// <summary>Во время звонка проверка не запускается: это отнятый у собеседника микрофон.</summary>
     public bool CanRunSelfTest => _isSelfTestRunning || !_isInCall;
@@ -457,6 +471,7 @@ public sealed class SettingsViewModel : Observable
             NotifyChanged(nameof(SelfTestButtonText));
             NotifyChanged(nameof(ShowsMeters));
             NotifyChanged(nameof(CanSaveRecording));
+        NotifyChanged(nameof(CanReplayRecording));
         }
 
         _voiceLevel = levels?.Voice ?? 0;
@@ -468,6 +483,8 @@ public sealed class SettingsViewModel : Observable
     // --- Связь со Spark -------------------------------------------------------
 
     /// <summary>Идентификатор машины — по нему её находят в Spark.</summary>
+    public string MachineShortID => Settings.Panel.IsActivated ? "ID " + (Settings.Panel.InstallationID.Length > 8 ? Settings.Panel.InstallationID[..8] + "…" : Settings.Panel.InstallationID) : "ID —";
+
     public string MachineID => Settings.Panel.IsActivated
         ? Settings.Panel.InstallationID
         : Strings.Get("SupportMachineNotPaired");
@@ -494,6 +511,7 @@ public sealed class SettingsViewModel : Observable
     internal void RefreshLink()
     {
         NotifyChanged(nameof(MachineID));
+        NotifyChanged(nameof(MachineShortID));
         NotifyChanged(nameof(LinkState));
         NotifyChanged(nameof(IsPanelOffline));
     }
@@ -541,9 +559,9 @@ public sealed class SettingsViewModel : Observable
         }
     }
 
-    public bool ShowsAudio => _section is SettingsSectionKind.Audio;
+    public bool ShowsAudio => _section is SettingsSectionKind.Audio or SettingsSectionKind.Ringtone;
 
-    public bool ShowsRingtone => _section is SettingsSectionKind.Ringtone;
+    public bool ShowsRingtone => _section is SettingsSectionKind.Audio or SettingsSectionKind.Ringtone;
 
     public bool ShowsAppearance => _section is SettingsSectionKind.Appearance;
 

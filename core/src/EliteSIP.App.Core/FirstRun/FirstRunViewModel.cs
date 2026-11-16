@@ -44,13 +44,14 @@ public enum FirstRunStep
 /// привязать через несколько дней — код на экране будет тот же.
 /// </para>
 /// </remarks>
-public sealed class FirstRunViewModel : Observable, IDisposable
+public sealed partial class FirstRunViewModel : Observable, IDisposable
 {
     /// <summary>Паузы между повторами при сбое сети: 5, 10, … 30 с.</summary>
     private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(30);
 
     private readonly AppSettings _settings;
     private readonly AdminAccessState _access;
+    private readonly LanguageSetting _originalLanguage;
 
     private FirstRunStep _step = FirstRunStep.Welcome;
     private LanguageSetting _language;
@@ -77,6 +78,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
         _settings = settings;
         _access = access;
         _language = settings.Appearance.Language;
+        _originalLanguage = _language;
         _theme = settings.Appearance.Theme;
     }
 
@@ -86,6 +88,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
         private set
         {
             Set(ref _step, value);
+            NotifyLayout();
             foreach (var name in new[]
             {
                 nameof(ShowsWelcome), nameof(ShowsPair), nameof(ShowsUser), nameof(ShowsAppearance),
@@ -135,6 +138,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
         {
             Set(ref _pairCode, value);
             NotifyChanged(nameof(HasPairCode));
+            NotifyLayout();
         }
     }
 
@@ -182,6 +186,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
             Set(ref _isPaired, value);
             NotifyChanged(nameof(CanGoForward));
             NotifyChanged(nameof(HasPairCode));
+            NotifyLayout();
         }
     }
 
@@ -189,13 +194,13 @@ public sealed class FirstRunViewModel : Observable, IDisposable
     public string PairedEmployee
     {
         get => _pairedEmployee;
-        private set => Set(ref _pairedEmployee, value);
+        private set { Set(ref _pairedEmployee, value); NotifyLayout(); }
     }
 
     public string PairedNumber
     {
         get => _pairedNumber;
-        private set => Set(ref _pairedNumber, value);
+        private set { Set(ref _pairedNumber, value); NotifyLayout(); }
     }
 
     /// <summary>
@@ -221,7 +226,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
     /// Не «пропустить»: пропущенный шаг возвращаются доделать, а этот выбор —
     /// вторая дорога целиком, и назад с неё ведёт кнопка «Назад».
     /// </remarks>
-    public void UseManualSetup() => Step = FirstRunStep.User;
+    public void UseManualSetup() { if (!IsPaired) { Step = FirstRunStep.User; } }
 
     /// <summary>Закрытие мастера: опрос не должен пережить окно.</summary>
     public void Dispose() => StopPairing();
@@ -421,7 +426,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
 
     public bool IsLastStep => _step is FirstRunStep.Finale;
 
-    public bool CanGoBack => _step is not FirstRunStep.Welcome;
+    public bool CanGoBack => _step is FirstRunStep.Appearance or FirstRunStep.Finale or FirstRunStep.User;
 
     /// <summary>Можно ли шагнуть дальше.</summary>
     ///
@@ -449,13 +454,13 @@ public sealed class FirstRunViewModel : Observable, IDisposable
     public LanguageSetting Language
     {
         get => _language;
-        set => Set(ref _language, value);
+        set { Set(ref _language, value); NotifyChanged(nameof(FooterNote)); }
     }
 
     public AppearanceMode Theme
     {
         get => _theme;
-        set => Set(ref _theme, value);
+        set { if (_theme != value) { _settings.Appearance.ThemeChosenByUser = true; } Set(ref _theme, value); }
     }
 
     public string Username
@@ -464,6 +469,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
         set
         {
             Set(ref _username, value);
+            NotifyLayout();
             NotifyUser();
         }
     }
@@ -471,7 +477,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
     public string DisplayName
     {
         get => _displayName;
-        set => Set(ref _displayName, value);
+        set { Set(ref _displayName, value); NotifyLayout(); }
     }
 
     public string SipPassword
@@ -529,7 +535,7 @@ public sealed class FirstRunViewModel : Observable, IDisposable
     }
 
     /// <summary>Меняется ли язык — от этого зависит, нужен ли перезапуск.</summary>
-    public bool LanguageChanges => _language != _settings.Appearance.Language;
+    public bool LanguageChanges => _language != _originalLanguage;
 
     public void Forward()
     {

@@ -33,9 +33,15 @@ public partial class AdministrationWindow : Window
     {
         Model = model;
         DataContext = model;
+        model.WatchAccountSelection(true);
+        Closed += (_, _) => model.WatchAccountSelection(false);
     }
 
     public AdministrationViewModel? Model { get; }
+    private void OnAddAccount(object? sender, RoutedEventArgs e) => Model?.AddAccount();
+    private void OnRemoveAccount(object? sender, RoutedEventArgs e)
+    { if (sender is Control { DataContext: AdminAccountDraft draft }) { Model?.RemoveAccount(draft); } }
+
 
     protected override void OnClosing(WindowClosingEventArgs e)
     {
@@ -55,6 +61,7 @@ public partial class AdministrationWindow : Window
         switch (answer)
         {
             case DialogAnswer.Confirm:
+                if (model.HasAccountError) { model.Section = AdminSectionKind.Account; e.Cancel = true; break; }
                 model.Save();
                 break;
             case DialogAnswer.Discard:
@@ -74,7 +81,7 @@ public partial class AdministrationWindow : Window
 
     private void OnSaveClick(object? sender, RoutedEventArgs e)
     {
-        if (Model is null)
+        if (Model is not { CanSave: true })
         {
             return;
         }
@@ -90,6 +97,7 @@ public partial class AdministrationWindow : Window
             return;
         }
 
+        if (!Model.CanSave) { Model.Section = AdminSectionKind.Account; return; }
         Model.Save();
         CloseConfirmed();
     }
@@ -130,7 +138,7 @@ public partial class AdministrationWindow : Window
     {
         if (Model is not null)
         {
-            Model.SipPassword = SipPasswordField.Text ?? string.Empty;
+            Model.SipPassword = (sender as TextBox)?.Text ?? string.Empty;
         }
     }
 

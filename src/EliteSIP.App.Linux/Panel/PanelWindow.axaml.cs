@@ -220,6 +220,8 @@ public partial class PanelWindow : Window
 
     private void OnModelChanged(object? sender, PropertyChangedEventArgs change)
     {
+        if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible) && !Model.IsTransferEntryVisible)
+        { Dispatcher.UIThread.Post(() => DialedField.Focus(), DispatcherPriority.Loaded); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible)
             or nameof(PanelViewModel.HasMacros)
             or nameof(PanelViewModel.ShowsMacros)

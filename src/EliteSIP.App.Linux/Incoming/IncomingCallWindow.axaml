@@ -19,7 +19,7 @@
         x:Class="EliteSIP.App.Incoming.IncomingCallWindow"
         x:DataType="incoming:IncomingCallViewModel"
         Title="{res:Loc IncomingWindowTitle}"
-        Width="320"
+        Width="360"
         SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -28,7 +28,7 @@
         WindowDecorations="None"
         WindowStartupLocation="Manual">
 
-  <Border BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
+  <Border CornerRadius="12" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
     <StackPanel Margin="8,6,8,8">
       <!--
           Шапка — ручка переноса: за неё карточку можно отодвинуть, не принимая
@@ -70,7 +70,7 @@
                   Classes.copyable="{Binding CanCopyNumber}"
                   ToolTip.Tip="{res:Loc IncomingCopyNumber}"
                   ToolTip.IsEnabled="{Binding CanCopyNumber}">
-        <TextBlock theme:Emoji.Text="{Binding Headline}"
+        <TextBlock theme:Emoji.Text="{Binding Headline}" TextWrapping="Wrap" MaxWidth="328"
                    HorizontalAlignment="Center"
                    TextAlignment="Center"
                    TextTrimming="CharacterEllipsis"

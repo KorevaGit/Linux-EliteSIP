@@ -42,7 +42,12 @@ internal static class IconLibrary
         using var stream = typeof(IconLibrary).Assembly.GetManifestResourceStream("EliteSIP.App.Theme.Icons.xaml")
             ?? throw new InvalidOperationException("в сборке нет Icons.xaml");
 
-        return Parse(XDocument.Load(stream));
+        var all = Parse(XDocument.Load(stream));
+        using var settings = typeof(IconLibrary).Assembly.GetManifestResourceStream("EliteSIP.App.Theme.Icons.Settings.xaml")!;
+        foreach (var pair in Parse(XDocument.Load(settings))) { all[pair.Key] = pair.Value; }
+        var aliases = new Dictionary<string, string> { ["phone.fill"] = "settings.phone", ["clock"] = "settings.history", ["gearshape"] = "settings.settings", ["mic.fill"] = "settings.mic", ["person.crop.circle"] = "settings.user-round", ["crown.fill"] = "settings.crown-split" };
+        foreach (var pair in aliases) { if (all.TryGetValue(pair.Value, out var shape)) { all[pair.Key] = shape; } }
+        return all;
     }
 
     internal static Dictionary<string, IconShape> Parse(XDocument document)

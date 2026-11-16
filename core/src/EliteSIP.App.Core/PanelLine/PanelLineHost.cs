@@ -557,6 +557,8 @@ internal static class MachineReset
             "history.db.pending",
             "history.db.pending.tmp",
             "activation-draft.dat",
+            "window-background.png",
+            "window-background.png.tmp",
             "elitesip.log",
             "crash.log",
             ClientEventLog.FileName,

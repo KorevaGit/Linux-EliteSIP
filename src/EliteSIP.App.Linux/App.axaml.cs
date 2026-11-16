@@ -60,6 +60,7 @@ public sealed partial class App : Application, IDisposable
     private AppSettings? _settings;
     private AdminAccessState? _access;
     private AppearanceService? _appearance;
+    private WindowBackgroundService? _background;
     private DesktopAppearance? _desktopAppearance;
     private CallHistoryStore? _history;
     private PanelViewModel? _panel;
@@ -83,6 +84,7 @@ public sealed partial class App : Application, IDisposable
     {
         AvaloniaXamlLoader.Load(this);
         DrawnCaption.Register();
+        ResizeEffects.Register();
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -152,7 +154,14 @@ public sealed partial class App : Application, IDisposable
         var appearance = _desktopAppearance;
         Task.Run(appearance.StartAsync).GetAwaiter().GetResult();
         _appearance = new AppearanceService(this, _desktopAppearance) { Appearance = _settings.Appearance.Theme };
+        _background = new WindowBackgroundService(this, _settings.Appearance, () => _appearance.IsDark);
+        _settings.Appearance.PropertyChanged += (_, change) => { if (change.PropertyName == nameof(AppearanceSettings.Theme)) { _appearance.Appearance = _settings.Appearance.Theme; } };
         Mark("настройки и палитра");
+
+        var splash = new StartupSplash();
+        splash.Show();
+        Dispatcher.UIThread.RunJobs(DispatcherPriority.Render);
+        Dispatcher.UIThread.Post(splash.Close, DispatcherPriority.Background);
 
         Log(SupportFacts.StartupLine(SettingsViewModel.Version, Environment.GetEnvironmentVariable));
         Log($"запуск: настройки {AppSettings.DefaultPath}"
@@ -436,6 +445,7 @@ public sealed partial class App : Application, IDisposable
 
         panel.PropertyChanged += (_, change) =>
         {
+            if (change.PropertyName is nameof(PanelViewModel.IsInCall) && panel.IsInCall) { _recordingPreview?.Cancel(); }
             if (change.PropertyName is nameof(PanelViewModel.IsInCall) && !panel.IsInCall)
             {
                 _panelLine?.HostBecameIdle();
@@ -773,6 +783,9 @@ public sealed partial class App : Application, IDisposable
     {
         ClientEventLog.Shared.EndSession();
         ClientEventLog.Shared.Dispose();
+        _recordingPreview?.Cancel();
+        _background?.Dispose();
+        _background = null;
         _appearance?.Dispose();
         _appearance = null;
         _desktopAppearance?.Dispose();

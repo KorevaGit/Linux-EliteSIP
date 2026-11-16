@@ -24,3 +24,9 @@ Win-EliteSIP, коммит d3d9498820704a2faf6c602e87fe91b501b0d391 (linux-v0.1.
 ClientEventLog, WorkFormatSync, MachineRecovery, закрепление формата работы
 и связанные проверки. Интеграция UI, отмена и статус связи адаптированы для Linux.
 Подробности: [этап 4](../docs/migration/2026-11-16-spark-port.md).
+
+16 ноября 2026 из Windows-коммита 13bba4436a035f2e62adc79945e2aa0d4c7a1f8e
+однократно перенесены переносимые модели интерфейса, настройки фона, подписи,
+PNG бренда и Lucide-контуры. Реализация окон, фона и отрисовки — собственная
+Avalonia/Skia для Linux. Лицензия Lucide сохранена в packaging/debian/copyright.
+Результат: [этап 5](../docs/migration/2026-11-16-ui-port.md).

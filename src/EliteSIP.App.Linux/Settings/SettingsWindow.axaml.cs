@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using EliteSIP.App.Resources;
 using EliteSIP.App.Theme;
@@ -70,6 +71,38 @@ public partial class SettingsWindow : Window
 
         _sounds?.StopPreview();
         base.OnClosed(e);
+    }
+
+    private async void OnCopyMachineID(object? sender, RoutedEventArgs e)
+    { if (Model?.Settings.Panel.IsActivated is true && Clipboard is { } clipboard) { await clipboard.SetTextAsync(Model.Settings.Panel.InstallationID); } }
+
+    private void OnThemeChosen(object? sender, RoutedEventArgs e)
+    { if (Model is not null) { Model.Settings.Appearance.ThemeChosenByUser = true; } }
+    private void OnTransparencyChosen(object? sender, RoutedEventArgs e)
+    { if (Model is not null) { Model.Settings.Appearance.TransparencyChosenByUser = true; } }
+    private async void OnChooseBackground(object? sender, RoutedEventArgs e)
+    {
+        if (Model is null) { return; }
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        { Title = Strings.Get("BackgroundChoose"), AllowMultiple = false,
+          FileTypeFilter = [new FilePickerFileType("PNG, JPEG, WebP") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp"] }] });
+        if (files is not [{ } file] || file.TryGetLocalPath() is not { } path) { return; }
+        try
+        {
+            await Task.Run(() => BackgroundImages.Import(path, BackgroundImages.StoredPath));
+            Model.Settings.Appearance.BackgroundImagePath = BackgroundImages.StoredPath;
+            Model.Settings.Appearance.ApplyWallpaperDefaults();
+            Model.Settings.Appearance.NotifyBackgroundChanged();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
+        { Dialog.Ask(this, Strings.Get("BackgroundTitle"), Strings.Get("BackgroundInvalid"), DialogButtons.ConfirmCancel); }
+    }
+    private void OnResetBackground(object? sender, RoutedEventArgs e)
+    {
+        if (Model is null) { return; }
+        Model.Settings.Appearance.ResetBackground();
+        try { File.Delete(BackgroundImages.StoredPath); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }
     }
 
     private static void SelectSystemDefault(ComboBox list, string? chosen)

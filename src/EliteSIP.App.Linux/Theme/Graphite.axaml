@@ -1,0 +1,16 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme">
+  <Style Selector="Window"><Setter Property="FontSize" Value="13"/><Setter Property="Icon" Value="avares://EliteSIP.App.Linux/Assets/elitesip.png"/></Style>
+  <Style Selector="Button, ToggleButton, TextBox, ComboBox"><Setter Property="CornerRadius" Value="8"/></Style>
+  <Style Selector="Button.surface /template/ Border#Surface, ToggleButton.key /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 2 4 0 #18000000"/><Setter Property="BorderThickness" Value="0,1,0,0"/></Style>
+  <Style Selector="Button.surface:pressed /template/ Border#Surface, ToggleButton.key:pressed /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/></Style>
+  <Style Selector="theme|SettingsSection"><Setter Property="Margin" Value="0,0,0,8"/></Style>
+  <Style Selector="theme|SettingsSection /template/ Border.card"><Setter Property="BoxShadow" Value="0 2 5 0 #10000000"/></Style>
+  <Style Selector="RadioButton.segment"><Setter Property="Padding" Value="10,7"/></Style>
+  <Style Selector="Border.card"><Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/><Setter Property="CornerRadius" Value="10"/><Setter Property="Padding" Value="12"/><Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/><Setter Property="BorderThickness" Value="0,1,0,0"/></Style>
+  <Style Selector="ScrollViewer"><Setter Property="VerticalScrollBarVisibility" Value="Visible"/></Style>
+  <Style Selector="Window.resizing Button.surface /template/ Border#Surface, Window.resizing ToggleButton.key /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/></Style>
+  <Style Selector="RadioButton.segment"><Setter Property="Margin" Value="0,0,4,0"/><Setter Property="Template"><ControlTemplate><Border Name="Segment" CornerRadius="8" Padding="10,7" Background="{DynamicResource ControlBackgroundBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1"><ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border></ControlTemplate></Setter></Style>
+  <Style Selector="RadioButton.segment:checked /template/ Border#Segment"><Setter Property="Background" Value="{DynamicResource ControlPressedBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}"/></Style>
+  <Style Selector="RadioButton.segment:pointerover /template/ Border#Segment"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
+  <Style Selector="RadioButton.segment:focus-visible /template/ Border#Segment"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></Style>
+</Styles>

@@ -34,9 +34,7 @@ namespace EliteSIP.App.Shell;
 internal sealed class Tray : IDisposable
 {
     /// <summary>Корона — тот же путь, что у Windows-значка.</summary>
-    private const string Crown =
-        "M1.6 16.2V3.4c0-.5.6-.75.95-.4l3.7 3.6L9.3 1.5c.32-.5 1.06-.5 1.38 0l3.07 5.1 "
-        + "3.7-3.6c.36-.35.95-.1.95.4v12.8z";
+
 
     private readonly PanelViewModel _model;
     private readonly TrayActions _actions;
@@ -181,34 +179,5 @@ internal sealed class Tray : IDisposable
     /// цвет у StatusNotifierHost нечем. На светлой панели белую корону
     /// выручает точка состояния — она цветная на любой.
     /// </remarks>
-    private static WindowIcon Draw(IBrush dot)
-    {
-        const int size = 32;
-        const double crownWidth = size * 15.0 / 18.0;
-        const double crownHeight = size * 11.0 / 18.0;
-        const double dotDiameter = size * 5.0 / 18.0;
-
-        var crown = Geometry.Parse(Crown);
-        var bounds = crown.Bounds;
-        var scale = Math.Min(crownWidth / bounds.Width, crownHeight / bounds.Height);
-
-        using RenderTargetBitmap bitmap = new(new PixelSize(size, size), new Vector(96, 96));
-        using (var context = bitmap.CreateDrawingContext())
-        {
-            using (context.PushTransform(
-                       Matrix.CreateTranslation(-bounds.X, -bounds.Y)
-                       * Matrix.CreateScale(scale, scale)
-                       * Matrix.CreateTranslation((size - (bounds.Width * scale)) / 2, 0)))
-            {
-                context.DrawGeometry(Brushes.White, null, crown);
-            }
-
-            context.DrawEllipse(dot, null, new Point(size / 2.0, size - (dotDiameter / 2)), dotDiameter / 2, dotDiameter / 2);
-        }
-
-        using MemoryStream png = new();
-        bitmap.Save(png, PngBitmapEncoderOptions.Default);
-        png.Position = 0;
-        return new WindowIcon(png);
-    }
+    private static WindowIcon Draw(IBrush status) => Theme.BrandMark.TrayIcon(status);
 }

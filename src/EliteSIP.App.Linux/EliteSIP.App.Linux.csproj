@@ -34,6 +34,7 @@
       стандартный рингтон — тот же WAV, смайлики — тот же emoji.pak.
     -->
     <EmbeddedResource Include="..\..\core\src\EliteSIP.App\Theme\Icons.xaml" LogicalName="EliteSIP.App.Theme.Icons.xaml" />
+    <EmbeddedResource Include="..\..\core\src\EliteSIP.App\Theme\Icons.Settings.xaml" LogicalName="EliteSIP.App.Theme.Icons.Settings.xaml" />
     <Content Include="..\..\core\src\EliteSIP.App\Assets\ringtone.wav" Link="ringtone.wav" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\core\src\EliteSIP.App\Assets\emoji.pak" Link="emoji.pak" CopyToOutputDirectory="PreserveNewest" />
     <AvaloniaResource Include="..\..\core\src\EliteSIP.App\Assets\AppIcon\icon_256x256.png" Link="Assets/elitesip.png" />
