@@ -28,11 +28,21 @@ public sealed partial class App
     private CallHistoryWindow? _historyWindow;
     private AdministrationWindow? _administrationWindow;
 
+    private static void RestoreAndActivate(Window window)
+    {
+        if (window.WindowState == WindowState.Minimized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        window.Activate();
+    }
+
     private void ShowSettings()
     {
         if (_settingsWindow is { IsVisible: true })
         {
-            _settingsWindow.Activate();
+            RestoreAndActivate(_settingsWindow);
             return;
         }
 
@@ -102,7 +112,7 @@ public sealed partial class App
     {
         if (_administrationWindow is { IsVisible: true })
         {
-            _administrationWindow.Activate();
+            RestoreAndActivate(_administrationWindow);
             return;
         }
 
@@ -192,7 +202,7 @@ public sealed partial class App
     {
         if (_historyWindow is { IsVisible: true })
         {
-            _historyWindow.Activate();
+            RestoreAndActivate(_historyWindow);
             return;
         }
 

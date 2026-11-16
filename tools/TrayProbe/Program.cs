@@ -68,6 +68,7 @@ internal static partial class Program
  }
  [STAThread] static void Main()
  {
+  if(Environment.GetEnvironmentVariable("ELITESIP_TEST_REOPEN")=="1") { ReopenTest();return; }
   if(Environment.GetEnvironmentVariable("ELITESIP_TEST_HISTORY")=="1") { HistoryTest();return; }
   if(SniTest) { SniTransportOnly().GetAwaiter().GetResult();return; }
   Console.WriteLine("Snapshots: "+Output);
