@@ -28,4 +28,5 @@
   <data name="PanelWaylandNotice" xml:space="preserve">
     <value>Wayland session is not supported: answer protection is weaker. Sign in to an X11 session</value>
   </data>
+<data name="SettingsStartup" xml:space="preserve"><value>Start at sign-in</value></data>
 </root>

@@ -29,7 +29,7 @@
         WindowStartupLocation="Manual">
 
   <Border CornerRadius="12" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
-    <StackPanel Margin="8,6,8,8">
+    <StackPanel Margin="12,8,12,12">
       <!--
           Шапка — ручка переноса: за неё карточку можно отодвинуть, не принимая
           и не отклоняя вызов. Кнопки приёма ниже переноса не начинают.
@@ -63,18 +63,18 @@
           Имя и номер — щелчком копируют номер. Только видимый: номер под
           маской не копируется (IncomingCallSubject.CopyableNumber).
       -->
-      <StackPanel x:Name="NumberBlock"
-                  Margin="0,4,0,0"
+<Border Background="{DynamicResource CallFieldBrush}" CornerRadius="10" BoxShadow="0 3 9 0 #29000000" Padding="12,16" MinHeight="116" Margin="0,8,0,0">      <StackPanel x:Name="NumberBlock"
+                  Margin="0"
                   HorizontalAlignment="Stretch"
                   Background="Transparent"
                   Classes.copyable="{Binding CanCopyNumber}"
                   ToolTip.Tip="{res:Loc IncomingCopyNumber}"
                   ToolTip.IsEnabled="{Binding CanCopyNumber}">
-        <TextBlock theme:Emoji.Text="{Binding Headline}" TextWrapping="Wrap" MaxWidth="328"
+        <TextBlock theme:Emoji.Text="{Binding Headline}" TextWrapping="Wrap" MaxWidth="312" MaxHeight="60" LineHeight="30"
                    HorizontalAlignment="Center"
                    TextAlignment="Center"
                    TextTrimming="CharacterEllipsis"
-                   FontSize="23"
+                   FontSize="25"
                    FontWeight="SemiBold" />
         <TextBlock Text="{Binding SecondaryNumber}"
                    HorizontalAlignment="Center"
@@ -84,7 +84,7 @@
                    IsVisible="{Binding SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       </StackPanel>
 
-      <StackPanel Margin="0,8,0,0">
+</Border>      <StackPanel Margin="0,8,0,0">
         <TextBlock Text="{res:Loc IncomingDealPrompt}"
                    Margin="0,0,0,6"
                    FontSize="15"

@@ -1,101 +1,82 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Threading;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.VisualTree;
 
 namespace EliteSIP.App.Theme;
 
-/// <summary>
-/// Состояние окна — кнопкам рамки, которую рисует Avalonia: развёрнуто ли
-/// окно и активно ли оно.
-/// </summary>
-///
-/// <remarks>
-/// <para>
-/// Кнопки рамки (Theme/Controls.axaml, «Рамка окна») сделаны под тему окон
-/// Cinnamon, и двух вещей им не хватает: значок «восстановить» у развёрнутого
-/// окна и серый «закрыть» у неактивного — так их рисует Muffin. Сама Avalonia
-/// развёрнутость показывает подменой контура внутри своей кнопки, без класса,
-/// а активность окна кнопкам не сообщает вовсе.
-/// </para>
-/// <para>
-/// Кнопки живут не в окне, а рядом с ним — в слое рамки над окном (корень
-/// дерева — <c>TopLevelHost</c>), поэтому <c>$parent[Window]</c> до окна из
-/// разметки не дотягивается, и классы ставятся отсюда.
-/// </para>
-/// </remarks>
+/// <summary>Product chrome; move, resize and maximize are delegated to the Linux window manager.</summary>
 internal static class DrawnCaption
 {
     internal const string Restore = "restore";
-
     internal const string Inactive = "inactive";
-
-    /// <summary>Подписывается на все окна приложения. Зовётся один раз при запуске.</summary>
     internal static void Register()
     {
+        Window.WindowOpenedEvent.AddClassHandler<Window>((window, _) => Attach(window));
         Window.WindowStateProperty.Changed.AddClassHandler<Window>((window, _) => Update(window));
         WindowBase.IsActiveProperty.Changed.AddClassHandler<Window>((window, _) => Update(window));
-
-        // Рамка собирается при показе окна, а не при создании: до него
-        // кнопок ещё нет.
-        Window.WindowOpenedEvent.AddClassHandler<Window>(
-            (window, _) => Dispatcher.UIThread.Post(
-                () =>
-                {
-                    Update(window);
-                    TintFrame(window);
-                },
-                DispatcherPriority.Loaded));
     }
-
-    /// <summary>
-    /// Кромка рамки — кистью разделителя, а не <c>ThemeBorderMidBrush</c>.
-    /// </summary>
-    ///
-    /// <remarks>
-    /// Шаблон рамки SimpleTheme красит кромку <c>ThemeBorderMidBrush</c> —
-    /// кистью рамок полей ввода, на чёрном окне тёмной темы она светло-серая
-    /// и смотрится белой обводкой. Значение задано в самом шаблоне, а оно у
-    /// Avalonia сильнее стиля, поэтому кисть ставится привязкой отсюда; она
-    /// динамическая и перекрашивается вместе с темой.
-    /// </remarks>
-    private static void TintFrame(Window window)
+    internal static void Attach(Window window)
     {
-        foreach (var border in Root(window).GetVisualDescendants()
-                     .OfType<Border>()
-                     .Where(border => border.Name is "PART_WindowBorder"))
+        if (!Program.DrawsOwnFrame || window.GetType().Assembly != typeof(App).Assembly || window is Incoming.IncomingCallWindow || window.WindowDecorations == WindowDecorations.None || window.Content is not Control content) { return; }
+        window.WindowDecorations = WindowDecorations.None;
+        window.Content = null;
+        var layout = new Grid { RowDefinitions = new RowDefinitions("32,*") };
+        var caption = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), Background = Brushes.Transparent };
+        var heading = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 7, Margin = new Thickness(9,0), VerticalAlignment = VerticalAlignment.Center };
+        var crown = new BrandMark { Width = 15, Height = 15 };
+        crown.Bind(BrandMark.ForegroundProperty, window.GetResourceObservable("TextPrimaryBrush"));
+        var title = new TextBlock { FontSize = 12, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+        title.Bind(TextBlock.TextProperty, window.GetObservable(Window.TitleProperty));
+        title.Bind(TextBlock.ForegroundProperty, window.GetResourceObservable("TextSecondaryBrush"));
+        heading.Children.Add(crown); heading.Children.Add(title); caption.Children.Add(heading);
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
+        Grid.SetColumn(buttons,1); caption.Children.Add(buttons);
+        Button Add(string glyph, string name, Action action)
         {
-            border.Bind(Border.BorderBrushProperty, border.GetResourceObservable("SeparatorBrush"));
+            var button = new Button { Name = name, Width = 38, Height = 32, Padding = new Thickness(0), Content = new TextBlock { Text = glyph, FontSize = 14, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center } };
+            button.Classes.Add("caption");
+            var label = Resources.Strings.Get(name == "PART_CloseButton" ? "WindowClose" : name == "PART_MinimizeButton" ? "WindowMinimize" : "WindowMaximize");
+            Avalonia.Automation.AutomationProperties.SetName(button, label);
+            ToolTip.SetTip(button, label);
+            button.Click += (_,_) => action(); buttons.Children.Add(button); return button;
         }
-    }
-
-    /// <summary>Классы кнопкам рамки этого окна по его нынешнему состоянию.</summary>
-    internal static void Update(Window window)
-    {
-        foreach (var button in Buttons(window))
+        Add("−", "PART_MinimizeButton", () => window.WindowState = WindowState.Minimized).IsVisible = window.CanResize;
+        void Toggle() { if (window.CanResize) { window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; } }
+        var maximize = Add("□", "PART_MaximizeButton", Toggle); maximize.IsVisible = window.CanResize;
+        Add("×", "PART_CloseButton", window.Close).Classes.Add("close");
+        caption.PointerPressed += (_,e) =>
         {
-            button.Classes.Set(Restore, window.WindowState is WindowState.Maximized);
-            button.Classes.Set(Inactive, !window.IsActive);
-        }
-    }
-
-    /// <summary>Кнопки «свернуть», «развернуть» и «закрыть» рамки окна.</summary>
-    internal static IEnumerable<Button> Buttons(Window window)
-    {
-        return Root(window).GetVisualDescendants()
-            .OfType<Button>()
-            .Where(button => button.Name is "PART_MinimizeButton" or "PART_MaximizeButton" or "PART_CloseButton");
-    }
-
-    /// <summary>Корень слоя рамки над окном — <c>TopLevelHost</c>.</summary>
-    private static Visual Root(Window window)
-    {
-        Visual root = window;
-        while (root.GetVisualParent() is { } parent)
+            if (e.Source is Visual source && (source is Button || source.GetVisualAncestors().OfType<Button>().Any())) { return; }
+            if (!e.GetCurrentPoint(window).Properties.IsLeftButtonPressed) { return; }
+            if (e.ClickCount == 2) { Toggle(); } else { window.BeginMoveDrag(e); }
+            e.Handled = true;
+        };
+        layout.Children.Add(caption); Grid.SetRow(content,1); layout.Children.Add(content);
+        var edge = new Border { BorderThickness = new Thickness(1), Child = layout };
+        edge.Bind(Border.BorderBrushProperty,window.GetResourceObservable("ControlBorderBrush"));
+        edge.Bind(Border.BackgroundProperty,window.GetResourceObservable("WindowBackgroundBrush"));
+        window.Content = edge;
+        // Borderless windows need explicit resize hit testing; the WM owns the drag.
+        window.AddHandler(InputElement.PointerPressedEvent, (_,e) =>
         {
-            root = parent;
-        }
-
-        return root;
+            if (!window.CanResize || window.WindowState != WindowState.Normal || !e.GetCurrentPoint(window).Properties.IsLeftButtonPressed) { return; }
+            var p = e.GetPosition(window); const int grip=5;
+            var left=p.X<grip;var right=p.X>window.Bounds.Width-grip;var top=p.Y<grip;var bottom=p.Y>window.Bounds.Height-grip;
+            WindowEdge? side = (left,right,top,bottom) switch
+            {
+                (true,_,true,_) => WindowEdge.NorthWest, (true,_,_,true) => WindowEdge.SouthWest,
+                (_,true,true,_) => WindowEdge.NorthEast, (_,true,_,true) => WindowEdge.SouthEast,
+                (true,_,_,_) => WindowEdge.West, (_,true,_,_) => WindowEdge.East,
+                (_,_,true,_) => WindowEdge.North, (_,_,_,true) => WindowEdge.South, _ => null,
+            };
+            if(side is {} value) { window.BeginResizeDrag(value,e); e.Handled=true; }
+        }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
     }
+    internal static void Update(Window window) { foreach(var button in Buttons(window)) { button.Classes.Set(Restore,window.WindowState==WindowState.Maximized);button.Classes.Set(Inactive,!window.IsActive);if (button.Name == "PART_MaximizeButton" && button.Content is TextBlock glyph) { glyph.Text = window.WindowState == WindowState.Maximized ? "❐" : "□"; } } }
+    internal static IEnumerable<Button> Buttons(Window window) => window.GetVisualDescendants().OfType<Button>().Where(button=>button.Name is "PART_MinimizeButton" or "PART_MaximizeButton" or "PART_CloseButton");
 }

@@ -30,3 +30,11 @@ ClientEventLog, WorkFormatSync, MachineRecovery, закрепление форм
 PNG бренда и Lucide-контуры. Реализация окон, фона и отрисовки — собственная
 Avalonia/Skia для Linux. Лицензия Lucide сохранена в packaging/debian/copyright.
 Результат: [этап 5](../docs/migration/2026-11-16-ui-port.md).
+
+## 2026-11-16 — новая композиция и иконки
+
+Однократно перенесены разметка FirstRun, Settings и Administration,
+геометрия иконок (побайтовые Icons.xaml и Icons.Settings.xaml) и палитры
+из Windows-донора 13bba4436a035f2e62adc79945e2aa0d4c7a1f8e.
+Адаптеры Avalonia, фирменная рамка и изменения Linux независимы;
+подробности в docs/migration/2026-11-16-design-parity.md.

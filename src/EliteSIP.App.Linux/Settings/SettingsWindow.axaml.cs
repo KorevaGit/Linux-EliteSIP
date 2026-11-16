@@ -197,7 +197,17 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        var chosen = Enum.Parse<LanguageSetting>(name);
+        ConfirmLanguage(Enum.Parse<LanguageSetting>(name));
+    }
+
+    private void OnLanguageSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded && Model is not null && sender is ComboBox { SelectedValue: LanguageSetting chosen }) { ConfirmLanguage(chosen); }
+    }
+
+    private void ConfirmLanguage(LanguageSetting chosen)
+    {
+        if (Model is null) { return; }
         if (chosen == Model.Settings.Appearance.Language)
         {
             return;
@@ -217,6 +227,20 @@ public partial class SettingsWindow : Window
 
         Model.Settings.Appearance.Language = chosen;
         RestartRequested?.Invoke();
+    }
+
+    internal Func<bool>? UnlockWorkplaceRequested { get; init; }
+    private void OnUnlockWorkplaceClick(object? sender, RoutedEventArgs e)
+    { if (UnlockWorkplaceRequested?.Invoke() is true) { Model?.RefreshWorkplace(); } }
+
+    private void OnTestMicrophoneClick(object? sender, RoutedEventArgs e) => Model?.RunSelfTest.Execute(null);
+    private void OnTestOutputClick(object? sender, RoutedEventArgs e)
+    {
+        if (Model is not null) { _sounds?.PlayKeyTone('5', Model.Settings.Audio.OutputDeviceId); }
+    }
+    private async void OnCopyMachineClick(object? sender, RoutedEventArgs e)
+    {
+        if (Model is not null && Clipboard is { } clipboard) { await clipboard.SetTextAsync(Model.MachineID); }
     }
 
     private void OnAdministrationClick(object? sender, RoutedEventArgs e) => AdministrationRequested?.Invoke();

@@ -279,7 +279,7 @@
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{StaticResource ControlCornerRadius}">
+                CornerRadius="{TemplateBinding CornerRadius}">
           <ContentPresenter Name="PART_ContentPresenter"
                             Content="{TemplateBinding Content}"
                             Foreground="{TemplateBinding Foreground}"

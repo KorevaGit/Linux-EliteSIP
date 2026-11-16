@@ -20,10 +20,11 @@ internal sealed class UpdateOffer : Window
             TextWrapping=Avalonia.Media.TextWrapping.Wrap, LineHeight=21 };
         body.Children.Add(new ScrollViewer { Content=text, MaxHeight=340, HorizontalScrollBarVisibility=Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled });
         var buttons=new StackPanel { Orientation=Orientation.Horizontal, Spacing=8, HorizontalAlignment=HorizontalAlignment.Right };
-        var later=new Button { Content=Strings.Get("UpdateOfferLater"), Padding=new Thickness(12,8) };
+        var later=new Button { Content=Strings.Get("UpdateLater"), Padding=new Thickness(12,8) };
         var install=new Button { IsDefault=true, Content=Strings.Get("UpdateOfferInstall"), Padding=new Thickness(12,8) };
         KeyDown+=(_,eventArgs)=> { if(eventArgs.Key==Avalonia.Input.Key.Escape) { Close(); } };
         later.Click+=(_,_)=>Close(); install.Click+=(_,_)=> { Accepted=true; Close(); };
+        later.Classes.Add("settings");install.Classes.Add("settings");
         buttons.Children.Add(later);buttons.Children.Add(install);body.Children.Add(buttons); Content=body;
     }
     internal bool Accepted { get; private set; }

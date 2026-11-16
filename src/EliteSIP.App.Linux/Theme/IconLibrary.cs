@@ -62,7 +62,7 @@ internal static class IconLibrary
             }
 
             List<IconStroke> strokes = [];
-            Walk(canvas, Matrix.Identity, strokes);
+            Walk(canvas, Matrix.CreateScale(CanvasSize / Number(canvas, "Width", CanvasSize), CanvasSize / Number(canvas, "Height", CanvasSize)), strokes);
             shapes[key] = new IconShape(strokes);
         }
 
@@ -75,6 +75,9 @@ internal static class IconLibrary
         {
             switch (child.Name.LocalName)
             {
+                case "Ellipse":
+                case "Rectangle":
+                case "Line":
                 case "Path":
                     strokes.Add(Stroke(child, outer));
                     break;
@@ -124,10 +127,16 @@ internal static class IconLibrary
     }
 
     private static IconStroke Stroke(XElement path, Matrix transform) => new(
-        Geometry.Parse(path.Attribute("Data")!.Value),
+        path.Name.LocalName switch
+        {
+            "Ellipse" => new EllipseGeometry(new Rect(Number(path,"Canvas.Left",0),Number(path,"Canvas.Top",0),Number(path,"Width",0),Number(path,"Height",0))),
+            "Rectangle" => new RectangleGeometry(new Rect(Number(path,"Canvas.Left",0),Number(path,"Canvas.Top",0),Number(path,"Width",0),Number(path,"Height",0)),Number(path,"RadiusX",0),Number(path,"RadiusY",0)),
+            "Line" => new LineGeometry(new Point(Number(path,"X1",0),Number(path,"Y1",0)),new Point(Number(path,"X2",0),Number(path,"Y2",0))),
+            _ => Geometry.Parse(path.Attribute("Data")!.Value),
+        },
         transform,
         IsStroked: path.Attribute("Stroke") is not null,
-        IsFilled: path.Attribute("Fill") is not null,
+        IsFilled: path.Attribute("Fill") is { Value: not "Transparent" },
         Thickness: Number(path, "StrokeThickness", 1),
         Cap: path.Attribute("StrokeStartLineCap")?.Value == "Round" ? PenLineCap.Round : PenLineCap.Flat,
         Join: path.Attribute("StrokeLineJoin")?.Value == "Round" ? PenLineJoin.Round : PenLineJoin.Miter);

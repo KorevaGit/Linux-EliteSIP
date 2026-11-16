@@ -115,15 +115,15 @@ public sealed class LayoutTests
     }
 
     [AvaloniaFact]
-    public void Растянутое_окно_с_клавишами_растит_управление_до_102_остальное_клавишам()
+    public void Растянутое_окно_с_клавишами_растит_управление_до_112_остальное_клавишам()
     {
         var natural = MeasurePanel(double.PositiveInfinity, withMacros: true);
         var tall = MeasurePanel(1000, withMacros: true);
 
-        Assert.Equal(68, natural.Controls, 0.5);
-        Assert.Equal(102, tall.Controls, 0.5);
+        Assert.Equal(96, natural.Controls, 0.5);
+        Assert.Equal(112, tall.Controls, 0.5);
         Assert.True(tall.Key > natural.Key + 20, $"клавиша {natural.Key:0} → {tall.Key:0}");
-        Assert.True(tall.Font > natural.Font + 4, $"кегль {natural.Font:0.#} → {tall.Font:0.#}");
+        Assert.Equal(natural.Font, tall.Font, 0.5); // Windows: larger keys retain the 18pt label.
         Assert.Equal(natural.Bottom, tall.Bottom, 0.5);
     }
 
@@ -132,7 +132,7 @@ public sealed class LayoutTests
     {
         var natural = Layout(Panel(macroHeight: 44, withMacros: true), 300, double.PositiveInfinity).DesiredSize.Height;
 
-        Assert.Equal(68, MeasurePanel(natural, withMacros: true).Controls, 0.5);
+        Assert.Equal(96, MeasurePanel(natural, withMacros: true).Controls, 0.5);
     }
 
     [AvaloniaFact]
@@ -158,7 +158,7 @@ public sealed class LayoutTests
         frame.InvalidateMeasure();
         Dispatcher.UIThread.RunJobs();
 
-        Assert.True(grown > 20, $"кегль не вырос: {grown:0.#}");
+        Assert.InRange(grown, 1, 18); // Labels shrink to fit; resizing no longer enlarges them.
         Assert.Equal(grown, text.FontSize, 0.5);
     }
 

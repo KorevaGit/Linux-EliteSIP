@@ -7,14 +7,14 @@
     SettingsButtonStyle → Button.settings, ThemeTileStyle → RadioButton.tile,
     SegmentStyle → RadioButton.segment.
 -->
-<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:res="using:EliteSIP.App.Resources">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:res="using:EliteSIP.App.Resources" xmlns:settings="using:EliteSIP.App.Settings">
 
   <Style Selector="theme|SettingsSection">
     <Setter Property="Margin" Value="0,0,0,32"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Classes="card" Padding="12" CornerRadius="10" Background="{DynamicResource SurfaceBrush}"><StackPanel>
-          <ContentPresenter Content="{TemplateBinding Header}" Margin="0,0,0,12" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+        <Border Classes="card" Padding="13,0,13,9" CornerRadius="11" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource ControlBorderBrush}" Background="{DynamicResource SurfaceBrush}" BoxShadow="0 3 7 0 #16000000"><StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="0,11,0,8" IsVisible="{TemplateBinding Header, Converter={x:Static theme:Converters.Present}}"><theme:Icon Glyph="{TemplateBinding Tag}" Size="14" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,6,0" IsVisible="{TemplateBinding Tag, Converter={x:Static theme:Converters.Present}}"/><ContentPresenter Content="{TemplateBinding Header}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
           <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}"/>
         </StackPanel>
       </Border></ControlTemplate>
@@ -289,4 +289,21 @@
     <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}"/>
   </Style>
 
+<Style Selector="Window.settings-window theme|SettingsRow"><Setter Property="Margin" Value="0"/><Setter Property="Template"><ControlTemplate><Grid MinHeight="47" ColumnDefinitions="122,*"><ContentPresenter Content="{TemplateBinding Header}" VerticalAlignment="Center" Margin="0,0,8,0"/><ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Grid></ControlTemplate></Setter></Style>
+<Style Selector="Window.settings-window theme|SettingsNote"><Setter Property="Margin" Value="0,0,0,8"/></Style>
+<Style Selector="Window.settings-window theme|SettingsRow.wide"><Setter Property="Template"><ControlTemplate><ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Stretch"/></ControlTemplate></Setter></Style>
+
+<Style Selector="theme|SettingsRow[Tag=Device] /template/ Grid"><Setter Property="MinHeight" Value="33"/></Style>
+<Style Selector="theme|SettingsRow[Tag=Compact] /template/ Grid"><Setter Property="MinHeight" Value="32"/></Style>
+<Style Selector="Window.admin-window theme|SettingsRow"><Setter Property="Margin" Value="0"/><Setter Property="Template"><ControlTemplate><Grid MinHeight="40" ColumnDefinitions="132,*"><ContentPresenter Content="{TemplateBinding Header}" Margin="0,0,8,0" VerticalAlignment="Center"/><ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Grid></ControlTemplate></Setter></Style>
+<Style Selector="Window.admin-window TextBox"><Setter Property="MinHeight" Value="33"/><Setter Property="Padding" Value="7,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Background" Value="{DynamicResource FieldBrush}"/></Style>
+<Style Selector="Button.small"><Setter Property="Width" Value="26"/><Setter Property="Height" Value="30"/><Setter Property="Padding" Value="3"/></Style>
+<Style Selector="Border.tabs"><Setter Property="Background" Value="{DynamicResource SeparatorBrush}"/><Setter Property="CornerRadius" Value="9"/><Setter Property="Padding" Value="3"/><Setter Property="Margin" Value="0,0,0,10"/><Setter Property="HorizontalAlignment" Value="Left"/></Style>
+
+<Style Selector="CheckBox.switch"><Setter Property="Margin" Value="0"/><Setter Property="Padding" Value="0"/><Setter Property="HorizontalAlignment" Value="Stretch"/><Setter Property="Template"><ControlTemplate><Grid MinHeight="47" ColumnDefinitions="*,Auto"><ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center"/><Border Grid.Column="1" Name="Track" Width="33" Height="19" CornerRadius="10" Background="{DynamicResource ControlPressedBrush}" VerticalAlignment="Center"><Ellipse Name="Knob" Width="13" Height="13" Fill="#EEEEEE" Margin="3,0,0,0" HorizontalAlignment="Left"/></Border></Grid></ControlTemplate></Setter></Style>
+<Style Selector="CheckBox.switch:checked /template/ Border#Track"><Setter Property="Background" Value="#468D35"/></Style>
+<Style Selector="CheckBox.switch:checked /template/ Ellipse#Knob"><Setter Property="HorizontalAlignment" Value="Right"/><Setter Property="Margin" Value="0,0,3,0"/></Style>
+<Style Selector="Window.settings-window theme|SettingsRow[Tag=Compact]"><Setter Property="Template"><ControlTemplate><Grid MinHeight="32" ColumnDefinitions="49,*"><ContentPresenter Content="{TemplateBinding Header}" Margin="29,0,6,0" VerticalAlignment="Center"/><ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Grid></ControlTemplate></Setter></Style>
+<Style Selector="Window.settings-window theme|SettingsRow[Tag=Restore]"><Setter Property="Template"><ControlTemplate><Grid MinHeight="47" ColumnDefinitions="220,*"><ContentPresenter Content="{TemplateBinding Header}" Margin="0,0,8,0" VerticalAlignment="Center"/><ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Grid></ControlTemplate></Setter></Style>
+<Style Selector="Window.settings-window theme|SettingsRow[Tag=WideLabel]"><Setter Property="Template"><ControlTemplate><Grid MinHeight="47" ColumnDefinitions="160,*"><ContentPresenter Content="{TemplateBinding Header}" Margin="0,0,8,0" VerticalAlignment="Center"/><ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/></Grid></ControlTemplate></Setter></Style>
 </Styles>

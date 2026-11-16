@@ -17,6 +17,7 @@ namespace EliteSIP.App.Theme;
 /// </remarks>
 public static class Converters
 {
+    public static IValueConverter Not { get; } = new NegationConverter();
     /// <summary>Значение равно параметру (по строке — так пишутся члены перечислений в разметке).</summary>
     public static IValueConverter Equal { get; } = new FuncValueConverter<object?, object?, bool>(
         (value, parameter) => value is not null
@@ -59,4 +60,10 @@ internal sealed class EnumToBoolConverter : IValueConverter
         var type = Nullable.GetUnderlyingType(targetType) ?? targetType;
         return type.IsEnum ? Enum.Parse(type, name) : name;
     }
+}
+
+internal sealed class NegationConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is bool flag && !flag;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is bool flag && !flag;
 }

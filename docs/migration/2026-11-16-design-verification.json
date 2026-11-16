@@ -1,0 +1,40 @@
+{
+  "windowsSource": "13bba4436a035f2e62adc79945e2aa0d4c7a1f8e",
+  "iconsSha256": {
+    "core/src/EliteSIP.App/Theme/Icons.xaml": "f9c0bca778207a355ec42305fd77fba64102412da62aab041013e820ebabdd67",
+    "core/src/EliteSIP.App/Theme/Icons.Settings.xaml": "7849aa7ec40a159ef00abbc4fb56bf1a6d4bbf3489f1a4ef5b3f2851cea48e0c"
+  },
+  "tests": {
+    "ui": 80,
+    "core": 121
+  },
+  "native": {
+    "os": "Linux Mint 22.3",
+    "session": "Cinnamon/X11",
+    "settingsClient": [
+      720,
+      460
+    ],
+    "maximizedClient": [
+      1920,
+      1040
+    ],
+    "wizardClient": [
+      560,
+      440
+    ],
+    "windowDecorations": "None",
+    "profile": "synthetic",
+    "sipStarted": false
+  },
+  "snapshots": [
+    "firstrun-user",
+    "firstrun-finale",
+    "parity-settings-Work-False",
+    "parity-settings-Audio-True",
+    "parity-settings-Appearance-True",
+    "parity-settings-Support-True",
+    "parity-admin-Account-True",
+    "parity-panel-connected"
+  ]
+}

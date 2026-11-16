@@ -1,7 +1,7 @@
-<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:history="using:EliteSIP.App.History">
   <Style Selector="Window"><Setter Property="FontSize" Value="13"/><Setter Property="Icon" Value="avares://EliteSIP.App.Linux/Assets/elitesip.png"/></Style>
   <Style Selector="Button, ToggleButton, TextBox, ComboBox"><Setter Property="CornerRadius" Value="8"/></Style>
-  <Style Selector="Button.surface /template/ Border#Surface, ToggleButton.key /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 2 4 0 #18000000"/><Setter Property="BorderThickness" Value="0,1,0,0"/></Style>
+  <Style Selector="Button.surface /template/ Border#Surface, ToggleButton.key /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 3 9 0 #29000000"/><Setter Property="BorderThickness" Value="0,1,0,0"/></Style>
   <Style Selector="Button.surface:pressed /template/ Border#Surface, ToggleButton.key:pressed /template/ Border#Surface"><Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/></Style>
   <Style Selector="theme|SettingsSection"><Setter Property="Margin" Value="0,0,0,8"/></Style>
   <Style Selector="theme|SettingsSection /template/ Border.card"><Setter Property="BoxShadow" Value="0 2 5 0 #10000000"/></Style>
@@ -13,4 +13,40 @@
   <Style Selector="RadioButton.segment:checked /template/ Border#Segment"><Setter Property="Background" Value="{DynamicResource ControlPressedBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}"/></Style>
   <Style Selector="RadioButton.segment:pointerover /template/ Border#Segment"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
   <Style Selector="RadioButton.segment:focus-visible /template/ Border#Segment"><Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></Style>
+
+  <Style Selector="Border.wizard-field"><Setter Property="Background" Value="{DynamicResource FieldBrush}"/><Setter Property="CornerRadius" Value="7"/><Setter Property="Height" Value="31"/><Setter Property="Padding" Value="8,0"/><Setter Property="Margin" Value="0,3,0,0"/></Style>
+  <Style Selector="TextBlock.wizard-label"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/></Style>
+  <Style Selector="TextBlock.wizard-step"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+  <Style Selector="Border.card"><Setter Property="Padding" Value="14"/><Setter Property="CornerRadius" Value="12"/><Setter Property="BoxShadow" Value="0 3 7 0 #16000000"/></Style>
+  <Style Selector="Button.surface"><Setter Property="BorderThickness" Value="0,1,0,0"/><Setter Property="CornerRadius" Value="10"/></Style>
+  <Style Selector="ToggleButton.key"><Setter Property="BorderThickness" Value="0,1,0,0"/><Setter Property="CornerRadius" Value="10"/></Style>
+  <Style Selector="Button.macro"><Setter Property="Background" Value="{DynamicResource MacroBrush}"/></Style>
+  <Style Selector="Button.macro:pointerover /template/ Border#Surface"><Setter Property="Background" Value="{DynamicResource MacroHoverBrush}"/></Style>
+  <Style Selector="Button.pill"><Setter Property="Background" Value="{DynamicResource ProfileBrush}"/></Style>
+  <Style Selector="Button.pill:pointerover /template/ Border#Surface"><Setter Property="Background" Value="{DynamicResource ProfileHoverBrush}"/></Style>
+  <Style Selector="Button.settings"><Setter Property="BorderThickness" Value="0,1,0,0"/><Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/><Setter Property="CornerRadius" Value="8"/></Style>
+  <Style Selector="Button.settings /template/ Border"><Setter Property="BoxShadow" Value="0 2 4 0 #22000000"/></Style>
+  <Style Selector="Button.settings:pressed /template/ Border"><Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/></Style>
+  <Style Selector="Button.management"><Setter Property="HorizontalAlignment" Value="Stretch"/><Setter Property="HorizontalContentAlignment" Value="Left"/><Setter Property="Padding" Value="9,10"/></Style>
+  <Style Selector="theme|SettingsSection /template/ Border.card"><Setter Property="BoxShadow" Value="0 3 7 0 #16000000"/></Style>
+  <Style Selector="Window.resizing Button.settings /template/ Border, Window.resizing Border.card"><Setter Property="BoxShadow" Value="0 0 0 0 Transparent"/></Style>
+<Style Selector="TextBlock.wizard-step.current"><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+
+<Style Selector="Button.caption"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="CornerRadius" Value="0"/><Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/></Style>
+<Style Selector="Button.caption:pointerover"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
+<Style Selector="Button.caption.close:pointerover"><Setter Property="Background" Value="#B83333"/><Setter Property="Foreground" Value="White"/></Style>
+<Style Selector="ListBox.nav ListBoxItem"><Setter Property="Padding" Value="10"/><Setter Property="Margin" Value="0,0,0,4"/><Setter Property="MinHeight" Value="39"/><Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/><Setter Property="Template"><ControlTemplate><Border Name="NavSurface" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" CornerRadius="10" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource ControlBorderBrush}"><ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/></Border></ControlTemplate></Setter></Style>
+<Style Selector="ListBox.nav ListBoxItem:selected"><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/><Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/></Style>
+<Style Selector="ListBox.nav ListBoxItem:selected /template/ Border#NavSurface"><Setter Property="BoxShadow" Value="0 2 5 0 #17000000"/></Style>
+<Style Selector="ListBox.nav ListBoxItem:pointerover:not(:selected)"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
+
+<Style Selector="ListBox.nav ListBoxItem /template/ Border#NavSurface"><Setter Property="BorderBrush" Value="Transparent"/></Style>
+<Style Selector="ListBox.nav ListBoxItem:selected /template/ Border#NavSurface"><Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/></Style>
+<Style Selector="ListBox.nav ListBoxItem:selected /template/ ContentPresenter, ListBox.nav ListBoxItem:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="Transparent"/></Style>
+<Style Selector="RadioButton.tile"><Setter Property="Margin" Value="0,0,8,0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Template"><ControlTemplate><Border Name="Outline" CornerRadius="10" Padding="5" BorderThickness="1" BorderBrush="Transparent"><StackPanel><Border Name="MiniWindow" Height="76" Background="#EFEFEF" CornerRadius="7" Padding="8"><Grid RowDefinitions="9,5,*,5,12"><Border Name="MiniHeader" Background="White" CornerRadius="4"/><Border Name="MiniCall" Grid.Row="2" Background="White" CornerRadius="5"/><Border Grid.Row="4" Background="#168016" CornerRadius="4"/></Grid></Border><ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" Margin="0,7,0,0"/></StackPanel></Border></ControlTemplate></Setter></Style>
+<Style Selector="RadioButton.tile[Tag=Dark] /template/ Border#MiniWindow"><Setter Property="Background" Value="#191919"/></Style>
+<Style Selector="RadioButton.tile[Tag=Dark] /template/ Border#MiniHeader, RadioButton.tile[Tag=Dark] /template/ Border#MiniCall"><Setter Property="Background" Value="#363636"/></Style>
+<Style Selector="RadioButton.tile:checked /template/ Border#Outline"><Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}"/></Style>
+<Style Selector="RadioButton.tile:pointerover /template/ Border#Outline"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
+<Style Selector="history|OutcomeBadge.all"><Setter Property="IsVisible" Value="False"/></Style>
 </Styles>

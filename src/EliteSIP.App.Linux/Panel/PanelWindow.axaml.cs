@@ -259,7 +259,7 @@ public partial class PanelWindow : Window
         var grid = Middle.RowDefinitions[4];
 
         keys.Height = macros ? new GridLength(100, GridUnitType.Star) : new GridLength(1, GridUnitType.Star);
-        keys.MaxHeight = macros ? 102 : double.PositiveInfinity;
+        keys.MaxHeight = macros ? 112 : double.PositiveInfinity;
         grid.Height = macros ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         grid.MinHeight = macros ? Model.MacroGridMinHeight : 0;
 
@@ -295,7 +295,7 @@ public partial class PanelWindow : Window
     private double MeasureContent(double width)
     {
         Frame.Measure(new Size(width, double.PositiveInfinity));
-        return Frame.DesiredSize.Height;
+        return Frame.DesiredSize.Height + (Content == Frame ? 0 : 34);
     }
 
     private int MacroRows()

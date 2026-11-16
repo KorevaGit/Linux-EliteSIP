@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:history="using:EliteSIP.App.History" xmlns:historycore="using:EliteSIP.App.History" xmlns:res="using:EliteSIP.App.Resources" xmlns:calls="using:EliteSIP.CallHistory" x:Class="EliteSIP.App.History.CallHistoryWindow" x:DataType="historycore:CallHistoryViewModel" Width="720" Height="480" MinWidth="600" MinHeight="380" WindowStartupLocation="CenterScreen" UseLayoutRounding="True">
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:history="using:EliteSIP.App.History" xmlns:historycore="using:EliteSIP.App.History" xmlns:res="using:EliteSIP.App.Resources" xmlns:calls="using:EliteSIP.CallHistory" x:Class="EliteSIP.App.History.CallHistoryWindow" x:DataType="historycore:CallHistoryViewModel" Width="720" Height="480" MinWidth="640" MinHeight="380" WindowStartupLocation="CenterScreen" UseLayoutRounding="True">
 
   <!--
       Отдельным окном, а не вкладкой панели: панель шириной 270 точек — это
@@ -13,7 +13,7 @@
       на «кому я звонил» одним звонком.
   -->
 
-  <Grid Margin="12">
+  <Grid Margin="8">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="8"/>
@@ -22,7 +22,7 @@
 
     <!-- Фильтры и снимок одним рядом по центру. -->
     <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto">
-      <ItemsControl ItemsSource="{Binding Filters}" HorizontalAlignment="Left">
+      <Border HorizontalAlignment="Left" Background="{DynamicResource MacroBrush}" CornerRadius="10"><ItemsControl ItemsSource="{Binding Filters}" HorizontalAlignment="Left">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <StackPanel Orientation="Horizontal"/>
@@ -43,13 +43,13 @@
                     кнопка обязана показывать ровно ту фигуру, которую человек
                     будет искать глазами в списке.
                 -->
-                <history:OutcomeBadge Size="14" VerticalAlignment="Center" IsIncoming="{Binding IsIncoming}" IsCompleted="{Binding IsCompleted}" Outcome="{Binding Outcome}"/>
+                <history:OutcomeBadge Classes.all="{Binding Filter, Converter={x:Static theme:Converters.Equal}, ConverterParameter=All}" Size="14" VerticalAlignment="Center" IsIncoming="{Binding IsIncoming}" IsCompleted="{Binding IsCompleted}" Outcome="{Binding Outcome}"/>
                 <TextBlock Text="{Binding Title}" Margin="4,0,0,0" VerticalAlignment="Center"/>
               </StackPanel>
             </RadioButton>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
-      </ItemsControl>
+      </ItemsControl></Border>
 
       <!--
           Кнопка дня и календарь под ней. Стоят в том же ряду, что фильтры:

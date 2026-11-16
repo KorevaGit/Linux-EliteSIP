@@ -1,18 +1,14 @@
-<!-- Generated from local tokens.json. -->
+<!-- Generated from local tokens.json and gradients.json. -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF292C30" />
-      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF555A60" />
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#242424" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#686868" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FF6B7075" />
-      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFE8E7E4" />
-      <SolidColorBrush x:Key="SidebarBrush" Color="#FFE0DFDC" />
-      <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF3F2EF" />
-      <LinearGradientBrush x:Key="ControlBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#FFF8F7F4" Offset="0"/><GradientStop Color="#FFE3E2DE" Offset="1"/></LinearGradientBrush>
-      <SolidColorBrush x:Key="ControlHoverBrush" Color="#FFF8F7F4" />
-      <SolidColorBrush x:Key="ControlPressedBrush" Color="#FFD7D6D2" />
+      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#f1f1f1" />
+      <SolidColorBrush x:Key="SidebarBrush" Color="#00000000" />
       <SolidColorBrush x:Key="SeparatorBrush" Color="#26000000" />
-      <SolidColorBrush x:Key="ControlBorderBrush" Color="#35FFFFFF" />
+      <SolidColorBrush x:Key="ControlBorderBrush" Color="#D0FFFFFF" />
       <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="#FF7A7A7A" />
       <SolidColorBrush x:Key="ScrollThumbBrush" Color="#6B000000" />
       <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#8A000000" />
@@ -28,8 +24,6 @@
       <SolidColorBrush x:Key="StatusInCallBrush" Color="#FF0078D4" />
       <SolidColorBrush x:Key="AnswerBrush" Color="#FF0F7B0F" />
       <SolidColorBrush x:Key="DeclineBrush" Color="#FFC42B1C" />
-      <SolidColorBrush x:Key="AnswerFillBrush" Color="#FF0F7B0F" />
-      <SolidColorBrush x:Key="DeclineFillBrush" Color="#FFC42B1C" />
       <SolidColorBrush x:Key="OutcomeCompletedBrush" Color="#9E000000" />
       <SolidColorBrush x:Key="OutcomeAnsweredBrush" Color="#FF0F7B0F" />
       <SolidColorBrush x:Key="OutcomeUnreachableBrush" Color="#FFC4600C" />
@@ -53,17 +47,27 @@
       <SolidColorBrush x:Key="CaptionButtonBackground" Color="#FFE8E7E4" />
       <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#FFE8E7E4" />
       <SolidColorBrush x:Key="CaptionButtonForeground" Color="#FF292C30" />
+      <SolidColorBrush x:Key="FieldBrush" Color="#F9F9F9" />
+      <LinearGradientBrush x:Key="CallFieldBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ffffff" Offset="0"/><GradientStop Color="#e4e4e4" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ffffff" Offset="0"/><GradientStop Color="#e8e8e8" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MacroBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#e8e8e8" Offset="0"/><GradientStop Color="#dfdfdf" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ffffff" Offset="0"/><GradientStop Color="#eeeeee" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlPressedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#d4d4d4" Offset="0"/><GradientStop Color="#dedede" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="SelectedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#c6c6c6" Offset="0"/><GradientStop Color="#b8b8b8" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MutedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#f3cece" Offset="0"/><GradientStop Color="#e8b9b9" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="AnswerFillBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#259B25" Offset="0"/><GradientStop Color="#168616" Offset="0.45"/><GradientStop Color="#0C700C" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="DeclineFillBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#bd4545" Offset="0"/><GradientStop Color="#a43131" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ProfileBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ffffff" Offset="0"/><GradientStop Color="#e9e9e9" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ProfileHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ffffff" Offset="0"/><GradientStop Color="#efefef" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MacroHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ececec" Offset="0"/><GradientStop Color="#e5e5e5" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="SurfaceBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#E9E9E9" Offset="1"/></LinearGradientBrush>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
-      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFF1F1EF" />
-      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFCAD0D5" />
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F2F2" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#BCBCBC" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FFA3ABB4" />
-      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF25282C" />
-      <SolidColorBrush x:Key="SidebarBrush" Color="#FF202327" />
-      <SolidColorBrush x:Key="SurfaceBrush" Color="#FF30343A" />
-      <LinearGradientBrush x:Key="ControlBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#FF41464E" Offset="0"/><GradientStop Color="#FF32363D" Offset="1"/></LinearGradientBrush>
-      <SolidColorBrush x:Key="ControlHoverBrush" Color="#FF444A52" />
-      <SolidColorBrush x:Key="ControlPressedBrush" Color="#FF292D33" />
+      <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#191919" />
+      <SolidColorBrush x:Key="SidebarBrush" Color="#00000000" />
       <SolidColorBrush x:Key="SeparatorBrush" Color="#26FFFFFF" />
       <SolidColorBrush x:Key="ControlBorderBrush" Color="#20FFFFFF" />
       <SolidColorBrush x:Key="ControlBorderHoverBrush" Color="#FF858585" />
@@ -81,8 +85,6 @@
       <SolidColorBrush x:Key="StatusInCallBrush" Color="#FF4CC2FF" />
       <SolidColorBrush x:Key="AnswerBrush" Color="#FF6CCB5F" />
       <SolidColorBrush x:Key="DeclineBrush" Color="#FFFF99A4" />
-      <SolidColorBrush x:Key="AnswerFillBrush" Color="#FF107C10" />
-      <SolidColorBrush x:Key="DeclineFillBrush" Color="#FFC42B1C" />
       <SolidColorBrush x:Key="OutcomeCompletedBrush" Color="#C5FFFFFF" />
       <SolidColorBrush x:Key="OutcomeAnsweredBrush" Color="#FF6CCB5F" />
       <SolidColorBrush x:Key="OutcomeUnreachableBrush" Color="#FFFCA02E" />
@@ -106,6 +108,20 @@
       <SolidColorBrush x:Key="CaptionButtonBackground" Color="#FF25282C" />
       <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#FF25282C" />
       <SolidColorBrush x:Key="CaptionButtonForeground" Color="#FFF1F1EF" />
+      <SolidColorBrush x:Key="FieldBrush" Color="#202020" />
+      <LinearGradientBrush x:Key="CallFieldBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#3c3c3c" Offset="0"/><GradientStop Color="#303030" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#363636" Offset="0"/><GradientStop Color="#2e2e2e" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MacroBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#292929" Offset="0"/><GradientStop Color="#242424" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#3b3b3b" Offset="0"/><GradientStop Color="#323232" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ControlPressedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#222222" Offset="0"/><GradientStop Color="#282828" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="SelectedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#505050" Offset="0"/><GradientStop Color="#424242" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MutedBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#653c3c" Offset="0"/><GradientStop Color="#513131" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="AnswerFillBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#259B25" Offset="0"/><GradientStop Color="#168616" Offset="0.45"/><GradientStop Color="#0C700C" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="DeclineFillBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#bd4545" Offset="0"/><GradientStop Color="#a43131" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ProfileBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#3b3b3b" Offset="0"/><GradientStop Color="#303030" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="ProfileHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#404040" Offset="0"/><GradientStop Color="#353535" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="MacroHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#2f2f2f" Offset="0"/><GradientStop Color="#292929" Offset="1"/></LinearGradientBrush>
+      <LinearGradientBrush x:Key="SurfaceBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#363636" Offset="0"/><GradientStop Color="#2B2B2B" Offset="1"/></LinearGradientBrush>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

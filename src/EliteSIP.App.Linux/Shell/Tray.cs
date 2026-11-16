@@ -68,11 +68,11 @@ internal sealed class Tray : IDisposable
         _icon.ToolTipText = StatusTitle;
         _icon.Menu = BuildMenu();
 
-        var key = DotKey();
+        var key = !_model.IsOfflineByChoice && _model.Registration == RegistrationState.Registered ? "registered" : "offline";
         if (key != _drawnKey)
         {
             _drawnKey = key;
-            _icon.Icon = Draw(Application.Current?.FindResource(key) as IBrush ?? Brushes.Gray);
+            _icon.Icon = Draw(key == "registered" ? Brushes.Lime : Brushes.Red);
         }
     }
 
@@ -148,36 +148,6 @@ internal sealed class Tray : IDisposable
         return item;
     }
 
-    private string DotKey()
-    {
-        if (_model.IsOfflineByChoice)
-        {
-            return "StatusOfflineBrush";
-        }
-
-        if (_model.IsInCall)
-        {
-            return "StatusInCallBrush";
-        }
-
-        return _model.Registration switch
-        {
-            RegistrationState.Registered => "StatusRegisteredBrush",
-            RegistrationState.Registering => "StatusConnectingBrush",
-            RegistrationState.Failed => "StatusFailureBrush",
-            _ => "StatusOfflineBrush",
-        };
-    }
-
-    /// <summary>
-    /// Корона и точка на 32 × 32 — доли те же, что у Windows: корона 15/18
-    /// ширины и 11/18 высоты, точка 5/18.
-    /// </summary>
-    ///
-    /// <remarks>
-    /// Корона белая: панель Cinnamon в Mint по умолчанию тёмная, а узнать её
-    /// цвет у StatusNotifierHost нечем. На светлой панели белую корону
-    /// выручает точка состояния — она цветная на любой.
-    /// </remarks>
+    // The full donor crown is lime online and red offline, including active calls.
     private static WindowIcon Draw(IBrush status) => Theme.BrandMark.TrayIcon(status);
 }

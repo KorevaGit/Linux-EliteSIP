@@ -57,6 +57,10 @@ public sealed class WindowBackgroundTests
             var path=Path.Combine(dir.FullName,"stored.png");Image(path);
             var settings=new AppearanceSettings { BackgroundImagePath=path, Theme=Appearance.Wallpaper, BackgroundTransparency=BackgroundTransparency.Light };
             using var service=new WindowBackgroundService(app,settings,()=>dark);
+            Assert.True(app.TryFindResource("ControlBackgroundBrush", app.ActualThemeVariant, out var raised));
+            var gradient = Assert.IsAssignableFrom<Avalonia.Media.ILinearGradientBrush>(raised);
+            Assert.True(gradient.GradientStops.Count >= 2);
+            Assert.NotEqual(gradient.GradientStops[0].Color, gradient.GradientStops[^1].Color);
             var image=service.Image;Assert.NotNull(image);
             using(var encoded=new MemoryStream())
             {

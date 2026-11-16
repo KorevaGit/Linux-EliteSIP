@@ -1,0 +1,274 @@
+{
+  "Light": {
+    "CallFieldBrush": [
+      [
+        "#ffffff",
+        "0"
+      ],
+      [
+        "#e4e4e4",
+        "1"
+      ]
+    ],
+    "ControlBackgroundBrush": [
+      [
+        "#ffffff",
+        "0"
+      ],
+      [
+        "#e8e8e8",
+        "1"
+      ]
+    ],
+    "MacroBrush": [
+      [
+        "#e8e8e8",
+        "0"
+      ],
+      [
+        "#dfdfdf",
+        "1"
+      ]
+    ],
+    "ControlHoverBrush": [
+      [
+        "#ffffff",
+        "0"
+      ],
+      [
+        "#eeeeee",
+        "1"
+      ]
+    ],
+    "ControlPressedBrush": [
+      [
+        "#d4d4d4",
+        "0"
+      ],
+      [
+        "#dedede",
+        "1"
+      ]
+    ],
+    "SelectedBrush": [
+      [
+        "#c6c6c6",
+        "0"
+      ],
+      [
+        "#b8b8b8",
+        "1"
+      ]
+    ],
+    "MutedBrush": [
+      [
+        "#f3cece",
+        "0"
+      ],
+      [
+        "#e8b9b9",
+        "1"
+      ]
+    ],
+    "AnswerFillBrush": [
+      [
+        "#259B25",
+        "0"
+      ],
+      [
+        "#168616",
+        "0.45"
+      ],
+      [
+        "#0C700C",
+        "1"
+      ]
+    ],
+    "DeclineFillBrush": [
+      [
+        "#bd4545",
+        "0"
+      ],
+      [
+        "#a43131",
+        "1"
+      ]
+    ],
+    "ProfileBrush": [
+      [
+        "#ffffff",
+        "0"
+      ],
+      [
+        "#e9e9e9",
+        "1"
+      ]
+    ],
+    "ProfileHoverBrush": [
+      [
+        "#ffffff",
+        "0"
+      ],
+      [
+        "#efefef",
+        "1"
+      ]
+    ],
+    "MacroHoverBrush": [
+      [
+        "#ececec",
+        "0"
+      ],
+      [
+        "#e5e5e5",
+        "1"
+      ]
+    ],
+    "SurfaceBrush": [
+      [
+        "#FFFFFF",
+        "0"
+      ],
+      [
+        "#E9E9E9",
+        "1"
+      ]
+    ]
+  },
+  "Dark": {
+    "CallFieldBrush": [
+      [
+        "#3c3c3c",
+        "0"
+      ],
+      [
+        "#303030",
+        "1"
+      ]
+    ],
+    "ControlBackgroundBrush": [
+      [
+        "#363636",
+        "0"
+      ],
+      [
+        "#2e2e2e",
+        "1"
+      ]
+    ],
+    "MacroBrush": [
+      [
+        "#292929",
+        "0"
+      ],
+      [
+        "#242424",
+        "1"
+      ]
+    ],
+    "ControlHoverBrush": [
+      [
+        "#3b3b3b",
+        "0"
+      ],
+      [
+        "#323232",
+        "1"
+      ]
+    ],
+    "ControlPressedBrush": [
+      [
+        "#222222",
+        "0"
+      ],
+      [
+        "#282828",
+        "1"
+      ]
+    ],
+    "SelectedBrush": [
+      [
+        "#505050",
+        "0"
+      ],
+      [
+        "#424242",
+        "1"
+      ]
+    ],
+    "MutedBrush": [
+      [
+        "#653c3c",
+        "0"
+      ],
+      [
+        "#513131",
+        "1"
+      ]
+    ],
+    "AnswerFillBrush": [
+      [
+        "#259B25",
+        "0"
+      ],
+      [
+        "#168616",
+        "0.45"
+      ],
+      [
+        "#0C700C",
+        "1"
+      ]
+    ],
+    "DeclineFillBrush": [
+      [
+        "#bd4545",
+        "0"
+      ],
+      [
+        "#a43131",
+        "1"
+      ]
+    ],
+    "ProfileBrush": [
+      [
+        "#3b3b3b",
+        "0"
+      ],
+      [
+        "#303030",
+        "1"
+      ]
+    ],
+    "ProfileHoverBrush": [
+      [
+        "#404040",
+        "0"
+      ],
+      [
+        "#353535",
+        "1"
+      ]
+    ],
+    "MacroHoverBrush": [
+      [
+        "#2f2f2f",
+        "0"
+      ],
+      [
+        "#292929",
+        "1"
+      ]
+    ],
+    "SurfaceBrush": [
+      [
+        "#363636",
+        "0"
+      ],
+      [
+        "#2B2B2B",
+        "1"
+      ]
+    ]
+  }
+}

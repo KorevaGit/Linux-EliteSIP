@@ -46,6 +46,46 @@ public sealed class UiParityTests
         finally { app.RequestedThemeVariant=old; }
     }
     [AvaloniaFact]
+    public void Microphone_test_button_updates_immediately_before_the_next_meter_poll()
+    {
+        var model = new SettingsViewModel(new AppSettings(), new EliteSIP.App.Platform.AvaloniaUiThread(), new TestAudioPlatform(), new TestAutoStart());
+        var before = model.MicrophoneTestText;
+        var changed = new List<string?>();
+        model.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+        model.ReportSelfTestRunning(true);
+        Assert.NotEqual(before, model.MicrophoneTestText);
+        Assert.Contains(nameof(model.MicrophoneTestText), changed);
+        Assert.Contains(nameof(model.SelfTestElapsed), changed);
+        model.ReportSelfTestRunning(false);
+        Assert.Equal(before, model.MicrophoneTestText);
+        Assert.Equal("00:00", model.SelfTestElapsed);
+    }
+
+    [AvaloniaFact]
+    public void Wizard_uses_product_chrome_and_two_column_manual_form()
+    {
+        using var errors = new BindingErrors();
+        var model = new EliteSIP.App.FirstRun.FirstRunViewModel(new AppSettings(), new AdminAccessState());
+        model.UseManualSetup();
+        var window = new EliteSIP.App.FirstRun.FirstRunWindow(model);
+        window.Show();
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            Assert.Equal(WindowDecorations.None, window.WindowDecorations);
+            Assert.Equal(560, window.Width);
+            Assert.Equal(440, window.Height);
+            Assert.Contains(DrawnCaption.Buttons(window), button => button.Name == "PART_CloseButton");
+            var sip = window.FindControl<TextBox>("SipPasswordField")!;
+            var admin = window.FindControl<TextBox>("AdminPasswordField")!;
+            Assert.True(sip.TranslatePoint(default, window)!.Value.X > admin.TranslatePoint(default, window)!.Value.X);
+            Assert.Equal('●', sip.PasswordChar);
+            Assert.Empty(errors.Errors);
+        }
+        finally { window.Hide(); }
+    }
+
+    [AvaloniaFact]
     public void Call_header_has_two_columns_and_offline_number_entry_remains_enabled()
     {
         var model=new PanelViewModel { CanPlaceCall=false };var window=new PanelWindow(model) { AllowsClosing=true };window.Show();

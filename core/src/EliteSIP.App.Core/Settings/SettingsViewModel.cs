@@ -55,14 +55,11 @@ public sealed class SettingsViewModel : Observable
 
         Sections =
         [
-            new(SettingsSectionKind.Work, Strings.Get("SectionWork"), "person.crop.circle"),
-            new(SettingsSectionKind.Audio, Strings.Get("SectionAudio"), "mic.fill"),
+            new(SettingsSectionKind.Work, Strings.Get("SectionWork"), "settings.briefcase-business"),
+            new(SettingsSectionKind.Audio, Strings.Get("SectionAudio"), "settings.headphones"),
 
-            // Своего значка у оформления в комплекте нет. `gearshape` — не
-            // «тема», а «настройка вообще», и это признанная неточность: раздел
-            // опознаётся подписью, а значок держит строку в колонке с прочими.
-            new(SettingsSectionKind.Appearance, Strings.Get("SectionAppearance"), "gearshape"),
-            new(SettingsSectionKind.Support, Strings.Get("SettingsSystem"), "settings.monitor"),
+            new(SettingsSectionKind.Appearance, Strings.Get("SectionAppearance"), "settings.panels-top-left"),
+            new(SettingsSectionKind.Support, Strings.Get("SettingsSystem"), "settings.activity"),
         ];
 
         ReloadDevices();
@@ -361,12 +358,15 @@ public sealed class SettingsViewModel : Observable
     private double _voiceLevel;
     private double _soundLevel;
 
+    private DateTimeOffset? _selfTestStarted;
+    public string SelfTestElapsed => (_selfTestStarted is { } start ? DateTimeOffset.UtcNow - start : TimeSpan.Zero).ToString(@"mm\:ss", System.Globalization.CultureInfo.InvariantCulture);
     public bool IsSelfTestRunning => _isSelfTestRunning;
     internal void ReportSelfTestRunning(bool running)
     {
+        _selfTestStarted = running ? DateTimeOffset.UtcNow : null;
         _isSelfTestRunning=running;
         if (!running) { _voiceLevel=0; _soundLevel=0; }
-        foreach(var name in new[] { nameof(IsSelfTestRunning),nameof(CanRunSelfTest),nameof(SelfTestButtonText),nameof(ShowsMeters),nameof(CanSaveRecording),nameof(CanReplayRecording),nameof(VoiceLevel),nameof(SoundLevel) }) { NotifyChanged(name); }
+        foreach(var name in new[] { nameof(IsSelfTestRunning),nameof(CanRunSelfTest),nameof(SelfTestButtonText),nameof(MicrophoneTestText),nameof(SelfTestElapsed),nameof(ShowsMeters),nameof(CanSaveRecording),nameof(CanReplayRecording),nameof(VoiceLevel),nameof(SoundLevel) }) { NotifyChanged(name); }
     }
 
     /// <summary>Во время звонка проверка не запускается: это отнятый у собеседника микрофон.</summary>
@@ -374,6 +374,7 @@ public sealed class SettingsViewModel : Observable
 
     public bool IsSelfTestBlockedByCall => _isInCall && !_isSelfTestRunning;
 
+    public string MicrophoneTestText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "SettingsTest");
     public string SelfTestButtonText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "AudioSelfTestStart");
 
     /// <summary>Шкалы видны во время проверки и разговора, в остальное время — подсказка.</summary>
@@ -463,17 +464,20 @@ public sealed class SettingsViewModel : Observable
 
         if (running != _isSelfTestRunning || inCall != _isInCall)
         {
+            _selfTestStarted = running ? _selfTestStarted ?? DateTimeOffset.UtcNow : null;
             _isSelfTestRunning = running;
             _isInCall = inCall;
             NotifyChanged(nameof(IsSelfTestRunning));
             NotifyChanged(nameof(CanRunSelfTest));
             NotifyChanged(nameof(IsSelfTestBlockedByCall));
             NotifyChanged(nameof(SelfTestButtonText));
+            NotifyChanged(nameof(MicrophoneTestText));
             NotifyChanged(nameof(ShowsMeters));
             NotifyChanged(nameof(CanSaveRecording));
         NotifyChanged(nameof(CanReplayRecording));
         }
 
+        NotifyChanged(nameof(SelfTestElapsed));
         _voiceLevel = levels?.Voice ?? 0;
         _soundLevel = levels?.Sound ?? 0;
         NotifyChanged(nameof(VoiceLevel));
@@ -527,7 +531,7 @@ public sealed class SettingsViewModel : Observable
             UpdateMeterPolling(_meterWindowOpen);
             foreach (var name in new[]
             {
-                nameof(ShowsWork), nameof(ShowsAudio), nameof(ShowsRingtone),
+                nameof(SectionTitle), nameof(ShowsWork), nameof(ShowsAudio), nameof(ShowsRingtone),
                 nameof(ShowsAppearance), nameof(ShowsSupport),
             })
             {
@@ -535,6 +539,8 @@ public sealed class SettingsViewModel : Observable
             }
         }
     }
+
+    public string SectionTitle => Sections.First(section => section.Kind == (_section == SettingsSectionKind.Ringtone ? SettingsSectionKind.Audio : _section)).Title;
 
     public bool ShowsWork => _section is SettingsSectionKind.Work;
 

@@ -28,4 +28,5 @@
   <data name="PanelWaylandNotice" xml:space="preserve">
     <value>Сеанс Wayland не поддерживается: защита приёма слабее. Войдите в сеанс X11</value>
   </data>
+<data name="SettingsStartup" xml:space="preserve"><value>Запускать при входе в систему</value></data>
 </root>

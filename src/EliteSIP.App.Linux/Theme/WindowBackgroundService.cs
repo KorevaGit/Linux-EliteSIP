@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -74,10 +75,23 @@ internal sealed class WindowBackgroundService : IDisposable
         var hue = _settings.Theme == Appearance.Wallpaper ? _dominant : (dark ? Color.Parse("#30343A") : Color.Parse("#F3F2EF"));
         var amount = _settings.Theme == Appearance.Wallpaper ? 0.16 : 0;
         var alpha = _settings.BackgroundTransparency switch { BackgroundTransparency.Light => 246, BackgroundTransparency.Medium => 232, BackgroundTransparency.Strong => 218, _ => 255 };
-        foreach (var (key, basis) in new[] { ("SurfaceBrush",dark ? "#30343A" : "#F3F2EF"), ("SidebarBrush",dark ? "#202327" : "#E0DFDC"), ("ControlBackgroundBrush",dark ? "#383D44" : "#ECEBE8"), ("ControlHoverBrush",dark ? "#444A52" : "#F8F7F4") })
+        // Clone the palette's actual gradient. Wallpaper tint/opacity must not
+        // flatten the raised surfaces into solid rectangles.
+        foreach (var key in new[] { "SurfaceBrush", "ControlBackgroundBrush", "ControlHoverBrush", "ControlPressedBrush", "MacroBrush", "MacroHoverBrush", "CallFieldBrush", "ProfileBrush", "ProfileHoverBrush", "SelectedBrush" })
         {
-            var color = Mix(Color.Parse(basis), hue, amount);
-            Put(key, new SolidColorBrush(Color.FromArgb((byte)alpha,color.R,color.G,color.B))); _overrides.Add(key);
+            if (!_app.TryFindResource(key, _app.ActualThemeVariant, out var value)) { continue; }
+            Color Tint(Color color) { var mixed = Mix(color, hue, amount); return Color.FromArgb((byte)alpha, mixed.R, mixed.G, mixed.B); }
+            IBrush? brush = value switch
+            {
+                LinearGradientBrush gradient => new LinearGradientBrush
+                {
+                    StartPoint = gradient.StartPoint, EndPoint = gradient.EndPoint,
+                    GradientStops = [ .. gradient.GradientStops.Select(stop => new GradientStop(Tint(stop.Color), stop.Offset)) ],
+                },
+                ISolidColorBrush solid => new SolidColorBrush(Tint(solid.Color)),
+                _ => null,
+            };
+            if (brush is not null) { Put(key, brush); _overrides.Add(key); }
         }
     }
     private void Put(string key, IBrush value) => _app.Resources[key] = value;

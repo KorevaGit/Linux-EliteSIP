@@ -55,7 +55,7 @@
       <Grid Grid.Row="2" Name="Middle" RowDefinitions="Auto,Auto,*,Auto,Auto,Auto">
 
         <Grid Grid.Row="0" Height="72">
-          <Border CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource ControlBackgroundBrush}" IsVisible="{Binding !HasSecondLine}">
+          <Border CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}" IsVisible="{Binding !HasSecondLine}">
             <Grid>
               <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !IsInCall}">
                 <TextBox Name="DialedField" Grid.Column="0" Classes="panel" Text="{Binding DialedNumber}" PlaceholderText="{res:Loc PanelNumberPlaceholder}" FontSize="20" KeyDown="OnDialedNumberKeyDown" TextInput="OnDialedNumberTextInput"/>
@@ -89,10 +89,10 @@
         <Border Grid.Row="1" Height="4"/>
 
         <!-- Клавиши управления 2 × 2. -->
-        <Grid Grid.Row="2" Name="ControlKeys" MinHeight="68" RowDefinitions="*,4,*" ColumnDefinitions="*,4,*">
+        <Grid Grid.Row="2" Name="ControlKeys" MinHeight="96" RowDefinitions="*,8,*" ColumnDefinitions="*,8,*">
           <Grid.Styles>
             <Style Selector="Grid#ControlKeys &gt; ToggleButton">
-              <Setter Property="MinHeight" Value="32"/>
+              <Setter Property="MinHeight" Value="44"/>
             </Style>
           </Grid.Styles>
 
@@ -149,8 +149,8 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="panel:MacroViewModel">
-              <Button Classes="surface" Margin="0,0,8,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).EffectiveMacroHeight}" IsEnabled="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).CanSendDtmf}" Command="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).SendMacro}" CommandParameter="{Binding}">
-                <theme:ShrinkBox BaseFontSize="16" Margin="4,0" GrowsWithHeight="True" FallbackHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).MacroLabelMaxHeight}">
+              <Button Classes="surface macro" Margin="0,0,8,8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).EffectiveMacroHeight}" IsEnabled="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).CanSendDtmf}" Command="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).SendMacro}" CommandParameter="{Binding}">
+                <theme:ShrinkBox BaseFontSize="18" Margin="0" GrowsWithHeight="False" FallbackHeight="{Binding $parent[ItemsControl].((panel:PanelViewModel)DataContext).MacroLabelMaxHeight}">
                   <TextBlock theme:Emoji.Text="{Binding Title}" FontWeight="Medium" TextAlignment="Center" TextWrapping="Wrap"/>
                 </theme:ShrinkBox>
               </Button>
@@ -160,7 +160,7 @@
 
         <!-- Ввод номера перевода. -->
         <StackPanel Grid.Row="5" IsVisible="{Binding IsTransferEntryVisible}">
-          <Border Height="34" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource ControlBackgroundBrush}">
+          <Border Height="34" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}">
             <TextBox Name="TransferField" Classes="panel" Text="{Binding TransferNumber}" PlaceholderText="{res:Loc PanelTransferNumber}" FontSize="18" IsEnabled="{Binding !IsTransferring}"/>
           </Border>
           <Grid Margin="0,4,0,0" ColumnDefinitions="*,4,*">

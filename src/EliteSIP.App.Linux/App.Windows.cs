@@ -75,6 +75,7 @@ public sealed partial class App
         _settingsWindow = new SettingsWindow(model, _appearance!, _phone!.Sounds)
         {
             RestartRequested = RestartApplication,
+            UnlockWorkplaceRequested = () => new AdminUnlockWindow(_settings!, _access!).Ask(_settingsWindow),
         };
         _settingsWindow.AdministrationRequested += ShowAdministration;
         _settingsWindow.Closed += (_, _) => _recordingPreview?.Cancel();
