@@ -389,6 +389,13 @@ public sealed class SettingsViewModel : Observable
     public double SoundLevel => _soundLevel;
 
     /// <summary>Открыт раздел «Звук» — начать опрос. Закрыт — остановить и снять проверку.</summary>
+    private bool _meterSuspended;
+    internal void SuspendMeterPolling(bool suspended)
+    {
+        _meterSuspended = suspended;
+        UpdateMeterPolling(_meterWindowOpen);
+    }
+
     internal void UpdateMeterPolling(bool windowOpen)
     {
         _meterWindowOpen = windowOpen;
@@ -399,6 +406,7 @@ public sealed class SettingsViewModel : Observable
 
         if (windowOpen && ShowsAudio)
         {
+            if (_meterSuspended) { _meterTimer.Stop(); return; }
             Settings.Audio.PropertyChanged += OnAudioSettingChanged;
 
             if (!_meterTimer.IsEnabled)

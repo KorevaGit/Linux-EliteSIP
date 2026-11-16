@@ -639,7 +639,7 @@ public sealed class AppSettings : Observable
     /// десятка, и забытый в одном из них означал бы настройку, которая
     /// применилась и не пережила перезапуск. Ищется такое неделями.
     /// </remarks>
-    public void AutoSave(Action<Exception>? onFailure = null)
+    public void AutoSave(Action<Exception>? onFailure = null, Action<Action>? scheduleVisualSave = null)
     {
         // Список — коллекция, и её правки уведомлением о свойстве не приходят:
         // подписываться надо и на сам список, и на каждый пункт в нём. Без
@@ -680,7 +680,15 @@ public sealed class AppSettings : Observable
 
         foreach (var section in new Observable[] { Account, Audio, Ringtone, Appearance, Dtmf, History, Admin, Pbx, Queues, IncomingCall, Maintenance, Credentials, Setup, Panel, PortKnock, Placement, IncomingPlacement })
         {
-            section.PropertyChanged += (_, _) => TrySave(onFailure);
+            if ((ReferenceEquals(section, Appearance) || ReferenceEquals(section, Placement) || ReferenceEquals(section, IncomingPlacement)) && scheduleVisualSave is not null)
+            {
+                Action save = () => TrySave(onFailure);
+                section.PropertyChanged += (_, _) => scheduleVisualSave(save);
+            }
+            else
+            {
+                section.PropertyChanged += (_, _) => TrySave(onFailure);
+            }
         }
     }
     private void TrySave(Action<Exception>? onFailure)

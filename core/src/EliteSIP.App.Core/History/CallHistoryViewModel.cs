@@ -131,6 +131,9 @@ public sealed class CallHistoryViewModel : Observable
 
     public ObservableCollection<HistoryDay> Days { get; } = [];
 
+    /// <summary>Flat headers and records for viewport virtualization.</summary>
+    public ObservableCollection<object> Rows { get; } = [];
+
     public HistoryFilter Filter
     {
         get => _filter;
@@ -170,6 +173,7 @@ public sealed class CallHistoryViewModel : Observable
     public void Reload()
     {
         Days.Clear();
+        Rows.Clear();
         _loaded = 0;
         Append(_store.Records(Scope, _filter, PageSize));
         NotifyChanged(nameof(IsEmpty));
@@ -206,10 +210,13 @@ public sealed class CallHistoryViewModel : Observable
             // сбитую сортировку, и склеивать их было бы враньём.
             if (Days.Count == 0 || Days[^1].Title != title)
             {
-                Days.Add(new HistoryDay(title, record.StartedAt.LocalDateTime.Date == DateTime.Today));
+                var day = new HistoryDay(title, record.StartedAt.LocalDateTime.Date == DateTime.Today);
+                Days.Add(day);
+                if (!day.IsToday) { Rows.Add(day); }
             }
 
             Days[^1].Records.Add(record);
+            Rows.Add(record);
         }
 
         _loaded += records.Count;

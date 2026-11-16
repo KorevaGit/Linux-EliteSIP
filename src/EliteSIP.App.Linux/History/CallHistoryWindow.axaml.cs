@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using EliteSIP.App.Resources;
 using EliteSIP.CallHistory;
 
@@ -28,6 +29,7 @@ public partial class CallHistoryWindow : Window
     public CallHistoryWindow()
     {
         InitializeComponent();
+        HistoryList.AddHandler(ScrollViewer.ScrollChangedEvent, OnScrollChanged);
 
         _noticeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
         _noticeTimer.Tick += (_, _) =>
@@ -47,6 +49,8 @@ public partial class CallHistoryWindow : Window
             : Strings.Get("HistoryWindowTitleWithProfile").Replace("{0}", model.ProfileTitle, StringComparison.Ordinal);
     }
 
+    private ScrollViewer? Scroller => HistoryList.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+
     public CallHistoryViewModel? Model { get; }
 
     /// <summary>Перезвонить: номер уходит в поле набора панели.</summary>
@@ -63,20 +67,20 @@ public partial class CallHistoryWindow : Window
         if (Model is not null && sender is RadioButton { Tag: HistoryFilter filter, IsChecked: true } && Model.Filter != filter)
         {
             Model.Filter = filter;
-            Scroller.ScrollToHome();
+            Scroller?.ScrollToHome();
         }
     }
 
     private void OnScrollChanged(object? sender, ScrollChangedEventArgs e)
     {
-        if (Model is not { HasMore: true } || Scroller.Viewport.Height <= 0)
+        if (Model is not { HasMore: true } || Scroller is not { } scroller || scroller.Viewport.Height <= 0)
         {
             return;
         }
 
         // Догружать заранее — за экран до конца, а не на последней строке.
-        var remaining = Scroller.Extent.Height - Scroller.Offset.Y - Scroller.Viewport.Height;
-        if (remaining <= Scroller.Viewport.Height)
+        var remaining = scroller.Extent.Height - scroller.Offset.Y - scroller.Viewport.Height;
+        if (remaining <= scroller.Viewport.Height)
         {
             Model.LoadMore();
         }
@@ -104,7 +108,7 @@ public partial class CallHistoryWindow : Window
         {
             Model.Calendar.SelectedDay = day.Date;
             CalendarPopup.IsOpen = false;
-            Scroller.ScrollToHome();
+            Scroller?.ScrollToHome();
         }
     }
 

@@ -397,6 +397,7 @@ public sealed partial class App
     /// </remarks>
     private void RestartApplication()
     {
+        _appearanceSave.Flush();
         ClientEventLog.Shared.NoteShutdown("перезапуск приложения");
 
         if (!UserService.IsCurrentProcess)

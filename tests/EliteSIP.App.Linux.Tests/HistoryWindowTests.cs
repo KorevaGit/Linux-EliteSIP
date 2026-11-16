@@ -14,6 +14,29 @@ namespace EliteSIP.App.Tests;
 public sealed class HistoryWindowTests
 {
     [AvaloniaFact]
+    public void Long_history_virtualizes_rows_and_still_reaches_the_last_record()
+    {
+        using TemporaryHome home=new();
+        using CallHistoryStore store=new(new CallHistoryStore.Settings(Path.Combine(home.Path,"history.db")));
+        var profile=Guid.NewGuid();var now=DateTimeOffset.Now;
+        for(var i=0;i<2000;i++) {Add(store,profile,(1000+i).ToString(System.Globalization.CultureInfo.InvariantCulture),null,now.AddMinutes(-i),CallDirection.Outgoing,CallOutcome.Completed,true);}
+        store.Flush();
+        var model=new CallHistoryViewModel(store,profile,"701",false,()=>30);
+        while(model.HasMore) {model.LoadMore();}
+        Assert.Equal(2000,model.Rows.OfType<CallRecord>().Count());
+        var window=new CallHistoryWindow(model);window.Show();Dispatcher.UIThread.RunJobs();
+        try
+        {
+            Assert.InRange(window.GetVisualDescendants().OfType<OutcomeBadge>().Count(),1,60);
+            window.HistoryList.ScrollIntoView(model.Rows[^1]);Dispatcher.UIThread.RunJobs();
+            Assert.InRange(window.GetVisualDescendants().OfType<OutcomeBadge>().Count(),1,60);
+            Assert.Contains(window.GetVisualDescendants().OfType<Control>(),control=>ReferenceEquals(control.DataContext,model.Rows[^1]));
+            model.Filter=HistoryFilter.Missed;Dispatcher.UIThread.RunJobs();Assert.Empty(model.Rows);Assert.True(model.IsEmpty);
+        }
+        finally {window.Close();}
+    }
+
+    [AvaloniaFact]
     public void История_с_записями_рисуется_и_календарь_открывается()
     {
         using BindingErrors errors = new();

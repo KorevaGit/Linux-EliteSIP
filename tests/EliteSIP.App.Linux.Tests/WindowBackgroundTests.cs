@@ -44,6 +44,20 @@ public sealed class WindowBackgroundTests
         }
         finally { dir.Delete(true); }
     }
+    [Fact]
+    public void Compressed_large_png_is_rejected_before_allocating_an_unbounded_decode_buffer()
+    {
+        using TemporaryHome home=new();var path=Path.Combine(home.Path,"large.png");
+        using(var pixels=new SKBitmap(5000,4000))
+        {
+            pixels.Erase(SKColors.White);using var data=pixels.Encode(SKEncodedImageFormat.Png,100);
+            using var file=File.Create(path);data.SaveTo(file);
+        }
+        Assert.True(new FileInfo(path).Length<30*1024*1024);
+        var error=Assert.Throws<InvalidDataException>(()=>BackgroundImages.Read(path));
+        Assert.Contains("64 MB",error.Message,StringComparison.Ordinal);
+    }
+
     [AvaloniaTheory]
     [InlineData(false)]
     [InlineData(true)]
@@ -127,6 +141,65 @@ public sealed class WindowBackgroundTests
         canvas.DrawRect(70,0,30,100,accent);
         var dominant=WindowBackgroundService.Sample(pixels);
         Assert.Equal(Avalonia.Media.Color.FromRgb(30,100,180),dominant);
+    }
+
+    [Fact]
+    public void Wallpaper_color_ignores_large_neutral_regions_but_not_grayscale_photos()
+    {
+        using var pixels=new SKBitmap(100,100);using var canvas=new SKCanvas(pixels);
+        canvas.Clear(new SKColor(250,251,253));
+        using var blue=new SKPaint {Color=new SKColor(109,202,253)};
+        canvas.DrawRect(65,0,35,100,blue);
+        var color=WindowBackgroundService.Sample(pixels);
+        Assert.Equal(Avalonia.Media.Color.FromRgb(109,202,253),color);
+        canvas.Clear(new SKColor(190,190,190));canvas.DrawRect(99,0,1,100,blue);
+        Assert.Equal(Avalonia.Media.Color.FromRgb(190,190,190),WindowBackgroundService.Sample(pixels));
+    }
+
+    [AvaloniaFact]
+    public void Wallpaper_color_reaches_rendered_settings_cards_and_changes_live()
+    {
+        using TemporaryHome home=new();
+        var app=Application.Current!;var old=app.RequestedThemeVariant;
+        var settings=AppSettings.Load(home.SettingsPath);
+        settings.Appearance.Theme=Appearance.Wallpaper;
+        var path=Path.Combine(home.Path,"blue-white.png");
+        using(var pixels=new SKBitmap(100,100))
+        {
+            using var canvas=new SKCanvas(pixels);canvas.Clear(new SKColor(250,251,253));
+            using var blue=new SKPaint {Color=new SKColor(109,202,253)};canvas.DrawRect(65,0,35,100,blue);
+            using var png=pixels.Encode(SKEncodedImageFormat.Png,100);using var output=File.Create(path);png.SaveTo(output);
+        }
+        settings.Appearance.BackgroundImagePath=path;
+        try
+        {
+            using var appearance=new AppearanceService(app,new EliteSIP.Platform.Linux.DesktopAppearance(_=>{})) {Appearance=Appearance.Wallpaper};
+            using var background=new WindowBackgroundService(app,settings.Appearance,()=>appearance.IsDark);
+            var audio=new TestAudioPlatform();
+            var model=new SettingsViewModel(settings,new EliteSIP.App.Platform.AvaloniaUiThread(),audio,new TestAutoStart()) {Section=SettingsSectionKind.Appearance};
+            var window=new SettingsWindow(model,appearance,audio.CreateSignalSounds(_=>{}));window.Show();Dispatcher.UIThread.RunJobs();
+            try
+            {
+                var cards=Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(window).OfType<Border>().Where(b=>b.Classes.Contains("card")).ToArray();
+                Assert.NotEmpty(cards);
+                foreach(var card in cards)
+                {
+                    var colors=card.Background switch
+                    {
+                        Avalonia.Media.ILinearGradientBrush gradient=>gradient.GradientStops.Select(stop=>stop.Color).ToArray(),
+                        Avalonia.Media.ISolidColorBrush solid=>[solid.Color],
+                        _=>throw new InvalidOperationException("Missing card brush"),
+                    };
+                    Assert.All(colors,color=>Assert.True(color.B>color.R+15));
+                }
+                Snapshot.Save(window.CaptureRenderedFrame()!,"wallpaper-blue-white-settings");
+                settings.Appearance.Theme=Appearance.Dark;appearance.Appearance=Appearance.Dark;background.Apply();Dispatcher.UIThread.RunJobs();
+                var neutral=Assert.IsAssignableFrom<Avalonia.Media.ILinearGradientBrush>(cards[0].Background).GradientStops[0].Color;
+                Assert.True(Math.Abs(neutral.R-neutral.B)<10);
+            }
+            finally {window.Close();}
+        }
+        finally {app.RequestedThemeVariant=old;}
     }
 
     [AvaloniaFact]

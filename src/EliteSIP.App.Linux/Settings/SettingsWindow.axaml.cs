@@ -52,6 +52,15 @@ public partial class SettingsWindow : Window
         };
     }
 
+    protected override void OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == WindowStateProperty || change.Property == IsVisibleProperty)
+        {
+            Model?.SuspendMeterPolling(!IsVisible || WindowState == WindowState.Minimized);
+        }
+    }
+
     public SettingsViewModel? Model { get; }
 
     /// <summary>«Открыть управление» внизу окна.</summary>

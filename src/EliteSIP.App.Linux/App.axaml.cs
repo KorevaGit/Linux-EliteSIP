@@ -61,6 +61,7 @@ public sealed partial class App : Application, IDisposable
     private AdminAccessState? _access;
     private AppearanceService? _appearance;
     private WindowBackgroundService? _background;
+    private readonly DeferredSettingsSave _appearanceSave = new();
     private DesktopAppearance? _desktopAppearance;
     private CallHistoryStore? _history;
     private PanelViewModel? _panel;
@@ -143,7 +144,7 @@ public sealed partial class App : Application, IDisposable
         Mark("экземпляр");
 
         _settings = AppSettings.Load();
-        _settings.AutoSave();
+        _settings.AutoSave(scheduleVisualSave: _appearanceSave.Schedule);
         Strings.Apply(Chosen(_settings.Appearance.Language));
         _access = new AdminAccessState(_settings.Admin.ToCredential());
 
@@ -785,6 +786,7 @@ public sealed partial class App : Application, IDisposable
 
     public void Dispose()
     {
+        _appearanceSave.Dispose();
         if (_startupSplash?.IsVisible is true) { _startupSplash.Close(); }
         ClientEventLog.Shared.EndSession();
         ClientEventLog.Shared.Dispose();

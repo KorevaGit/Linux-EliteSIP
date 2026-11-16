@@ -118,7 +118,7 @@ internal sealed class WindowBackgroundService : IDisposable
         return Color.FromArgb(color.A, Channel(hue.R), Channel(hue.G), Channel(hue.B));
     }
     private void Put(string key, IBrush value) => _app.Resources[key] = value;
-    private Bitmap Compose(SKBitmap source, bool dark)
+    private WriteableBitmap Compose(SKBitmap source, bool dark)
     {
         using var output = new SKBitmap(source.Width, source.Height, SKColorType.Bgra8888, SKAlphaType.Opaque);
         using var canvas = new SKCanvas(output);
@@ -131,9 +131,21 @@ internal sealed class WindowBackgroundService : IDisposable
         var dx = source.Width * (1-scale)/2; var dy = source.Height * (1-scale)/2;
         canvas.DrawBitmap(source, new SKRect(dx,dy,source.Width-dx,source.Height-dy), paint);
         canvas.DrawColor(dark ? new SKColor(24,27,31,145) : new SKColor(247,246,243,165), SKBlendMode.SrcOver);
-        using var data = output.Encode(SKEncodedImageFormat.Png,100);
-        using var stream = new MemoryStream(data.ToArray());
-        return new Bitmap(stream);
+        // Copy pixels directly: PNG encoding + decoding here blocked the UI on
+        // every slider adjustment and temporarily duplicated the image buffers.
+        var bitmap = new WriteableBitmap(new PixelSize(output.Width, output.Height), new Vector(96,96),
+            Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Opaque);
+        try
+        {
+            using var buffer = bitmap.Lock();
+            using var pixels = output.PeekPixels();
+            if (!pixels.ReadPixels(output.Info, buffer.Address, buffer.RowBytes))
+            {
+                throw new InvalidOperationException("Cannot copy wallpaper pixels");
+            }
+            return bitmap;
+        }
+        catch { bitmap.Dispose(); throw; }
     }
     internal static Color Sample(SKBitmap source)
     {
@@ -148,7 +160,20 @@ internal sealed class WindowBackgroundService : IDisposable
             groups.TryGetValue(key,out var group);
             groups[key]=(group.R+pixel.Red*alpha,group.G+pixel.Green*alpha,group.B+pixel.Blue*alpha,group.Weight+alpha);
         }
-        var dominant=groups.Values.OrderByDescending(group=>group.Weight).FirstOrDefault();
+        var total = groups.Values.Sum(group => group.Weight);
+        // White/gray regions often occupy the largest bucket in a colorful photo.
+        // Prefer a meaningful colored region, but ignore tiny accents (<3%).
+        var chromatic = groups.Values.Where(group =>
+        {
+            if (group.Weight == 0 || group.Weight < total * .03) { return false; }
+            var r = (double)group.R / group.Weight;
+            var g = (double)group.G / group.Weight;
+            var b = (double)group.B / group.Weight;
+            var max = Math.Max(r, Math.Max(g,b));
+            var chroma = max - Math.Min(r, Math.Min(g,b));
+            return max >= 32 && chroma >= 24 && chroma / max >= .15;
+        }).OrderByDescending(group => group.Weight).ToArray();
+        var dominant = chromatic.Length > 0 ? chromatic[0] : groups.Values.OrderByDescending(group=>group.Weight).FirstOrDefault();
         return dominant.Weight==0?Colors.Gray:Color.FromRgb((byte)(dominant.R/dominant.Weight),(byte)(dominant.G/dominant.Weight),(byte)(dominant.B/dominant.Weight));
     }
     private static Color Mix(Color a,Color b,double t) => Color.FromRgb((byte)(a.R+(b.R-a.R)*t),(byte)(a.G+(b.G-a.G)*t),(byte)(a.B+(b.B-a.B)*t));

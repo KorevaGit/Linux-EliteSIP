@@ -1,0 +1,16 @@
+{
+  "fixture": "native X11 panel + synthetic 1600x1000 wallpaper; no SIP/audio",
+  "startup_ms": 5625.4298,
+  "background_initial_ms": 163.6482,
+  "adjustments_8_ms": 1564.292,
+  "adjustments_allocated_bytes": 4121696,
+  "visible_idle_cpu_ms": 177.204,
+  "visible_idle_wall_ms": 10000.4393,
+  "visible_rss_bytes": 248672256,
+  "hidden_idle_cpu_ms": 61.371,
+  "hidden_idle_wall_ms": 10001.6592,
+  "hidden_rss_bytes": 249217024,
+  "managed_heap_bytes": 7580312,
+  "idle_image_builds": 0,
+  "idle_palette_builds": 0
+}
