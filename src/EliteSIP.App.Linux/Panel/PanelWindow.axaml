@@ -22,12 +22,12 @@
               <MenuItem Header="{res:Loc PanelOffline}" ToggleType="CheckBox" IsChecked="{Binding IsOfflineByChoice, Mode=OneWay}" Command="{Binding GoOffline}"/>
             </ContextMenu>
           </Button.ContextMenu>
-          <Grid VerticalAlignment="Center" ColumnDefinitions="16,Auto,Auto,Auto">
+          <Grid><TextBlock Name="OfflineProfileLabel" Text="{res:Loc PanelOffline}" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsOfflineByChoice}"/><Grid Name="OnlineProfileIdentity" IsVisible="{Binding !IsOfflineByChoice}" VerticalAlignment="Center" ColumnDefinitions="16,Auto,Auto,Auto">
             <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" Classes.registering="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registering}" Classes.registered="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registered}" Classes.failed="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Failed}" Classes.offline="{Binding IsOfflineByChoice}"/>
             <TextBlock Grid.Column="1" Text="{Binding StatusTitle}" TextTrimming="CharacterEllipsis" Margin="4,0,0,0" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <TextBlock Grid.Column="2" theme:Emoji.Text="{Binding StatusLabel}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextTertiaryBrush}" IsVisible="{Binding StatusLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
             <theme:Icon Grid.Column="3" Glyph="chevron.down" Size="10" Margin="5,1,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextTertiaryBrush}" IsVisible="{Binding CanOpenProfileMenu}"/>
-          </Grid>
+          </Grid></Grid>
         </Button>
 
         <!-- Беда связи: «нет сети», «отказ сервера» — поверх всего остального. -->

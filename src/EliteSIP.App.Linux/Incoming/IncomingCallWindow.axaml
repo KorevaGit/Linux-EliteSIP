@@ -28,7 +28,7 @@
         WindowDecorations="None"
         WindowStartupLocation="Manual">
 
-  <Border CornerRadius="12" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
+  <Border Name="IncomingFrame" CornerRadius="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="1">
     <StackPanel Margin="12,8,12,12">
       <!--
           Шапка — ручка переноса: за неё карточку можно отодвинуть, не принимая
@@ -63,17 +63,17 @@
           Имя и номер — щелчком копируют номер. Только видимый: номер под
           маской не копируется (IncomingCallSubject.CopyableNumber).
       -->
-<Border Background="{DynamicResource CallFieldBrush}" CornerRadius="10" BoxShadow="0 3 9 0 #29000000" Padding="12,16" MinHeight="116" Margin="0,8,0,0">      <StackPanel x:Name="NumberBlock"
+<Border Name="IdentityCard" Background="{DynamicResource CallFieldBrush}" CornerRadius="10" BoxShadow="0 3 9 0 #29000000" Padding="12,16" MinHeight="116" Margin="0,8,0,0">      <StackPanel x:Name="NumberBlock" VerticalAlignment="Center"
                   Margin="0"
                   HorizontalAlignment="Stretch"
                   Background="Transparent"
                   Classes.copyable="{Binding CanCopyNumber}"
                   ToolTip.Tip="{res:Loc IncomingCopyNumber}"
                   ToolTip.IsEnabled="{Binding CanCopyNumber}">
-        <TextBlock theme:Emoji.Text="{Binding Headline}" TextWrapping="Wrap" MaxWidth="312" MaxHeight="60" LineHeight="30"
+        <TextBlock theme:Emoji.Text="{Binding Headline}" TextWrapping="Wrap" MaxWidth="312"
                    HorizontalAlignment="Center"
                    TextAlignment="Center"
-                   TextTrimming="CharacterEllipsis"
+                   TextTrimming="None"
                    FontSize="25"
                    FontWeight="SemiBold" />
         <TextBlock Text="{Binding SecondaryNumber}"

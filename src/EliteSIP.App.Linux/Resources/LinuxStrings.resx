@@ -30,4 +30,5 @@
   </data>
 <data name="SettingsStartup" xml:space="preserve"><value>Start at sign-in</value></data>
 <data name="PanelYourNumber" xml:space="preserve"><value>YOUR NUMBER</value></data>
+<data name="HistorySnapshotFailed" xml:space="preserve"><value>Could not copy the history snapshot. Please try again.</value></data>
 </root>

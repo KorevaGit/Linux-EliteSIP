@@ -233,7 +233,7 @@
                       <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{res:Loc SettingsAgc}" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="1"/>
-                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsProcessing="{Binding Settings.Audio.AutomaticGainControl}" Foreground="{DynamicResource StatusRegisteredBrush}" Width="118"/>
+                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsActive="{Binding Settings.Audio.AutomaticGainControl}" Foreground="{DynamicResource TextSecondaryBrush}" ProcessedBrush="{DynamicResource SettingsGreenBrush}"/>
                     <theme:Icon Glyph="settings.mic" Size="18" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                   </Grid>
                 </CheckBox>
@@ -245,7 +245,7 @@
                       <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{res:Loc SettingsReceive}" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="1"/>
-                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsProcessing="{Binding Settings.Audio.ReceiveGainControl}" Foreground="{DynamicResource StatusRegisteredBrush}" Width="118"/>
+                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsActive="{Binding Settings.Audio.ReceiveGainControl}" Foreground="{DynamicResource TextSecondaryBrush}" ProcessedBrush="{DynamicResource SettingsGreenBrush}"/>
                     <theme:Icon Glyph="settings.volume-2" Size="18" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                   </Grid>
                 </CheckBox>
@@ -257,7 +257,7 @@
                       <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{res:Loc AudioNoiseSuppression}" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="1"/>
-                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsProcessing="{Binding Settings.Audio.NoiseSuppression}" Foreground="{DynamicResource StatusRegisteredBrush}" Width="118"/>
+                    <theme:ProcessingPreview Kind="Noise" Grid.Column="2" Margin="8,0,0,0" IsActive="{Binding Settings.Audio.NoiseSuppression}" Foreground="{DynamicResource TextSecondaryBrush}" ProcessedBrush="{DynamicResource SettingsGreenBrush}"/>
                     <theme:Icon Glyph="settings.audio-lines" Size="18" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                   </Grid>
                 </CheckBox>
@@ -269,7 +269,7 @@
                       <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{res:Loc SettingsVoices}" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="1"/>
-                    <theme:ProcessingPreview Grid.Column="2" Margin="8,0,0,0" IsProcessing="{Binding Settings.Audio.BackgroundVoiceSuppression}" Foreground="{DynamicResource StatusRegisteredBrush}" Width="118"/>
+                    <theme:ProcessingPreview Kind="Voices" Grid.Column="2" Margin="8,0,0,0" IsActive="{Binding Settings.Audio.BackgroundVoiceSuppression}" Foreground="{DynamicResource TextSecondaryBrush}" ProcessedBrush="{DynamicResource SettingsGreenBrush}"/>
                     <theme:Icon Glyph="settings.users-round" Size="18" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                   </Grid>
                 </CheckBox>
@@ -290,12 +290,12 @@
                   </Grid.ColumnDefinitions>
                   <Button x:Name="SelfTestRecordButton" Classes="settings" Command="{Binding RunSelfTest}" IsEnabled="{Binding CanRunSelfTest}">
                     <StackPanel Orientation="Horizontal">
-                      <theme:Icon Glyph="settings.mic-vocal" Size="16" VerticalAlignment="Center"/>
+                      <theme:Icon Glyph="{Binding SelfTestGlyph}" Size="16" VerticalAlignment="Center"/>
                       <TextBlock Text="{Binding SelfTestButtonText}" Margin="7,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                   </Button>
                   <Border Grid.Column="1" Background="{DynamicResource FieldBrush}" CornerRadius="7" Margin="8,0,0,0" Padding="8,0">
-                    <theme:VoiceTrace IsRunning="{Binding IsSelfTestRunning}" Level="{Binding VoiceLevel}" VerticalAlignment="Center"/>
+                    <theme:RecordingWaveform Foreground="{DynamicResource SettingsGreenBrush}" TrackBrush="{DynamicResource SettingsTrackBrush}" Level="{Binding VoiceLevel}" VerticalAlignment="Center"/>
                   </Border>
                   <Button Grid.Column="2" Classes="settings" Width="32" Padding="0" HorizontalAlignment="Right" Command="{Binding ReplayRecording}" IsEnabled="{Binding CanReplayRecording}" ToolTip.Tip="{res:Loc SettingsPlayRecording}" AutomationProperties.Name="{res:Loc SettingsPlayRecording}">
                     <theme:Icon Glyph="settings.play" Size="16"/>
@@ -313,9 +313,9 @@
                     <ColumnDefinition Width="45"/>
                   </Grid.ColumnDefinitions>
                   <TextBlock Text="{res:Loc AudioMeterVoice}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                  <theme:LevelMeter Grid.Column="1" Level="{Binding VoiceLevel}" VerticalAlignment="Center"/>
+                  <theme:LevelMeter ActiveBrush="{DynamicResource SettingsGreenBrush}" TrackBrush="{DynamicResource SettingsTrackBrush}" Grid.Column="1" Level="{Binding VoiceLevel}" VerticalAlignment="Center"/>
                   <TextBlock Grid.Column="2" Text="{res:Loc AudioMeterSound}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="14,0,8,0"/>
-                  <theme:LevelMeter Grid.Column="3" Level="{Binding SoundLevel}" VerticalAlignment="Center"/>
+                  <theme:LevelMeter ActiveBrush="{DynamicResource SettingsGreenBrush}" TrackBrush="{DynamicResource SettingsTrackBrush}" Grid.Column="3" Level="{Binding SoundLevel}" VerticalAlignment="Center"/>
                   <TextBlock Grid.Column="4" Text="{Binding SelfTestElapsed}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
                 <theme:SettingsNote Text="{res:Loc AudioSelfTestBusy}" IsVisible="{Binding IsSelfTestBlockedByCall}"/>
@@ -408,7 +408,7 @@
                     <theme:Icon Glyph="settings.languages" Size="18" VerticalAlignment="Center"/>
                     <TextBlock Text="{res:Loc AppearanceLanguage}" Margin="7,0,0,0" VerticalAlignment="Center"/>
                   </StackPanel>
-                  <ComboBox x:Name="LanguageChoice" HorizontalAlignment="Stretch" Width="145" Grid.Column="1" SelectedValueBinding="{ReflectionBinding Tag}" SelectedValue="{Binding Settings.Appearance.Language, Mode=OneWay}" SelectionChanged="OnLanguageSelectionChanged">
+                  <ComboBox Height="32" VerticalAlignment="Center" x:Name="LanguageChoice" HorizontalAlignment="Stretch" Width="145" Grid.Column="1" SelectedValueBinding="{ReflectionBinding Tag}" SelectedValue="{Binding Settings.Appearance.Language, Mode=OneWay}" SelectionChanged="OnLanguageSelectionChanged">
                     <ComboBoxItem Tag="{x:Static settings:LanguageSetting.System}" Content="{res:Loc AppearanceLanguageSystem}"/>
                     <ComboBoxItem Tag="{x:Static settings:LanguageSetting.Russian}" Content="{res:Loc SettingsRussian}"/>
                     <ComboBoxItem Tag="{x:Static settings:LanguageSetting.English}" Content="English"/>

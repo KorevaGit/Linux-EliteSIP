@@ -40,6 +40,23 @@ public sealed class TrayUiTests
         finally { window.Close();CultureInfo.CurrentUICulture=old; }
     }
 
+    [AvaloniaFact]
+    public void Offline_choice_replaces_profile_identity_with_offline_label()
+    {
+        var model = new PanelViewModel { StatusTitle="701", Registration=RegistrationState.Registered };
+        var window = new PanelWindow(model) { AllowsClosing=true };window.Show();
+        try
+        {
+            model.GoOffline.Execute(null);Dispatcher.UIThread.RunJobs();
+            var pill=window.FindControl<Button>("ProfilePill")!;
+            Assert.Contains(pill.GetVisualDescendants().OfType<TextBlock>(),t=>t.IsEffectivelyVisible&&t.Text==Strings.Get("PanelOffline"));
+            Assert.DoesNotContain(pill.GetVisualDescendants().OfType<TextBlock>(),t=>t.IsEffectivelyVisible&&t.Text=="701");
+            model.GoOnline.Execute(null);Dispatcher.UIThread.RunJobs();
+            Assert.Contains(pill.GetVisualDescendants().OfType<TextBlock>(),t=>t.IsEffectivelyVisible&&t.Text=="701");
+        }
+        finally {window.Close();}
+    }
+
     [AvaloniaTheory]
     [InlineData(false)]
     [InlineData(true)]

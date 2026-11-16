@@ -39,4 +39,22 @@
   <Style Selector="Button.chip:disabled, RadioButton.chip:disabled">
     <Setter Property="Opacity" Value="{StaticResource DisabledOpacity}" />
   </Style>
+  <!-- Windows GraphiteHistory geometry, copied into the independent Linux UI. -->
+  <Style Selector="Button.history-toolbar"><Setter Property="Height" Value="40"/><Setter Property="MinHeight" Value="40"/><Setter Property="Padding" Value="10,0"/><Setter Property="FontSize" Value="13"/></Style>
+  <Style Selector="RadioButton.history-filter">
+    <Setter Property="Height" Value="40"/><Setter Property="Margin" Value="2,0"/><Setter Property="Padding" Value="9,0"/><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Template"><ControlTemplate><Border Name="Filter" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}"><ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center"/></Border></ControlTemplate></Setter>
+  </Style>
+  <Style Selector="RadioButton.history-filter:checked"><Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/></Style>
+  <Style Selector="RadioButton.history-filter:checked /template/ Border#Filter"><Setter Property="BoxShadow" Value="0 3 9 0 #29000000"/><Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/><Setter Property="BorderThickness" Value="0,1,0,0"/></Style>
+  <Style Selector="RadioButton.history-filter:pointerover:not(:checked)"><Setter Property="Background" Value="{DynamicResource HistoryFilterHoverBrush}"/></Style>
+  <!-- Calendar controls deliberately have no gradient, raised edge or shadow. -->
+  <Style Selector="Button.day, Button.calendar-nav">
+    <Setter Property="Background" Value="Transparent"/><Setter Property="Padding" Value="0"/><Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    <Setter Property="Template"><ControlTemplate><Border Name="Day" CornerRadius="6" Background="{TemplateBinding Background}"><ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter>
+  </Style>
+  <Style Selector="Button.calendar-nav"><Setter Property="Width" Value="28"/><Setter Property="Height" Value="28"/></Style>
+  <Style Selector="Button.day:pointerover, Button.calendar-nav:pointerover"><Setter Property="Background" Value="{DynamicResource SelectionBrush}"/></Style>
+  <Style Selector="Button.day:disabled, Button.calendar-nav:disabled"><Setter Property="Opacity" Value="0.25"/></Style>
 </Styles>

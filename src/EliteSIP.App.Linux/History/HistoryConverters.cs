@@ -34,6 +34,9 @@ public static class HistoryConverters
     public static IValueConverter CallStamp { get; } = new FuncValueConverter<DateTimeOffset, string>(
         moment => moment.ToLocalTime().ToString("HH:mm dd.MM.yyyy", CultureInfo.CurrentCulture));
 
+    public static IValueConverter CallTime { get; } = new FuncValueConverter<DateTimeOffset, string>(moment => moment.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture));
+    public static IValueConverter CallDate { get; } = new FuncValueConverter<DateTimeOffset, string>(moment => moment.ToLocalTime().ToString("dd.MM.yyyy", CultureInfo.CurrentCulture));
+
     public static IValueConverter IsIncoming { get; } = new FuncValueConverter<CallRecord?, bool>(
         record => record?.Direction == CallDirection.Incoming);
 

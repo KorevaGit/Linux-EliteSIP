@@ -13,7 +13,7 @@ using Tmds.DBus.Protocol;
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("linux")]
 namespace EliteSIP.Tools.TrayProbe;
 
-internal static class Program
+internal static partial class Program
 {
  private static readonly string Output=Directory.CreateTempSubdirectory("elitesip-tray-probe-").FullName;
  static bool SniTest => Environment.GetEnvironmentVariable("ELITESIP_TEST_SNI")=="1";
@@ -68,6 +68,7 @@ internal static class Program
  }
  [STAThread] static void Main()
  {
+  if(Environment.GetEnvironmentVariable("ELITESIP_TEST_HISTORY")=="1") { HistoryTest();return; }
   if(SniTest) { SniTransportOnly().GetAwaiter().GetResult();return; }
   Console.WriteLine("Snapshots: "+Output);
   CultureInfo.CurrentUICulture=CultureInfo.GetCultureInfo("ru-RU");

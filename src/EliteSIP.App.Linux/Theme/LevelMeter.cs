@@ -15,6 +15,11 @@ public sealed class LevelMeter : Control
     public static readonly StyledProperty<double> LevelProperty =
         AvaloniaProperty.Register<LevelMeter, double>(nameof(Level));
 
+    public static readonly StyledProperty<IBrush?> ActiveBrushProperty = AvaloniaProperty.Register<LevelMeter,IBrush?>(nameof(ActiveBrush));
+    public static readonly StyledProperty<IBrush?> TrackBrushProperty = AvaloniaProperty.Register<LevelMeter,IBrush?>(nameof(TrackBrush));
+    public IBrush? ActiveBrush { get=>GetValue(ActiveBrushProperty);set=>SetValue(ActiveBrushProperty,value); }
+    public IBrush? TrackBrush { get=>GetValue(TrackBrushProperty);set=>SetValue(TrackBrushProperty,value); }
+
     private const int Segments = 24;
     private const double GreenUntil = 0.75;
     private const double YellowUntil = 0.92;
@@ -31,7 +36,7 @@ public sealed class LevelMeter : Control
 
     static LevelMeter()
     {
-        AffectsRender<LevelMeter>(LevelProperty);
+        AffectsRender<LevelMeter>(LevelProperty,ActiveBrushProperty,TrackBrushProperty);
     }
 
     public LevelMeter()
@@ -55,6 +60,7 @@ public sealed class LevelMeter : Control
         }
 
         _shown = Math.Sqrt(Math.Clamp(change.GetNewValue<double>(), 0, 1));
+        if (_shown == 0) { _peak = 0; return; }
         var now = DateTime.UtcNow;
         if (_shown >= _peak || now - _peakAt > PeakHold)
         {
@@ -72,9 +78,9 @@ public sealed class LevelMeter : Control
             return;
         }
 
-        var unlit = this.TryFindResource("SeparatorBrush", ActualThemeVariant, out var found) && found is IBrush brush
+        var unlit = TrackBrush ?? (this.TryFindResource("SeparatorBrush", ActualThemeVariant, out var found) && found is IBrush brush
             ? brush
-            : Brushes.LightGray;
+            : Brushes.LightGray);
 
         var segment = (width - (Gap * (Segments - 1))) / Segments;
         var lit = (int)Math.Round(_shown * Segments);
@@ -85,7 +91,7 @@ public sealed class LevelMeter : Control
             var position = (index + 1) / (double)Segments;
             var color = position <= GreenUntil ? Green : position <= YellowUntil ? Yellow : Red;
             var on = index < lit || (index == peak && _peak > 0.02);
-            context.DrawRectangle(on ? color : unlit, null, new RoundedRect(new Rect(index * (segment + Gap), 0, segment, height), 1.5));
+            context.DrawRectangle(on ? ActiveBrush ?? color : unlit, null, new RoundedRect(new Rect(index * (segment + Gap), 0, segment, height), 1.5));
         }
     }
 }

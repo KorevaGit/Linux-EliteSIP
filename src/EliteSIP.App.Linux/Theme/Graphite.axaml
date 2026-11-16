@@ -53,4 +53,7 @@
 <Style Selector="Button.tray-menu:pointerover, Button.tray-menu:focus-visible"><Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/></Style>
 <Style Selector="Button.tray-menu:pressed"><Setter Property="Background" Value="{DynamicResource ControlPressedBrush}"/></Style>
 <Style Selector="Button.tray-menu:disabled"><Setter Property="Opacity" Value="0.45"/></Style>
+<Style Selector="TextBox:not(.panel)"><Setter Property="Background" Value="{DynamicResource FieldBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource SettingsLineBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="7"/><Setter Property="Padding" Value="7,0"/><Setter Property="MinHeight" Value="33"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+<Style Selector="TextBox:not(.panel):pointerover /template/ Border#border"><Setter Property="BorderBrush" Value="{DynamicResource SettingsLineBrush}"/></Style>
+<Style Selector="TextBox:not(.panel):focus /template/ Border#border"><Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}"/></Style>
 </Styles>

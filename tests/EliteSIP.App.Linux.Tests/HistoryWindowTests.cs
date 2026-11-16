@@ -1,3 +1,7 @@
+using Avalonia.Input;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
+using Avalonia.Media;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
@@ -28,16 +32,55 @@ public sealed class HistoryWindowTests
         window.Show();
         Dispatcher.UIThread.RunJobs();
         Snapshot.Save(window.CaptureRenderedFrame()!, "history");
+        Assert.Equal(40, window.CalendarButton.Bounds.Height);
+        Assert.Contains(window.GetVisualDescendants().OfType<OutcomeBadge>(), badge=>badge.Size==40);
+        Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), text=>text.FontSize==18&&text.Text=="Отдел продаж");
 
         window.CalendarPopup.IsOpen = true;
         Dispatcher.UIThread.RunJobs();
         Snapshot.Save(window.CaptureRenderedFrame()!, "history-calendar");
+        var calendar=Assert.IsType<Border>(window.CalendarPopup.Child);
+        Assert.IsAssignableFrom<ISolidColorBrush>(calendar.Background);
+        Assert.Equal(0, calendar.BoxShadow.Count);
+        Assert.All(calendar.GetVisualDescendants().OfType<Border>(), border=>Assert.Equal(0, border.BoxShadow.Count));
 
         model.Filter = HistoryFilter.Missed;
         Dispatcher.UIThread.RunJobs();
 
         window.Close();
         Assert.True(errors.Errors.Count == 0, string.Join(Environment.NewLine, errors.Errors.Distinct()));
+    }
+
+    [AvaloniaFact]
+    public async Task Snapshot_survives_deferred_clipboard_request_after_window_closes()
+    {
+        var clipboard = System.Reflection.DispatchProxy.Create<Avalonia.Input.Platform.IClipboard, DeferredClipboard>();
+        var deferred = (DeferredClipboard)(object)clipboard;
+        var window = new CallHistoryWindow();
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+        await window.CopySnapshotAsync(clipboard);
+        window.Close();
+        // X11 requests the image later, often after the click handler has returned.
+        for (var i=0;i<3;i++)
+        {
+            using var bitmap = await deferred.Data!.TryGetBitmapAsync();
+            Assert.NotNull(bitmap);
+            using var png = new MemoryStream();
+            bitmap.Save(png, Avalonia.Media.Imaging.PngBitmapEncoderOptions.Default);
+            Assert.True(png.Length > 100);
+        }
+        deferred.Data!.Dispose();
+    }
+
+    public class DeferredClipboard : System.Reflection.DispatchProxy
+    {
+        public Avalonia.Input.IAsyncDataTransfer? Data { get; private set; }
+        protected override object? Invoke(System.Reflection.MethodInfo? targetMethod, object?[]? args)
+        {
+            if (targetMethod!.Name == "SetDataAsync") { Data = (Avalonia.Input.IAsyncDataTransfer)args![0]!; return Task.CompletedTask; }
+            throw new NotSupportedException(targetMethod.Name);
+        }
     }
 
     private static void Add(

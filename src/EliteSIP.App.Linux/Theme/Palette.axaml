@@ -2,6 +2,9 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="SettingsGreenBrush" Color="#168016"/><SolidColorBrush x:Key="SettingsTrackBrush" Color="#D0D0D0"/><SolidColorBrush x:Key="SettingsLineBrush" Color="#13000000"/>
+      <LinearGradientBrush x:Key="HistoryFilterBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#ECECEC" Offset="0"/><GradientStop Color="#E3E3E3" Offset="1"/></LinearGradientBrush><SolidColorBrush x:Key="HistoryFilterHoverBrush" Color="#70FFFFFF"/>
+      <SolidColorBrush x:Key="HistoryOutgoingBrush" Color="#B77900"/><SolidColorBrush x:Key="HistoryMissedBrush" Color="#D51E32"/>
       <SolidColorBrush x:Key="TextPrimaryBrush" Color="#242424" />
       <SolidColorBrush x:Key="TextSecondaryBrush" Color="#686868" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FF6B7075" />
@@ -63,6 +66,9 @@
       <LinearGradientBrush x:Key="SurfaceBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#E9E9E9" Offset="1"/></LinearGradientBrush>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="SettingsGreenBrush" Color="#78CD61"/><SolidColorBrush x:Key="SettingsTrackBrush" Color="#484848"/><SolidColorBrush x:Key="SettingsLineBrush" Color="#13FFFFFF"/>
+      <LinearGradientBrush x:Key="HistoryFilterBackgroundBrush" StartPoint="0%,0%" EndPoint="0%,100%"><GradientStop Color="#252525" Offset="0"/><GradientStop Color="#222222" Offset="1"/></LinearGradientBrush><SolidColorBrush x:Key="HistoryFilterHoverBrush" Color="#18FFFFFF"/>
+      <SolidColorBrush x:Key="HistoryOutgoingBrush" Color="#F2B544"/><SolidColorBrush x:Key="HistoryMissedBrush" Color="#FF4E62"/>
       <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F2F2" />
       <SolidColorBrush x:Key="TextSecondaryBrush" Color="#BCBCBC" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FFA3ABB4" />

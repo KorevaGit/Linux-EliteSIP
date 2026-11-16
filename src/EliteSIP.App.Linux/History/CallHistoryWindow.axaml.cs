@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -117,13 +118,27 @@ public partial class CallHistoryWindow : Window
 
     private async void OnSnapshotClick(object? sender, RoutedEventArgs e)
     {
+        try
+        {
+            if (Clipboard is { } clipboard) { await CopySnapshotAsync(clipboard); }
+        }
+        catch (Exception error) when (error is not OutOfMemoryException)
+        {
+            ShowNotice(LinuxStrings.Get("HistorySnapshotFailed"));
+        }
+    }
+
+    internal async Task CopySnapshotAsync(IClipboard clipboard)
+    {
         const double scale = 2;
         var size = ListSurface.Bounds.Size;
-        if (size.Width <= 0 || size.Height <= 0 || Clipboard is not { } clipboard)
+        if (size.Width <= 0 || size.Height <= 0)
         {
             return;
         }
 
+        _noticeTimer.Stop();
+        Notice.IsVisible = false;
         using RenderTargetBitmap list = new(new PixelSize((int)Math.Ceiling(size.Width*scale),(int)Math.Ceiling(size.Height*scale)),new Vector(96*scale,96*scale));
         list.Render(ListSurface);
         using RenderTargetBitmap image = new(new PixelSize((int)Math.Ceiling(size.Width*scale),(int)Math.Ceiling((size.Height+52)*scale)),new Vector(96*scale,96*scale));
@@ -135,7 +150,19 @@ public partial class CallHistoryWindow : Window
             context.DrawText(text,new Point(10,16));
             context.DrawImage(list,new Rect(0,52,size.Width,size.Height));
         }
-        await clipboard.SetBitmapAsync(image);
+        // X11 reads lazily, possibly after this window closes. The clipboard
+        // owns the transfer; each request decodes an independent bitmap.
+        using var png = new MemoryStream();
+        image.Save(png, PngBitmapEncoderOptions.Default);
+        var bytes = png.ToArray();
+        var transfer = new DataTransfer();
+        transfer.Add(DataTransferItem.Create(DataFormat.Bitmap, () =>
+        {
+            using var source = new MemoryStream(bytes, writable: false);
+            return new Bitmap(source);
+        }));
+        try { await clipboard.SetDataAsync(transfer); }
+        catch { ((IDisposable)transfer).Dispose(); throw; }
         ShowNotice(Strings.Get("HistorySnapshotDone"));
     }
 

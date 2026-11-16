@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Headless;
@@ -107,6 +108,32 @@ public sealed class IncomingWindowTests
     {
         Assert.True(PointerWatch.IsXTest("Virtual core XTEST pointer"));
         Assert.False(PointerWatch.IsXTest("Telink Wireless Receiver Mouse"));
+    }
+
+    [AvaloniaTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Incoming_identity_is_centered_without_native_corner_artifacts_or_clipped_title(bool deal)
+    {
+        var old = System.Globalization.CultureInfo.CurrentUICulture;
+        System.Globalization.CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+        var subject = IncomingCallSubject.Classify(deal ? "701" : "79161234567", "Тест", requestsAutoAnswer: !deal, ownNumber: "701", masksMobileNumbers:true);
+        var model = new IncomingCallViewModel(subject, CallGuardChallenge.Build(new CallGuardPolicy { TargetCount=1 }.Normalized(),new Random(7)), false, _=>{},()=>{});
+        var window = new IncomingCallWindow(model);window.Show();Dispatcher.UIThread.RunJobs();
+        try
+        {
+            var outer=Assert.IsType<Border>(window.Content);
+            Assert.Equal(default(Avalonia.CornerRadius),outer.CornerRadius);
+            var block=window.NumberBlock;
+            var card=Assert.IsType<Border>(block.Parent);
+            var center=block.TranslatePoint(new Avalonia.Point(0,block.Bounds.Height/2),card)!.Value.Y;
+            Assert.InRange(center,card.Bounds.Height/2-1,card.Bounds.Height/2+1);
+            var headline=block.GetVisualDescendants().OfType<TextBlock>().First();
+            Assert.InRange(headline.TextLayout.Height,0,headline.Bounds.Height+1);
+            Assert.DoesNotContain(headline.TextLayout.TextLines,line=>line.HasCollapsed);
+            Snapshot.Save(window.CaptureRenderedFrame()!,deal?"incoming-deal-centered":"incoming-hot-complete");
+        }
+        finally {window.Close();System.Globalization.CultureInfo.CurrentUICulture=old;}
     }
 
     private static PointerPress Press(int id, string device, bool xtest)

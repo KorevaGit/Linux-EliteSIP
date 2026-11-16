@@ -366,7 +366,7 @@ public sealed class SettingsViewModel : Observable
         _selfTestStarted = running ? DateTimeOffset.UtcNow : null;
         _isSelfTestRunning=running;
         if (!running) { _voiceLevel=0; _soundLevel=0; }
-        foreach(var name in new[] { nameof(IsSelfTestRunning),nameof(CanRunSelfTest),nameof(SelfTestButtonText),nameof(MicrophoneTestText),nameof(SelfTestElapsed),nameof(ShowsMeters),nameof(CanSaveRecording),nameof(CanReplayRecording),nameof(VoiceLevel),nameof(SoundLevel) }) { NotifyChanged(name); }
+        foreach(var name in new[] { nameof(IsSelfTestRunning),nameof(CanRunSelfTest),nameof(SelfTestButtonText),nameof(SelfTestGlyph),nameof(MicrophoneTestText),nameof(SelfTestElapsed),nameof(ShowsMeters),nameof(CanSaveRecording),nameof(CanReplayRecording),nameof(VoiceLevel),nameof(SoundLevel) }) { NotifyChanged(name); }
     }
 
     /// <summary>Во время звонка проверка не запускается: это отнятый у собеседника микрофон.</summary>
@@ -375,7 +375,9 @@ public sealed class SettingsViewModel : Observable
     public bool IsSelfTestBlockedByCall => _isInCall && !_isSelfTestRunning;
 
     public string MicrophoneTestText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "SettingsTest");
-    public string SelfTestButtonText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "AudioSelfTestStart");
+    public string SelfTestGlyph => _isSelfTestRunning ? "settings.square" : "settings.circle";
+
+    public string SelfTestButtonText => Strings.Get(_isSelfTestRunning ? "AudioSelfTestStop" : "SettingsRecordFiveSeconds");
 
     /// <summary>Шкалы видны во время проверки и разговора, в остальное время — подсказка.</summary>
     public bool ShowsMeters => _isSelfTestRunning || _isInCall;
@@ -471,6 +473,7 @@ public sealed class SettingsViewModel : Observable
             NotifyChanged(nameof(CanRunSelfTest));
             NotifyChanged(nameof(IsSelfTestBlockedByCall));
             NotifyChanged(nameof(SelfTestButtonText));
+            NotifyChanged(nameof(SelfTestGlyph));
             NotifyChanged(nameof(MicrophoneTestText));
             NotifyChanged(nameof(ShowsMeters));
             NotifyChanged(nameof(CanSaveRecording));

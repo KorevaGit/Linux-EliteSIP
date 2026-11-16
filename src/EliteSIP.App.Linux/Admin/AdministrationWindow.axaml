@@ -97,21 +97,15 @@
                 </StackPanel>
               </StackPanel>
               <theme:SettingsRow Header="{res:Loc AdminPbxOffice}">
-                <Border Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                  <TextBox Text="{Binding OfficeAddress, UpdateSourceTrigger=PropertyChanged}"/>
-                </Border>
+                <TextBox Height="33" Text="{Binding OfficeAddress, UpdateSourceTrigger=PropertyChanged}"/>
               </theme:SettingsRow>
               <theme:SettingsRow Header="{res:Loc AdminPbxRemote}">
-                <Border Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                  <TextBox Text="{Binding RemoteAddress, UpdateSourceTrigger=PropertyChanged}"/>
-                </Border>
+                <TextBox Height="33" Text="{Binding RemoteAddress, UpdateSourceTrigger=PropertyChanged}"/>
               </theme:SettingsRow>
               <Expander Header="{res:Loc AdminConnectionAdvanced}">
                 <StackPanel>
                   <theme:SettingsRow Header="{res:Loc AdminPbxPort}">
-                    <Border Height="33" Width="90" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                      <TextBox Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Border>
+                    <TextBox Height="33" Width="90" HorizontalAlignment="Left" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"/>
                   </theme:SettingsRow>
                   <theme:SettingsRow Header="{res:Loc AdminPbxTransport}">
                     <StackPanel Orientation="Horizontal">
@@ -121,15 +115,11 @@
                     </StackPanel>
                   </theme:SettingsRow>
                   <theme:SettingsRow Header="{res:Loc AdminPbxExpiry}">
-                    <Border Height="33" Width="90" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                      <TextBox Text="{Binding RegistrationExpirySeconds, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Border>
+                    <TextBox Height="33" Width="90" HorizontalAlignment="Left" Text="{Binding RegistrationExpirySeconds, UpdateSourceTrigger=PropertyChanged}"/>
                   </theme:SettingsRow>
                   <theme:SettingsSection Header="{res:Loc AdminPbxTlsTitle}" IsVisible="{Binding IsTls}" Tag="settings.circle">
                     <theme:SettingsRow Header="{res:Loc AdminPbxTlsFingerprint}">
-                      <Border Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                        <TextBox IsEnabled="{Binding AcceptsAnyTlsCertificate, Converter={x:Static theme:Converters.Not}}" Text="{Binding PinnedCertificateFingerprint, UpdateSourceTrigger=PropertyChanged}"/>
-                      </Border>
+                      <TextBox Height="33" IsEnabled="{Binding AcceptsAnyTlsCertificate, Converter={x:Static theme:Converters.Not}}" Text="{Binding PinnedCertificateFingerprint, UpdateSourceTrigger=PropertyChanged}"/>
                     </theme:SettingsRow>
                     <theme:SettingsDivider/>
                     <CheckBox Classes="switch" IsChecked="{Binding AcceptsAnyTlsCertificate}">
@@ -157,15 +147,9 @@
                               <ColumnDefinition Width="6"/>
                               <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                              <TextBox Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockHost}"/>
-                            </Border>
-                            <Border Grid.Column="2" Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                              <TextBox FontFamily="Consolas" Text="{Binding PayloadBytes, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockBytes}"/>
-                            </Border>
-                            <Border Grid.Column="4" Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                              <TextBox FontFamily="Consolas" Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockCount}"/>
-                            </Border>
+                            <TextBox Grid.Column="0" Height="33" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockHost}"/>
+                            <TextBox Grid.Column="2" Height="33" FontFamily="Consolas" Text="{Binding PayloadBytes, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockBytes}"/>
+                            <TextBox Grid.Column="4" Height="33" FontFamily="Consolas" Text="{Binding Count, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminKnockCount}"/>
                             <Button Grid.Column="6" Classes="settings" Padding="6,2" ToolTip.Tip="{res:Loc AdminMacroRemove}" Click="OnKnockRemoveClick">
                               <theme:Icon Glyph="trash" Size="12"/>
                             </Button>
@@ -178,14 +162,10 @@
                     </theme:SettingsIndented>
                     <theme:SettingsDivider/>
                     <theme:SettingsRow Header="{res:Loc AdminKnockSpacing}">
-                      <Border Height="33" Width="90" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                        <TextBox Text="{Binding KnockSpacingSeconds, UpdateSourceTrigger=PropertyChanged}"/>
-                      </Border>
+                      <TextBox Height="33" Width="90" HorizontalAlignment="Left" Text="{Binding KnockSpacingSeconds, UpdateSourceTrigger=PropertyChanged}"/>
                     </theme:SettingsRow>
                     <theme:SettingsRow Header="{res:Loc AdminKnockRepeat}">
-                      <Border Height="33" Width="90" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                        <TextBox Text="{Binding KnockRepeatIntervalSeconds, UpdateSourceTrigger=PropertyChanged}"/>
-                      </Border>
+                      <TextBox Height="33" Width="90" HorizontalAlignment="Left" Text="{Binding KnockRepeatIntervalSeconds, UpdateSourceTrigger=PropertyChanged}"/>
                     </theme:SettingsRow>
                     <theme:SettingsNote Text="{Binding KnockSummary}"/>
                   </theme:SettingsSection>
@@ -284,14 +264,10 @@
             </theme:SettingsSection>
             <theme:SettingsSection Header="{res:Loc AdminPbxFeatureTitle}" Tag="settings.headset">
               <theme:SettingsRow Header="{res:Loc AdminPbxTransfer}">
-                <Border Height="33" Width="120" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                  <TextBox FontFamily="Consolas" Text="{Binding TransferFeatureCode, UpdateSourceTrigger=PropertyChanged}"/>
-                </Border>
+                <TextBox Height="33" Width="120" HorizontalAlignment="Left" FontFamily="Consolas" Text="{Binding TransferFeatureCode, UpdateSourceTrigger=PropertyChanged}"/>
               </theme:SettingsRow>
               <theme:SettingsRow Header="{res:Loc AdminPbxConference}">
-                <Border Height="33" Width="120" HorizontalAlignment="Left" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                  <TextBox FontFamily="Consolas" Text="{Binding ConferenceFeatureCode, UpdateSourceTrigger=PropertyChanged}"/>
-                </Border>
+                <TextBox Height="33" Width="120" HorizontalAlignment="Left" FontFamily="Consolas" Text="{Binding ConferenceFeatureCode, UpdateSourceTrigger=PropertyChanged}"/>
               </theme:SettingsRow>
             </theme:SettingsSection>
           </StackPanel>
@@ -316,12 +292,8 @@
                           <ColumnDefinition Width="6"/>
                           <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                          <TextBox FontFamily="Consolas" Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueNumber}"/>
-                        </Border>
-                        <Border Grid.Column="2" Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                          <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueTitle}"/>
-                        </Border>
+                        <TextBox Grid.Column="0" Height="33" FontFamily="Consolas" Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueNumber}"/>
+                        <TextBox Grid.Column="2" Height="33" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueTitle}"/>
                         <Button Grid.Column="4" Classes="settings" Padding="6,2" ToolTip.Tip="{res:Loc AdminMacroRemove}" Click="OnQueueRemoveClick">
                           <theme:Icon Glyph="trash" Size="12"/>
                         </Button>
@@ -623,14 +595,10 @@
                   </StackPanel>
                 </StackPanel>
                 <theme:SettingsRow Header="{res:Loc AdminAccessNewPassword}">
-                  <Border Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                    <TextBox x:Name="NewPasswordField" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}" PasswordChar="●" Classes="panel" TextChanged="OnNewPasswordChanged"/>
-                  </Border>
+                  <TextBox Height="33" x:Name="NewPasswordField" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}" PasswordChar="●" Classes="panel" TextChanged="OnNewPasswordChanged"/>
                 </theme:SettingsRow>
                 <theme:SettingsRow Header="{res:Loc AdminAccessRepeatPassword}">
-                  <Border Height="33" CornerRadius="7" Padding="6,0" Background="{DynamicResource FieldBrush}">
-                    <TextBox x:Name="RepeatedPasswordField" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}" PasswordChar="●" Classes="panel" TextChanged="OnRepeatedPasswordChanged"/>
-                  </Border>
+                  <TextBox Height="33" x:Name="RepeatedPasswordField" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}" PasswordChar="●" Classes="panel" TextChanged="OnRepeatedPasswordChanged"/>
                 </theme:SettingsRow>
                 <theme:SettingsNote Text="{res:Loc AdminAccessMismatch}" IsAlarming="True" IsVisible="{Binding PasswordsDiffer}"/>
                 <theme:SettingsIndented>
