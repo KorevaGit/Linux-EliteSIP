@@ -192,6 +192,7 @@ public sealed partial class App : Application, IDisposable
         {
             ShowSettings = new RelayCommand(_ => ShowSettings()),
             ShowHistory = new RelayCommand(_ => ShowHistory()),
+            Quit = new RelayCommand(_ => Quit()),
         };
 
         var settings = _settings;

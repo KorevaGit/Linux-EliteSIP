@@ -44,17 +44,17 @@ internal static class DrawnCaption
         Grid.SetColumn(buttons,1); caption.Children.Add(buttons);
         Button Add(string glyph, string name, Action action)
         {
-            var button = new Button { Name = name, Width = 38, Height = 32, Padding = new Thickness(0), Content = new TextBlock { Text = glyph, FontSize = 14, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center } };
+            var button = new Button { Name = name, Width = 38, Height = 32, Padding = new Thickness(0), Content = new CaptionGlyph { Kind = glyph } };
             button.Classes.Add("caption");
             var label = Resources.Strings.Get(name == "PART_CloseButton" ? "WindowClose" : name == "PART_MinimizeButton" ? "WindowMinimize" : "WindowMaximize");
             Avalonia.Automation.AutomationProperties.SetName(button, label);
             ToolTip.SetTip(button, label);
             button.Click += (_,_) => action(); buttons.Children.Add(button); return button;
         }
-        Add("−", "PART_MinimizeButton", () => window.WindowState = WindowState.Minimized).IsVisible = window.CanResize;
+        Add("Minimize", "PART_MinimizeButton", () => window.WindowState = WindowState.Minimized).IsVisible = window.CanResize;
         void Toggle() { if (window.CanResize) { window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; } }
-        var maximize = Add("□", "PART_MaximizeButton", Toggle); maximize.IsVisible = window.CanResize;
-        Add("×", "PART_CloseButton", window.Close).Classes.Add("close");
+        var maximize = Add("Maximize", "PART_MaximizeButton", Toggle); maximize.IsVisible = window.CanResize;
+        Add("Close", "PART_CloseButton", window.Close).Classes.Add("close");
         caption.PointerPressed += (_,e) =>
         {
             if (e.Source is Visual source && (source is Button || source.GetVisualAncestors().OfType<Button>().Any())) { return; }
@@ -83,6 +83,6 @@ internal static class DrawnCaption
             if(side is {} value) { window.BeginResizeDrag(value,e); e.Handled=true; }
         }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
     }
-    internal static void Update(Window window) { foreach(var button in Buttons(window)) { button.Classes.Set(Restore,window.WindowState==WindowState.Maximized);button.Classes.Set(Inactive,!window.IsActive);if (button.Name == "PART_MaximizeButton" && button.Content is TextBlock glyph) { glyph.Text = window.WindowState == WindowState.Maximized ? "❐" : "□"; } } }
+    internal static void Update(Window window) { foreach(var button in Buttons(window)) { button.Classes.Set(Restore,window.WindowState==WindowState.Maximized);button.Classes.Set(Inactive,!window.IsActive);if (button.Name == "PART_MaximizeButton" && button.Content is CaptionGlyph glyph) { glyph.Kind = window.WindowState == WindowState.Maximized ? "Restore" : "Maximize"; } } }
     internal static IEnumerable<Button> Buttons(Window window) => window.GetVisualDescendants().OfType<Button>().Where(button=>button.Name is "PART_MinimizeButton" or "PART_MaximizeButton" or "PART_CloseButton");
 }

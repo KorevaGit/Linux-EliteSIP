@@ -670,6 +670,8 @@ public sealed class PanelViewModel : Observable
 
     public ICommand? ShowHistory { get; set; }
 
+    public ICommand? Quit { get; set; }
+
     public ICommand? ShowSettings { get; set; }
 
     /// <summary>Открывает поле перевода. Само по себе — дело панели, а не протокола.</summary>

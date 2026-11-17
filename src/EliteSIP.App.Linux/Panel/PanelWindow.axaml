@@ -19,7 +19,9 @@
             <ContextMenu Name="ProfileMenu" Placement="BottomEdgeAlignedLeft">
               <MenuItem Name="SingleProfile" Header="{Binding ProfileMenuTitle}" ToggleType="CheckBox" IsChecked="{Binding IsOnline, Mode=OneWay}" Command="{Binding GoOnline}"/>
               <Separator/>
-              <MenuItem Header="{res:Loc PanelOffline}" ToggleType="CheckBox" IsChecked="{Binding IsOfflineByChoice, Mode=OneWay}" Command="{Binding GoOffline}"/>
+              <MenuItem Name="OfflineMenuItem" Header="{res:Loc PanelOffline}" ToggleType="CheckBox" IsChecked="{Binding IsOfflineByChoice, Mode=OneWay}" Command="{Binding GoOffline}"/>
+              <Separator/>
+              <MenuItem Name="QuitMenuItem" Header="{res:Loc TrayQuit}" Command="{Binding Quit}"><MenuItem.Icon><theme:Icon Glyph="settings.unplug" Size="16"/></MenuItem.Icon></MenuItem>
             </ContextMenu>
           </Button.ContextMenu>
           <Grid><TextBlock Name="OfflineProfileLabel" Text="{res:Loc PanelOffline}" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsOfflineByChoice}"/><Grid Name="OnlineProfileIdentity" IsVisible="{Binding !IsOfflineByChoice}" VerticalAlignment="Center" ColumnDefinitions="16,Auto,Auto,Auto">

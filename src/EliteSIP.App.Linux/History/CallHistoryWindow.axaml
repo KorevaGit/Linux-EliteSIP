@@ -157,9 +157,14 @@
   <Window.Styles>
     <Style Selector="ListBox.history-items ListBoxItem">
       <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/><Setter Property="Focusable" Value="False"/>
       <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-      <Setter Property="Template"><ControlTemplate><ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="Stretch"/></ControlTemplate></Setter>
+      <Setter Property="Template"><ControlTemplate><ContentPresenter Name="PART_ContentPresenter" Background="Transparent" Foreground="{DynamicResource TextPrimaryBrush}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="Stretch"/></ControlTemplate></Setter>
     </Style>
+    <Style Selector="ListBox.history-items ListBoxItem:pointerover /template/ ContentPresenter, ListBox.history-items ListBoxItem:selected /template/ ContentPresenter, ListBox.history-items ListBoxItem:selected:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.history-items ListBoxItem:pointerover, ListBox.history-items ListBoxItem:selected, ListBox.history-items ListBoxItem:selected:pointerover"><Setter Property="Background" Value="Transparent"/></Style>
     <Style Selector="history|OutcomeBadge"><Setter Property="Foreground" Value="{DynamicResource HistoryOutgoingBrush}"/></Style>
     <Style Selector="history|OutcomeBadge.incoming"><Setter Property="Foreground" Value="{DynamicResource OutcomeAnsweredBrush}"/></Style>
     <Style Selector="history|OutcomeBadge.missed"><Setter Property="Foreground" Value="{DynamicResource HistoryMissedBrush}"/></Style>

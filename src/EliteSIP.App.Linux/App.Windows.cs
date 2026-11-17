@@ -85,6 +85,7 @@ public sealed partial class App
         _settingsWindow = new SettingsWindow(model, _appearance!, _phone!.Sounds)
         {
             RestartRequested = RestartApplication,
+            TestOutputRequested = () => TestSpeakers(model),
             UnlockWorkplaceRequested = () => new AdminUnlockWindow(_settings!, _access!).Ask(_settingsWindow),
         };
         _settingsWindow.AdministrationRequested += ShowAdministration;
@@ -327,6 +328,20 @@ public sealed partial class App
     private async void ReplaySelfTest(SettingsViewModel model)
     {
         if (_phone is not { IsCallActive: false } phone || phone.SelfTest.ReadLastRecording() is not { } recording) { return; }
+        await PlayAudioPreviewAsync(model,recording.Samples,recording.SampleRate);
+    }
+
+    private async void TestSpeakers(SettingsViewModel model)
+    {
+        if (_phone?.IsCallActive is true) { return; }
+        const int rate=8000;
+        var samples=new short[rate/2];
+        for(var i=0;i<samples.Length;i++) { samples[i]=(short)(Math.Sin(2*Math.PI*800*i/rate)*short.MaxValue*.15); }
+        await PlayAudioPreviewAsync(model,samples,rate);
+    }
+
+    private async Task PlayAudioPreviewAsync(SettingsViewModel model,short[] samples,int sampleRate)
+    {
         _recordingPreview?.Cancel();
         using var cancellation = new CancellationTokenSource();
         _recordingPreview = cancellation;
@@ -336,8 +351,8 @@ public sealed partial class App
             {
                 using var output = EliteSIP.Audio.Pulse.PulseSignalSounds.Outputs.Open(_settings?.Audio.OutputDeviceId);
                 cancellation.Token.ThrowIfCancellationRequested();
-                output.Play(new RecordingSamples(recording.Samples, recording.SampleRate));
-                try { await Task.Delay(TimeSpan.FromSeconds((double)recording.Samples.Length / recording.SampleRate + .15), cancellation.Token); }
+                output.Play(new RecordingSamples(samples, sampleRate, () => model.Settings.Audio.PlaybackVolume));
+                try { await Task.Delay(TimeSpan.FromSeconds((double)samples.Length / sampleRate + .15), cancellation.Token); }
                 finally { output.Stop(); }
             });
         }

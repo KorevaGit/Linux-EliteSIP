@@ -243,9 +243,10 @@ public partial class SettingsWindow : Window
     { if (UnlockWorkplaceRequested?.Invoke() is true) { Model?.RefreshWorkplace(); } }
 
     private void OnTestMicrophoneClick(object? sender, RoutedEventArgs e) => Model?.RunSelfTest.Execute(null);
+    internal Action? TestOutputRequested { get; init; }
     private void OnTestOutputClick(object? sender, RoutedEventArgs e)
     {
-        if (Model is not null) { _sounds?.PlayKeyTone('5', Model.Settings.Audio.OutputDeviceId); }
+        if (Model is not null && !Model.IsSelfTestBlockedByCall) { TestOutputRequested?.Invoke(); }
     }
     private async void OnCopyMachineClick(object? sender, RoutedEventArgs e)
     {

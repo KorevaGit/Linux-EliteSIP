@@ -1,0 +1,23 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Independent copy of Windows Controls.xaml scroll dimensions and palette. -->
+  <Style Selector="ScrollBar:vertical, ScrollBar:horizontal">
+    <Setter Property="Background" Value="Transparent"/><Setter Property="MinWidth" Value="12"/><Setter Property="Width" Value="12"/>
+    <Setter Property="AllowAutoHide" Value="False"/>
+    <Setter Property="Template"><ControlTemplate>
+      <Border Name="ScrollTrack" Background="{TemplateBinding Background}" CornerRadius="6">
+        <Track Name="PART_Track" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}" Value="{TemplateBinding Value, Mode=TwoWay}" ViewportSize="{TemplateBinding ViewportSize}" Orientation="{TemplateBinding Orientation}">
+          <Track.DecreaseButton><RepeatButton Name="PART_PageUpButton" Classes="scroll-page"/></Track.DecreaseButton>
+          <Track.Thumb><Thumb Classes="product-scroll-thumb" Background="{DynamicResource ScrollThumbBrush}" Padding="4,0" MinHeight="24"/></Track.Thumb>
+          <Track.IncreaseButton><RepeatButton Name="PART_PageDownButton" Classes="scroll-page"/></Track.IncreaseButton>
+        </Track>
+      </Border>
+    </ControlTemplate></Setter>
+  </Style>
+  <Style Selector="ScrollBar:vertical /template/ Track#PART_Track"><Setter Property="IsDirectionReversed" Value="True"/></Style>
+  <Style Selector="ScrollBar:horizontal"><Setter Property="Width" Value="NaN"/><Setter Property="MinWidth" Value="0"/><Setter Property="Height" Value="12"/><Setter Property="MinHeight" Value="12"/></Style>
+  <Style Selector="ScrollBar:horizontal /template/ Thumb.product-scroll-thumb"><Setter Property="Padding" Value="0,4"/><Setter Property="MinHeight" Value="0"/><Setter Property="MinWidth" Value="24"/></Style>
+  <Style Selector="ScrollBar:pointerover /template/ Border#ScrollTrack"><Setter Property="Background" Value="{DynamicResource ScrollTrackBrush}"/></Style>
+  <Style Selector="RepeatButton.scroll-page"><Setter Property="Focusable" Value="False"/><Setter Property="Template"><ControlTemplate><Border Background="Transparent"/></ControlTemplate></Setter></Style>
+  <Style Selector="Thumb.product-scroll-thumb"><Setter Property="Focusable" Value="False"/><Setter Property="Template"><ControlTemplate><Border Background="Transparent" Padding="{TemplateBinding Padding}"><Border Name="ScrollPill" Background="{TemplateBinding Background}" CornerRadius="3"/></Border></ControlTemplate></Setter></Style>
+  <Style Selector="Thumb.product-scroll-thumb:pointerover, Thumb.product-scroll-thumb:pressed"><Setter Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}"/></Style>
+</Styles>

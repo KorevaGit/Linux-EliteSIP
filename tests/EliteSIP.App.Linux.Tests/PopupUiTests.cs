@@ -65,7 +65,7 @@ public sealed class PopupUiTests
             var frame=menu.GetVisualDescendants().OfType<Border>().Single(b=>b.Name=="ProductMenu");
             Assert.Equal(new CornerRadius(10),frame.CornerRadius);
             Assert.IsAssignableFrom<ILinearGradientBrush>(frame.Background);
-            var offline=menu.Items.OfType<MenuItem>().Last();
+            var offline=menu.Items.OfType<MenuItem>().Single(item=>item.Name=="OfflineMenuItem");
             model.GoOffline.Execute(null);Dispatcher.UIThread.RunJobs();Assert.True(offline.IsChecked);
             model.GoOnline.Execute(null);Dispatcher.UIThread.RunJobs();Assert.False(offline.IsChecked);
             using var image=new RenderTargetBitmap(PixelSize.FromSize(menu.Bounds.Size,1),new Vector(96,96));

@@ -79,6 +79,8 @@ internal static class IconLibrary
                 case "Rectangle":
                 case "Line":
                 case "Path":
+                case "Polygon":
+                case "Polyline":
                     strokes.Add(Stroke(child, outer));
                     break;
 
@@ -132,6 +134,7 @@ internal static class IconLibrary
             "Ellipse" => new EllipseGeometry(new Rect(Number(path,"Canvas.Left",0),Number(path,"Canvas.Top",0),Number(path,"Width",0),Number(path,"Height",0))),
             "Rectangle" => new RectangleGeometry(new Rect(Number(path,"Canvas.Left",0),Number(path,"Canvas.Top",0),Number(path,"Width",0),Number(path,"Height",0)),Number(path,"RadiusX",0),Number(path,"RadiusY",0)),
             "Line" => new LineGeometry(new Point(Number(path,"X1",0),Number(path,"Y1",0)),new Point(Number(path,"X2",0),Number(path,"Y2",0))),
+            "Polygon" or "Polyline" => PointsGeometry(path),
             _ => Geometry.Parse(path.Attribute("Data")!.Value),
         },
         transform,
@@ -140,6 +143,15 @@ internal static class IconLibrary
         Thickness: Number(path, "StrokeThickness", 1),
         Cap: path.Attribute("StrokeStartLineCap")?.Value == "Round" ? PenLineCap.Round : PenLineCap.Flat,
         Join: path.Attribute("StrokeLineJoin")?.Value == "Round" ? PenLineJoin.Round : PenLineJoin.Miter);
+
+    private static Geometry PointsGeometry(XElement element)
+    {
+        var points=element.Attribute("Points")!.Value.Split([' ', ',', '\r', '\n', '\t'],StringSplitOptions.RemoveEmptyEntries);
+        var commands=new List<string>();
+        for(var i=0;i+1<points.Length;i+=2) { commands.Add($"{(i==0?"M":"L")} {points[i]} {points[i+1]}"); }
+        if(element.Name.LocalName=="Polygon") { commands.Add("Z"); }
+        return Geometry.Parse(string.Join(" ",commands));
+    }
 
     private static double Number(XElement element, string name, double fallback) =>
         element.Attribute(name)?.Value is { } value
