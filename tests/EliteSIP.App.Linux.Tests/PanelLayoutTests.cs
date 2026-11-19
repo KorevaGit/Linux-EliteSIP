@@ -1,4 +1,6 @@
+using System.Reflection;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using EliteSIP.App.Panel;
@@ -20,6 +22,30 @@ public sealed class PanelLayoutTests
         Snapshot.Save(frame!, "panel-idle");
 
         window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Таймер_работает_только_пока_есть_линия()
+    {
+        var model = new PanelViewModel();
+        var window = new PanelWindow(model) { AllowsClosing = true };
+        var clock = (DispatcherTimer)typeof(PanelWindow)
+            .GetField("_clock", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(window)!;
+        window.Show();
+        try
+        {
+            Assert.False(clock.IsEnabled);
+            model.PendingNumber = "701";
+            Assert.False(clock.IsEnabled);
+            model.Lines.Add(new CallLineViewModel { CallId = "one", ConnectedAt = DateTimeOffset.Now });
+            Assert.True(clock.IsEnabled);
+            model.Lines.Clear();
+            Assert.False(clock.IsEnabled);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     [Fact]

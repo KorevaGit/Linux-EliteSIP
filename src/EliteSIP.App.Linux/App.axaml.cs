@@ -426,16 +426,18 @@ public sealed partial class App : Application, IDisposable
 
         ClientEventLog.Shared.Start(() => _settings!, Log);
         ClientEventLog.Shared.BeginSession();
+        ReportConfirmedUpdate(settings.Maintenance);
         _phone!.RecoverConnection = () => Reconnect("канал закрыт");
 
         _updates = new UpdateService(
-            isBusy: () => panel.IsInCall,
+            isBusy: () => _phone!.BlocksUpdateOffer,
             announce: version => Log(version is null
                 ? "обновление больше не ждёт"
                 : $"обновление {version} ждёт решения оператора"),
             alsoCheckPresets: () => _ = _panelLine?.CheckAsync(),
             ui: _ui,
             handoff: _updateHandoff,
+            schedule: settings.Maintenance,
             log: Log)
         {
             AskToInstall = AskToInstallUpdate,
@@ -554,6 +556,24 @@ public sealed partial class App : Application, IDisposable
             _session,
             onNetworkChanged: () => Reconnect("сеть сменилась"),
             onResume: () => Reconnect("машина проснулась"));
+    }
+
+    private void ReportConfirmedUpdate(MaintenanceSettings maintenance)
+    {
+        var path = Path.Combine("/var/lib/elitesip/update-report", EliteSIP.PanelLink.UpdateReceipt.ConfirmedName);
+        try
+        {
+            var file = new FileInfo(path);
+            if (file.Exists && file.Length <= 256
+                && EliteSIP.PanelLink.UpdateReceipt.Parse(File.ReadAllText(path)) is { } receipt)
+            {
+                ClientEventLog.Shared.ReportConfirmedUpdate(receipt, ProductVersion.Current, maintenance);
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            Log($"не удалось прочитать подтверждение установки: {error.GetType().Name}");
+        }
     }
 
     private void ApplyTrayAvailability()

@@ -52,6 +52,12 @@ internal sealed record Layout(string Program, string Shared, string Trusted, str
     /// <summary>Копии отметок из общего каталога — читаются только они.</summary>
     internal string Inbox => Path.Combine(Trusted, "inbox");
 
+    internal string Reports => Path.Combine(Path.GetDirectoryName(Trusted)!, "update-report");
+
+    internal string PendingReceipt => Path.Combine(Trusted, EliteSIP.PanelLink.UpdateReceipt.PendingName);
+
+    internal string ConfirmedReceipt => Path.Combine(Reports, EliteSIP.PanelLink.UpdateReceipt.ConfirmedName);
+
     internal string Log => Path.Combine(Trusted, "updater.log");
 
     /// <summary>Какая отметка о согласии уже обработана. Вместо удаления самой отметки.</summary>

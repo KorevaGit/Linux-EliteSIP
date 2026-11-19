@@ -34,6 +34,7 @@ internal sealed class Stand : IDisposable
         Directory.CreateDirectory(Layout.Program);
         Directory.CreateDirectory(Layout.Shared);
         Directory.CreateDirectory(Layout.Trusted);
+        Directory.CreateDirectory(Layout.Reports);
 
         File.WriteAllText(Path.Combine(Layout.Program, "provisioning.json"), JsonSerializer.Serialize(new
         {
@@ -147,6 +148,10 @@ internal sealed class FakeMachine : IMachine
     internal int Restarts { get; private set; }
 
     public Version? InstalledVersion() => Installed;
+
+    internal bool Configured { get; set; } = true;
+
+    public bool IsPackageConfigured() => Configured;
 
     public bool IsAppRunning() => AppRunning;
 

@@ -92,6 +92,62 @@ public sealed class NetworkRecoveryTests
         }
     }
 
+    [AvaloniaFact]
+    public void Обновление_линий_сохраняет_модель_и_не_сигналит_ложный_простой()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"line-refresh-{Guid.NewGuid():N}.db");
+        try
+        {
+            using var history = new CallHistoryStore(new(path));
+            var panel = new PanelViewModel();
+            using var phone = new PhoneService(new AppSettings(), panel, history,
+                new IncomingCallPresenter(_ => { }, () => null), new AvaloniaUiThread(), new TestAudioPlatform(), _ => { });
+            const BindingFlags instancePrivate = BindingFlags.Instance | BindingFlags.NonPublic;
+            var records = (Dictionary<string, CallRecord>)typeof(PhoneService)
+                .GetField("_records", instancePrivate)!.GetValue(phone)!;
+            var sync = typeof(PhoneService).GetMethod("SyncLines", instancePrivate)!.CreateDelegate<Action>(phone);
+            records.Add("one", Answered("one", "701"));
+            sync();
+            var first = Assert.Single(panel.Lines);
+
+            var idle = false;
+            panel.PropertyChanged += (_, change) =>
+            {
+                if (change.PropertyName == nameof(PanelViewModel.IsInCall) && !panel.IsInCall)
+                {
+                    idle = true;
+                }
+            };
+
+            records.Add("two", Answered("two", "702"));
+            sync();
+            Assert.Same(first, panel.Lines[0]);
+            Assert.Equal("two", panel.ActiveLine?.CallId);
+
+            records.Remove("one");
+            sync();
+            Assert.Equal("two", Assert.Single(panel.Lines).CallId);
+            Assert.False(idle);
+
+            records.Clear();
+            sync();
+            Assert.Empty(panel.Lines);
+            Assert.True(idle);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+
+        static CallRecord Answered(string id, string number) => new()
+        {
+            CallId = id,
+            Number = number,
+            Direction = CallDirection.Outgoing,
+            AnsweredAt = DateTimeOffset.Now,
+        };
+    }
+
     private static async Task WaitForDialAsync(PanelViewModel panel, CancellationToken token)
     {
         while (true)

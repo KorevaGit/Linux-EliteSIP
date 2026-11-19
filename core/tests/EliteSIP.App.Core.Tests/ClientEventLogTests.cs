@@ -2,6 +2,8 @@ using System.IO;
 using System.Net;
 using System.Text.Json;
 using EliteSIP.App.PanelLine;
+using EliteSIP.App.Settings;
+using EliteSIP.PanelLink;
 
 namespace EliteSIP.App.Tests;
 
@@ -20,6 +22,27 @@ public sealed class ClientEventLogTests : IDisposable
     private ClientEventLog Make() => new(FilePath, () => _now);
 
     public void Dispose() => Directory.Delete(_directory, recursive: true);
+
+    [Fact]
+    public void Receipt_is_reported_once_and_only_by_the_installed_version()
+    {
+        var log = Make();
+        var maintenance = new MaintenanceSettings();
+        var before = new Version(1, 0, 2);
+        var after = new Version(1, 0, 3);
+        var receipt = new UpdateReceipt(Guid.NewGuid(), before, after);
+
+        log.ReportConfirmedUpdate(receipt, before, maintenance);
+        Assert.Empty(log.Pending);
+        log.ReportConfirmedUpdate(receipt, after, maintenance);
+        log.ReportConfirmedUpdate(receipt, after, maintenance);
+        Make().ReportConfirmedUpdate(receipt, after, new MaintenanceSettings());
+
+        var item = Assert.Single(Make().Pending);
+        Assert.Equal(ClientEventLog.Kind.Update, item.Kind);
+        Assert.Contains(receipt.OperationId.ToString("N"), item.Message);
+        Assert.Equal(receipt.OperationId, maintenance.LastReportedUpdate);
+    }
 
     [Fact]
     public void AnsweredCallCarriesDurationAndOptionalPeer()

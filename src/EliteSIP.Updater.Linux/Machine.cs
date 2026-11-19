@@ -15,6 +15,8 @@ internal interface IMachine
     /// <summary>Версия, которая стоит сейчас. <c>null</c> — прочитать не удалось.</summary>
     public Version? InstalledVersion();
 
+    public bool IsPackageConfigured();
+
     /// <summary>Запущен ли софтфон хоть в каком-то сеансе.</summary>
     public bool IsAppRunning();
 
@@ -58,6 +60,12 @@ internal sealed class SystemdMachine(Layout layout) : IMachine
         {
             return null;
         }
+    }
+
+    public bool IsPackageConfigured()
+    {
+        var package = Run("dpkg-query", ["--show", "--showformat=${Status}", "elitesip"]);
+        return package.ExitCode == 0 && package.Output.Trim() == "install ok installed";
     }
 
     public bool IsAppRunning()

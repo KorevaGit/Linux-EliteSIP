@@ -69,6 +69,7 @@ public sealed class CallLineViewModel : Observable
 {
     public string? CallId { get; init; }
     private string _title = string.Empty;
+    private string? _secondaryNumber;
     private string _status = string.Empty;
     private bool _isActive;
     private bool _isOnHold;
@@ -88,7 +89,11 @@ public sealed class CallLineViewModel : Observable
     }
 
     /// <summary>Номер мелкой строкой — или пусто, если он повторил бы имя.</summary>
-    public string? SecondaryNumber { get; set; }
+    public string? SecondaryNumber
+    {
+        get => _secondaryNumber;
+        set => Set(ref _secondaryNumber, value);
+    }
 
     public string Status
     {
@@ -114,8 +119,11 @@ public sealed class CallLineViewModel : Observable
         get => _connectedAt;
         set
         {
-            Set(ref _connectedAt, value);
-            NotifyChanged(nameof(Duration));
+            if (_connectedAt != value)
+            {
+                Set(ref _connectedAt, value);
+                NotifyChanged(nameof(Duration));
+            }
         }
     }
 

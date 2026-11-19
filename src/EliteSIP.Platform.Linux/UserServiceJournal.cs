@@ -8,7 +8,7 @@ namespace EliteSIP.Platform.Linux;
 /// <summary>Ограниченный по времени и объёму журнал службы пользователя для архива поддержки.</summary>
 internal static class UserServiceJournal
 {
-    internal static async Task<string> CollectAsync(string executable = "journalctl", TimeSpan? timeout = null)
+    internal static async Task<string> CollectAsync(string executable = "journalctl", TimeSpan? timeout = null, bool updater = false)
     {
         using var deadline = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(3));
         using var process = new Process
@@ -21,7 +21,10 @@ internal static class UserServiceJournal
                 CreateNoWindow = true,
             },
         };
-        foreach (var argument in new[] { "--user", "--unit=elitesip.service", "--since=-30days", "--lines=500", "--no-pager", "--output=short-iso" })
+        string[] units = updater
+            ? ["--system", "--unit=elitesip-updater.service", "--unit=elitesip-install.service"]
+            : ["--user", "--unit=elitesip.service"];
+        foreach (var argument in units.Concat(["--since=-30days", "--lines=500", "--no-pager", "--output=short-iso"]))
         {
             process.StartInfo.ArgumentList.Add(argument);
         }

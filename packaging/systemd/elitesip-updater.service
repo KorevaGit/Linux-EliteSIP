@@ -58,6 +58,7 @@ RuntimeDirectoryMode=0700
 PrivateTmp=yes
 PrivateDevices=yes
 ProtectSystem=strict
+ReadWritePaths=/var/lib/elitesip/update-report
 ProtectHome=read-only
 NoNewPrivileges=yes
 ProtectKernelTunables=yes

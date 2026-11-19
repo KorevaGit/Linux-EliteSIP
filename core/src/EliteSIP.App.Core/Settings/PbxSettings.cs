@@ -174,11 +174,27 @@ public sealed class SetupSettings : Observable
     }
 }
 
+public sealed record UpdateDeferral(string Version, DateTimeOffset Until);
+
 /// <summary>Журнал и чистка — то, что делают на машине, когда что-то пошло не так.</summary>
 public sealed class MaintenanceSettings : Observable
 {
     private bool _logToFile = true;
     private bool _logsSipTrace = true;
+    private UpdateDeferral? _deferredUpdate;
+    private Guid? _lastReportedUpdate;
+
+    public Guid? LastReportedUpdate
+    {
+        get => _lastReportedUpdate;
+        set => Set(ref _lastReportedUpdate, value);
+    }
+
+    public UpdateDeferral? DeferredUpdate
+    {
+        get => _deferredUpdate;
+        set => Set(ref _deferredUpdate, value);
+    }
 
     /// <summary>Вести ли журнал в файл.</summary>
     ///

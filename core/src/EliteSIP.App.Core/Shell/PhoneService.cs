@@ -192,6 +192,8 @@ public sealed class PhoneService : IDisposable
         || !_sessions.IsEmpty
         || _panel.IsInCall;
 
+    internal bool BlocksUpdateOffer => IsCallActive || _records.Count != 0;
+
     /// <summary>
     /// Уровни разговора для шкал. <c>null</c> — тракт свободен.
     /// </summary>
@@ -1951,10 +1953,36 @@ public sealed class PhoneService : IDisposable
         return name.Length > 0 && name != settings.Account.Username ? name : null;
     }
 
+    private bool _syncingLines;
+    private bool _linesSyncRequested;
+
     /// <summary>Переносит линии из слоя линий в панель.</summary>
     private void SyncLines()
     {
-        _panel.Lines.Clear();
+        if (_syncingLines)
+        {
+            _linesSyncRequested = true;
+            return;
+        }
+
+        _syncingLines = true;
+        try
+        {
+            ApplyLineSnapshot();
+        }
+        finally
+        {
+            _syncingLines = false;
+            if (_linesSyncRequested)
+            {
+                _linesSyncRequested = false;
+                _ui.Post(SyncLines);
+            }
+        }
+    }
+
+    private void ApplyLineSnapshot()
+    {
         var snapshotReady = _lines is null;
         var muted = _settings.Audio.MicrophoneMuted;
         if (_lines is null) { _lineSnapshot = Array.Empty<LineView>(); }
@@ -1970,13 +1998,14 @@ public sealed class PhoneService : IDisposable
         var visible = _lineSnapshot.Where(line => _records.ContainsKey(line.CallId))
             .Select(line => pendingActive is null ? line : line with { IsActive = false })
             .Concat(pending.Select(record => new LineView(record.CallId, record.Number,
-                record.CallId == pendingActive, false, false, ConferenceState.Idle)));
+                record.CallId == pendingActive, false, false, ConferenceState.Idle))).ToArray();
 
         CallLineViewModel? active = null;
         var conference = false;
-        foreach (var line in visible)
+        for (int index = 0; index < visible.Length; index++)
         {
-            var record = _records.Values.FirstOrDefault(candidate => candidate.CallId == line.CallId);
+            var line = visible[index];
+            _records.TryGetValue(line.CallId, out var record);
 
             // Входящий в шапке — тем же правилом, что в окне входящего и в
             // истории: раздача и звонок по сделке словами, мобильный под
@@ -1994,15 +2023,13 @@ public sealed class PhoneService : IDisposable
                     QueueTitle(record.Number))
                 : null;
 
-            var view = new CallLineViewModel
-            {
-                CallId = line.CallId,
-                Title = subject?.Headline ?? line.Peer,
-                SecondaryNumber = subject is null ? line.Peer : subject.SecondaryNumber,
-                IsActive = line.IsActive,
-                IsOnHold = line.IsHeldByOperator || line.IsHeldByServer,
-                ConnectedAt = record?.AnsweredAt,
-            };
+            var existing = _panel.Lines.FirstOrDefault(view => view.CallId == line.CallId);
+            var view = existing ?? new CallLineViewModel { CallId = line.CallId };
+            view.Title = subject?.Headline ?? line.Peer;
+            view.SecondaryNumber = subject is null ? line.Peer : subject.SecondaryNumber;
+            view.IsActive = line.IsActive;
+            view.IsOnHold = line.IsHeldByOperator || line.IsHeldByServer;
+            view.ConnectedAt = record?.AnsweredAt;
 
             view.Status = pending.Any(record => record.CallId == line.CallId)
                 ? Strings.Get("StatusAudioStarting")
@@ -2010,7 +2037,19 @@ public sealed class PhoneService : IDisposable
                 ? Strings.Get("PanelResume")
                 : Strings.Get("CallStatusTalking");
 
-            _panel.Lines.Add(view);
+            if (existing is null)
+            {
+                _panel.Lines.Insert(index, view);
+            }
+            else
+            {
+                int currentIndex = _panel.Lines.IndexOf(existing);
+                if (currentIndex != index)
+                {
+                    _panel.Lines.Move(currentIndex, index);
+                }
+            }
+
             if (line.IsActive)
             {
                 active = view;
@@ -2019,6 +2058,10 @@ public sealed class PhoneService : IDisposable
         }
 
         _panel.ActiveLine = active;
+        for (int index = _panel.Lines.Count - 1; index >= visible.Length; index--)
+        {
+            _panel.Lines.RemoveAt(index);
+        }
 
         // Кнопка конференции — по активной линии, а не флагом на всю панель:
         // до 23 октября 2026 он ставился один раз и не снимался никогда,

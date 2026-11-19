@@ -230,11 +230,33 @@ public sealed class UpdaterRunTests : IDisposable
         _stand.Consent("0.1.1");
         await _stand.RunAsync();
 
+        Assert.False(File.Exists(_stand.Layout.ConfirmedReceipt));
         _stand.Machine.Installed = new Version(0, 1, 1, 0);
         await _stand.RunAsync();
 
         Assert.Equal(1, _stand.Machine.Restarts);
         Assert.False(File.Exists(_stand.Layout.RelaunchMarker));
+        Assert.False(File.Exists(_stand.Layout.PendingReceipt));
+        var receipt = Assert.IsType<EliteSIP.PanelLink.UpdateReceipt>(
+            EliteSIP.PanelLink.UpdateReceipt.Parse(File.ReadAllText(_stand.Layout.ConfirmedReceipt)));
+        Assert.Equal(new Version(0, 1, 0), receipt.From);
+        Assert.Equal(new Version(0, 1, 1), receipt.To);
+        await _stand.RunAsync();
+        Assert.Equal(receipt.ToString(), File.ReadAllText(_stand.Layout.ConfirmedReceipt));
+    }
+
+    [Fact]
+    public async Task Распакованный_но_ненастроенный_пакет_не_подтверждается()
+    {
+        _stand.Publish("0.1.1");
+        _stand.Consent("0.1.1");
+        await _stand.RunAsync();
+
+        _stand.Machine.Installed = new Version(0, 1, 1, 0);
+        _stand.Machine.Configured = false;
+        await _stand.RunAsync();
+
+        Assert.False(File.Exists(_stand.Layout.ConfirmedReceipt));
     }
 
     [Fact]

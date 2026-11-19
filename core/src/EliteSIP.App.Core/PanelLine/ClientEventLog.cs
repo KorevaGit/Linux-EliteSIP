@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EliteSIP.App.Settings;
 using EliteSIP.Diagnostics;
+using EliteSIP.PanelLink;
 
 namespace EliteSIP.App.PanelLine;
 
@@ -37,8 +38,6 @@ namespace EliteSIP.App.PanelLine;
 /// </remarks>
 internal sealed class ClientEventLog : IDisposable
 {
-    internal static ClientEventLog Shared { get; } = new(DefaultPath);
-
     /// <summary>Сколько событий держим, пока сервер недоступен. Старые вытесняются.</summary>
     internal const int Capacity = 1000;
 
@@ -83,6 +82,9 @@ internal sealed class ClientEventLog : IDisposable
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
     };
+
+    // Конструктор читает очередь с настройками Format.
+    internal static ClientEventLog Shared { get; } = new(DefaultPath);
 
     private readonly Lock _gate = new();
     private readonly string? _path;
@@ -148,6 +150,7 @@ internal sealed class ClientEventLog : IDisposable
         Error,
         Crash,
         Connection,
+        Update,
     }
 
     internal enum Level
@@ -491,6 +494,26 @@ internal sealed class ClientEventLog : IDisposable
             }
 
             RecordLocked(Kind.Error, Level.Error, message);
+        }
+    }
+
+    internal void ReportConfirmedUpdate(UpdateReceipt receipt, Version running, MaintenanceSettings maintenance)
+    {
+        if (receipt.To.ToString(3) != running.ToString(3)
+            || receipt.OperationId == maintenance.LastReportedUpdate)
+        {
+            return;
+        }
+
+        var message = $"Установлено {receipt.From.ToString(3)} → {receipt.To.ToString(3)}; операция {receipt.OperationId:N}";
+        lock (_gate)
+        {
+            if (_forgotten) { return; }
+            if (!_pending.Any(item => item.Kind == Kind.Update && item.Message == message))
+            {
+                RecordLocked(Kind.Update, Level.Info, message);
+            }
+            maintenance.LastReportedUpdate = receipt.OperationId;
         }
     }
 

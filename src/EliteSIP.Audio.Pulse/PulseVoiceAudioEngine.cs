@@ -1376,9 +1376,17 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
                     break;
                 }
 
-                short[] samples = playback.IsConcealment
-                    ? concealer.Conceal(_configuration.SamplesPerFrame)
-                    : concealer.Receive(decoder.Decode(playback.Payload.Span));
+                short[] samples;
+                if (playback.IsConcealment)
+                {
+                    samples = concealer.Conceal(_configuration.SamplesPerFrame);
+                }
+                else
+                {
+                    samples = decoder.Decode(playback.Payload.Span);
+                    concealer.ReceiveInPlace(samples);
+                }
+
                 Handlers.DecodedSamples?.Invoke(samples);
 
                 int length = Math.Min(samples.Length, decoded.Length);

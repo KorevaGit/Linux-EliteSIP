@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using EliteSIP.App.Platform;
+using EliteSIP.App.Settings;
 using EliteSIP.PanelLink;
 
 namespace EliteSIP.App.PanelLine;
@@ -89,7 +90,10 @@ internal sealed class UpdateService : IDisposable
     /// <summary>Через сколько напомнить о скачанном после «Отложить».</summary>
     private static readonly TimeSpan ReminderInterval = TimeSpan.FromMinutes(30);
 
+    private static readonly TimeSpan BusyRetryInterval = TimeSpan.FromSeconds(5);
+
     private readonly Func<bool> _isBusy;
+    private readonly MaintenanceSettings _schedule;
     private readonly Action<string?> _announce;
     private readonly Action _alsoCheckPresets;
     private readonly Action<string> _log;
@@ -103,7 +107,8 @@ internal sealed class UpdateService : IDisposable
     /// <summary>Скачанный и проверенный установщик. Пока он есть, есть и предложение.</summary>
     private string? _readyInstaller;
 
-    /// <param name="isBusy">идёт ли разговор.</param>
+    /// <param name="isBusy">есть ли входящий, исходящий или активный вызов.</param>
+    /// <param name="schedule">настройки для сохранения отсрочки выбранной версии.</param>
     /// <param name="announce">
     /// сообщить приложению, что версия скачана и ждёт, — или что уже не ждёт.
     /// Замыкание, а не ссылка на окно: службе о нём знать нечего.
@@ -115,19 +120,25 @@ internal sealed class UpdateService : IDisposable
         Action alsoCheckPresets,
         IUiThread ui,
         IUpdateHandoff handoff,
+        MaintenanceSettings schedule,
         Action<string> log)
     {
         _isBusy = isBusy;
         _announce = announce;
         _alsoCheckPresets = alsoCheckPresets;
         _handoff = handoff;
+        _schedule = schedule;
         _log = log;
 
         _cycle = ui.CreateTimer(FirstCheckDelay);
         _reminder = ui.CreateTimer(ReminderInterval);
 
         _cycle.Tick += async (_, _) => await TickAsync().ConfigureAwait(true);
-        _reminder.Tick += (_, _) => Offer();
+        _reminder.Tick += (_, _) =>
+        {
+            _reminder.Stop();
+            Offer();
+        };
     }
 
     /// <summary>Версия, которая скачана и ждёт решения. <c>null</c> — не ждёт ничего.</summary>
@@ -231,20 +242,12 @@ internal sealed class UpdateService : IDisposable
     /// </summary>
     ///
     /// <remarks>
-    /// Зовётся и по концу разговора: предложение, отложенное на время звонка, не
-    /// должно ждать следующего получаса.
+    /// После звонка предложение может вернуться сразу, если отсрочка версии истекла.
     /// </remarks>
-    internal void Offer()
+    internal void Offer(bool userInitiated = false)
     {
         if (ReadyVersion is not { } version || _readyInstaller is null || AskToInstall is null)
         {
-            return;
-        }
-
-        if (_isBusy())
-        {
-            // Не «Отложить», а «сейчас нельзя»: напоминание вернётся, как только
-            // разговор кончится.
             return;
         }
 
@@ -266,6 +269,21 @@ internal sealed class UpdateService : IDisposable
             return;
         }
 
+        if (!userInitiated && _schedule.DeferredUpdate is { } deferral
+            && deferral.Version == version.ToString()
+            && deferral.Until - DateTimeOffset.UtcNow is var remaining
+            && remaining > TimeSpan.Zero && remaining <= ReminderInterval)
+        {
+            ScheduleOffer(remaining);
+            return;
+        }
+
+        if (_isBusy())
+        {
+            ScheduleOffer(BusyRetryInterval);
+            return;
+        }
+
         _reminder.Stop();
 
         bool accepted;
@@ -282,7 +300,14 @@ internal sealed class UpdateService : IDisposable
         if (!accepted)
         {
             _log($"обновление {version} отложено на {ReminderInterval.TotalMinutes:0} минут");
-            _reminder.Start();
+            Defer(version);
+            return;
+        }
+
+        // Модальное окно продолжает обрабатывать входящие звонки.
+        if (_isBusy() || ReadyVersion != version)
+        {
+            ScheduleOffer(BusyRetryInterval);
             return;
         }
 
@@ -294,8 +319,21 @@ internal sealed class UpdateService : IDisposable
             // Передать не вышло — предложение вернётся, как после «Отложить».
             _isInstalling = false;
             _cycle.Start();
-            _reminder.Start();
+            Defer(version);
         }
+    }
+
+    private void Defer(Version version)
+    {
+        _schedule.DeferredUpdate = new UpdateDeferral(version.ToString(), DateTimeOffset.UtcNow + ReminderInterval);
+        ScheduleOffer(ReminderInterval);
+    }
+
+    private void ScheduleOffer(TimeSpan delay)
+    {
+        _reminder.Stop();
+        _reminder.Interval = delay < TimeSpan.FromMilliseconds(100) ? TimeSpan.FromMilliseconds(100) : delay;
+        _reminder.Start();
     }
 
     /// <summary>Висит ли вопрос об установке на экране прямо сейчас.</summary>

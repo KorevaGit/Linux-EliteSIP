@@ -150,6 +150,12 @@ internal sealed class UpdaterRun(Layout layout, IMachine machine, HttpClient htt
             Request.MarkHandled(accepted, layout.RequestHandled);
         }
 
+        if (installed is { Build: >= 0 })
+        {
+            var receipt = new UpdateReceipt(Guid.NewGuid(), installed, manifest.Version);
+            await File.WriteAllTextAsync(layout.PendingReceipt, receipt.ToString()).ConfigureAwait(false);
+        }
+
         // Отметка «поднять после установки» — до установки: софтфон ушёл, и
         // вернуть его обязан кто-то, кто переживёт установку.
         await File.WriteAllTextAsync(layout.RelaunchMarker, manifest.Version.ToString(3)).ConfigureAwait(false);
@@ -227,6 +233,7 @@ internal sealed class UpdaterRun(Layout layout, IMachine machine, HttpClient htt
 
         if (utcNow() - File.GetLastWriteTimeUtc(layout.RelaunchMarker) > TimeSpan.FromDays(1))
         {
+            TryDelete(layout.PendingReceipt);
             TryDelete(layout.RelaunchMarker);
             return;
         }
@@ -245,6 +252,7 @@ internal sealed class UpdaterRun(Layout layout, IMachine machine, HttpClient htt
                 + $"журнал — install-{wanted}.log) — поднимаю стоящий");
         }
 
+        ConfirmInstalledUpdate(wanted, installed);
         if (machine.RestartInSessions(out var why))
         {
             log($"выпуск {installed?.ToString(3)} стоит, софтфон поднят в сеансе оператора"
@@ -255,6 +263,38 @@ internal sealed class UpdaterRun(Layout layout, IMachine machine, HttpClient htt
         {
             // Отметка остаётся: её подберёт следующий такт.
             log($"софтфон после установки не поднят ({why}) — попробую на следующем такте");
+        }
+    }
+
+    private void ConfirmInstalledUpdate(Version? wanted, Version? installed)
+    {
+        if (UpdateReceipt.Parse(ReadText(layout.PendingReceipt)) is not { } receipt)
+        {
+            return;
+        }
+
+        if (receipt.To.ToString(3) != wanted?.ToString(3) || receipt.To.ToString(3) != installed?.ToString(3)
+            || !machine.IsPackageConfigured())
+        {
+            TryDelete(layout.PendingReceipt);
+            return;
+        }
+
+        try
+        {
+            var temporary = layout.ConfirmedReceipt + ".tmp";
+            File.WriteAllText(temporary, receipt.ToString());
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(temporary, UnixFileMode.UserRead | UnixFileMode.UserWrite
+                    | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
+            }
+            File.Move(temporary, layout.ConfirmedReceipt, overwrite: true);
+            TryDelete(layout.PendingReceipt);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            log($"не удалось сохранить подтверждение установки: {error.GetType().Name}");
         }
     }
 

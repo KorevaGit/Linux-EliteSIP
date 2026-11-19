@@ -389,6 +389,7 @@ public sealed partial class App
                     ["environment.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.EnvironmentSummary()),
                     ["configuration.txt"] = System.Text.Encoding.UTF8.GetBytes(configuration),
                     ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync().ConfigureAwait(false)),
+                    ["linux-updater-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync(updater: true).ConfigureAwait(false)),
                     ["history-status.txt"] = System.Text.Encoding.UTF8.GetBytes(history?.DiagnosticSummary() ?? "история не открыта"),
                 };
                 return SupportArchive.MakeFromDirectory(directory, summary, destination, log, extras);

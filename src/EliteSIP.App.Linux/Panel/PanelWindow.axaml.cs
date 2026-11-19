@@ -139,7 +139,7 @@ public partial class PanelWindow : Window
             }
 
             Restore();
-            _clock.Start();
+            UpdateClock();
         }
 
         Relayout();
@@ -206,7 +206,9 @@ public partial class PanelWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _opened = false;
         _clock.Stop();
+        Model.PropertyChanged -= OnModelChanged;
         base.OnClosed(e);
     }
 
@@ -222,8 +224,25 @@ public partial class PanelWindow : Window
 
     private void UpdateCaption() => Title = $"EliteSIP — {LinuxStrings.Get("PanelYourNumber")}: {Model.StatusTitle}";
 
+    private void UpdateClock()
+    {
+        if (_opened && Model.Lines.Count > 0)
+        {
+            if (!_clock.IsEnabled)
+            {
+                Model.Tick();
+                _clock.Start();
+            }
+        }
+        else
+        {
+            _clock.Stop();
+        }
+    }
+
     private void OnModelChanged(object? sender, PropertyChangedEventArgs change)
     {
+        if (change.PropertyName == nameof(PanelViewModel.IsInCall)) { UpdateClock(); }
         if (change.PropertyName == nameof(PanelViewModel.StatusTitle)) { UpdateCaption(); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible) && !Model.IsTransferEntryVisible)
         { Dispatcher.UIThread.Post(() => DialedField.Focus(), DispatcherPriority.Loaded); }
@@ -244,6 +263,7 @@ public partial class PanelWindow : Window
 
     private void Relayout()
     {
+        if (!_opened) { return; }
         UpdateRows();
         UpdateMinimumHeight();
     }

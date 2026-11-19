@@ -32,7 +32,9 @@ public sealed class Emoji : AvaloniaObject
     public static readonly AttachedProperty<string?> TextProperty =
         AvaloniaProperty.RegisterAttached<Emoji, TextBlock, string?>("Text");
 
-    private static readonly Dictionary<string, Bitmap?> Images = [];
+    internal const int ImageCacheCapacity = 128;
+    private static readonly Dictionary<string, LinkedListNode<(string Name, Bitmap? Image)>> Images = [];
+    private static readonly LinkedList<(string Name, Bitmap? Image)> ImageUse = [];
 
     private static readonly FuncValueConverter<double, double> Scale = new(size => size * 1.25);
 
@@ -105,7 +107,9 @@ public sealed class Emoji : AvaloniaObject
     {
         if (Images.TryGetValue(name, out var cached))
         {
-            return cached;
+            ImageUse.Remove(cached);
+            ImageUse.AddLast(cached);
+            return cached.Value.Image;
         }
 
         Bitmap? image = null;
@@ -124,7 +128,13 @@ public sealed class Emoji : AvaloniaObject
             image = null;
         }
 
-        Images[name] = image;
+        if (ImageUse.Count == ImageCacheCapacity && ImageUse.First is { } oldest)
+        {
+            Images.Remove(oldest.Value.Name);
+            ImageUse.RemoveFirst();
+        }
+
+        Images.Add(name, ImageUse.AddLast((name, image)));
         return image;
     }
 }
