@@ -42,6 +42,9 @@ public abstract record VoiceAudioEvent
     /// Чинит человек — значит, сказать ему надо на панели, а не в журнале.
     /// </summary>
     public sealed record InputSilent(string DeviceName) : VoiceAudioEvent;
+
+    /// <summary>Поток воспроизведения работает, вход недоступен.</summary>
+    public sealed record InputUnavailable : VoiceAudioEvent;
 }
 
 /// <summary>Кадр для воспроизведения вместе с признаком, настоящий он или спрятанный.</summary>

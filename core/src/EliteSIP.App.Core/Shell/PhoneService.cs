@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using EliteSIP.Diagnostics;
 using EliteSIP.App.Platform;
 using EliteSIP.App.Incoming;
@@ -85,9 +86,25 @@ public sealed class PhoneService : IDisposable
     private bool _disposed;
     internal Action? RecoverConnection { get; set; }
 
-    // BYE может прийти во время запуска звука после 200 OK. Очистка ждёт
-    // завершения запуска, иначе тот заведёт линию уже после её снятия.
-    private readonly SemaphoreSlim _incomingMedia = new(1, 1);
+    internal bool HasLocalRouteChanged() => _transport?.HasLocalRouteChanged() == true;
+
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _mediaStarts = new();
+    private readonly HashSet<string> _answering = new();
+    private IReadOnlyList<LineView> _lineSnapshot = Array.Empty<LineView>();
+
+    private CancellationToken MediaLifetime(string callId) =>
+        _mediaStarts.GetOrAdd(callId, _ => new CancellationTokenSource()).Token;
+
+    private void CancelMediaStart(string callId)
+    {
+        lock (_preAnswerGate)
+        {
+            if (_mediaStarts.TryRemove(callId, out var lifetime))
+            {
+                lifetime.Cancel();
+            }
+        }
+    }
 
     /// <summary>Записи истории по Call-ID: их дописывают по ходу разговора.</summary>
     private readonly Dictionary<string, CallRecord> _records = [];
@@ -173,7 +190,7 @@ public sealed class PhoneService : IDisposable
         _pendingCallId is not null
         || _incoming.IsVisible
         || !_sessions.IsEmpty
-        || (_lines?.Lines.Count ?? 0) > 0;
+        || _panel.IsInCall;
 
     /// <summary>
     /// Уровни разговора для шкал. <c>null</c> — тракт свободен.
@@ -517,6 +534,7 @@ public sealed class PhoneService : IDisposable
 
     private async Task DisconnectCoreAsync()
     {
+        foreach (var callId in _mediaStarts.Keys) { CancelMediaStart(callId); }
         if (_agent is null)
         {
             return;
@@ -612,6 +630,7 @@ public sealed class PhoneService : IDisposable
         _history.Begin(record);
         _records[call.CallId] = record;
         ClientEventLog.Shared.CallStarted(call.CallId, incoming: false, record.Number, record.DisplayName);
+        _ = MediaLifetime(call.CallId);
 
         // Панель узнаёт о вызове сейчас, а не по «ответили»: до этой строки она
         // выглядела свободной всё время гудков, и «Позвонить» нажималась
@@ -720,15 +739,9 @@ public sealed class PhoneService : IDisposable
     /// </remarks>
     private async Task AnswerAsync(SipIncomingCall call)
     {
-        await _incomingMedia.WaitAsync().ConfigureAwait(true);
-        try
-        {
-            await AnswerIncomingCoreAsync(call).ConfigureAwait(true);
-        }
-        finally
-        {
-            _incomingMedia.Release();
-        }
+        if (!_answering.Add(call.CallId)) { return; }
+        try { await AnswerIncomingCoreAsync(call).ConfigureAwait(true); }
+        finally { _answering.Remove(call.CallId); }
     }
 
     private async Task AnswerIncomingCoreAsync(SipIncomingCall call)
@@ -737,6 +750,8 @@ public sealed class PhoneService : IDisposable
         {
             return;
         }
+
+        var lines = _lines;
 
         if (agent.MediaAddress is not string mediaAddress)
         {
@@ -769,10 +784,12 @@ public sealed class PhoneService : IDisposable
             return;
         }
 
+        var lifetime = MediaLifetime(call.CallId);
         await ConfirmHistoryAsync(call.CallId).ConfigureAwait(true);
 
         if (!await agent.AnswerIncomingCallAsync(call.CallId, answer.EncodedData()).ConfigureAwait(true))
         {
+            CancelMediaStart(call.CallId);
             reservation.Release();
             _log("ответить на входящий не удалось: звонка уже нет");
             return;
@@ -781,16 +798,29 @@ public sealed class PhoneService : IDisposable
         await PersistAnswerBeforeAudioAsync(call.CallId).ConfigureAwait(true);
         try
         {
+            lifetime.ThrowIfCancellationRequested();
             var session = OpenSession(call.CallId, negotiated, reservation);
 
-            await session.StartAsync(CancellationToken.None).ConfigureAwait(true);
-            await _lines.AttachAsync(call.CallId, new MediaSessionLine(session, answer), call.DisplayNumber)
-                .ConfigureAwait(true);
+            await session.StartAsync(lifetime).ConfigureAwait(true);
+            await Task.Run(async () =>
+            {
+                lifetime.ThrowIfCancellationRequested();
+                await lines.AttachAsync(call.CallId, new MediaSessionLine(session, answer), call.DisplayNumber)
+                    .ConfigureAwait(false);
+                if (lifetime.IsCancellationRequested)
+                {
+                    await lines.DetachAsync(call.CallId).ConfigureAwait(false);
+                }
+            }).ConfigureAwait(true);
+            lifetime.ThrowIfCancellationRequested();
             WatchMedia(call.CallId, session);
-
-            MarkAnsweredCore(call.CallId, confirmedBeforeMedia: true);
-
             SyncLines();
+            MarkAnsweredCore(call.CallId, confirmedBeforeMedia: true);
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+        {
+            reservation.Release();
+            await CloseMediaAsync(call.CallId).ConfigureAwait(true);
         }
         catch (VoiceAudioException failure)
         {
@@ -845,9 +875,7 @@ public sealed class PhoneService : IDisposable
                         await CloseIncoming(
                             call.CallId,
                             ended.Reason,
-                            _records.TryGetValue(call.CallId, out var record) && !record.IsAnswered
-                                ? CallOutcome.Missed
-                                : null);
+                            CallOutcome.Missed);
                         break;
 
                     default:
@@ -860,17 +888,8 @@ public sealed class PhoneService : IDisposable
             // Отбой звучит только у состоявшегося разговора: непринятый
             // входящий кончается вместе со звонком, и второй звук поверх
             // смолкшего рингтона был бы лишним.
-            bool hadMedia;
-            await _incomingMedia.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                hadMedia = _sessions.ContainsKey(call.CallId);
-                await CloseMediaAsync(call.CallId).ConfigureAwait(false);
-            }
-            finally
-            {
-                _incomingMedia.Release();
-            }
+            var hadMedia = _sessions.ContainsKey(call.CallId);
+            await CloseMediaAsync(call.CallId).ConfigureAwait(false);
 
             if (hadMedia)
             {
@@ -885,11 +904,13 @@ public sealed class PhoneService : IDisposable
     private Task CloseIncoming(string callId, string reason, CallOutcome? outcome)
         => _ui.InvokeAsync(() =>
         {
+            CancelMediaStart(callId);
             _incoming.Hide();
 
             if (_records.Remove(callId, out var record))
             {
-                _history.Finish(record.Id, reason, outcome);
+                _history.Finish(record.Id, reason,
+                    outcome == CallOutcome.Missed && record.IsAnswered ? null : outcome);
             }
 
             ClientEventLog.Shared.CallFinished(callId, reason, failed: outcome is CallOutcome.Failed);
@@ -909,12 +930,14 @@ public sealed class PhoneService : IDisposable
         // чаще, чем в разговоре.
         if (_pendingCallId is string pending)
         {
+            CancelMediaStart(pending);
             await _agent.HangUpAsync(pending).ConfigureAwait(true);
             return;
         }
 
-        if (_lines?.ActiveCallId is string callId)
+        if (_panel.ActiveLine?.CallId is string callId)
         {
+            CancelMediaStart(callId);
             await _agent.HangUpAsync(callId).ConfigureAwait(true);
         }
     }
@@ -1058,10 +1081,17 @@ public sealed class PhoneService : IDisposable
     /// <summary>Читает события агента и переводит их в состояние панели.</summary>
     private async Task PumpAsync(SipUserAgent agent, CancellationToken token)
     {
+        long reportedDrops = 0;
         try
         {
             await foreach (var value in agent.Events.WithCancellation(token).ConfigureAwait(false))
             {
+                var drops = agent.DroppedDiagnosticEvents;
+                if (drops != reportedDrops)
+                {
+                    _log($"SIP: пропущено диагностических событий {drops}; очередь управления звонками сохранена");
+                    reportedDrops = drops;
+                }
                 switch (value)
                 {
                     case SipUserAgentEvent.Registration registration:
@@ -1114,7 +1144,7 @@ public sealed class PhoneService : IDisposable
     {
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(500), token).ConfigureAwait(false);
             await _ui.InvokeAsync(() =>
             {
                 if (!token.IsCancellationRequested && !_disposed && ReferenceEquals(_agent, agent) && _connection.CurrentCount != 0)
@@ -1137,8 +1167,7 @@ public sealed class PhoneService : IDisposable
         string number)
     {
         MediaSession? session = null;
-        var answered = false;
-
+        Task mediaWork = Task.CompletedTask;
         try
         {
             await foreach (var value in call.Events.ConfigureAwait(false))
@@ -1147,49 +1176,13 @@ public sealed class PhoneService : IDisposable
                 {
                     case SipCallEvent.Answered response:
                         await PersistAnswerBeforeAudioAsync(call.CallId).ConfigureAwait(false);
-                        MediaSession? early;
                         lock (_preAnswerGate)
                         {
-                            // Гудки снимаются здесь, а не в `finally`: тракт
-                            // разговора поднимается следующей строкой, и гудок,
-                            // доигрывающий поверх первого «алло», слышен как
-                            // сбой связи.
                             _ringbackWanted = false;
-                            early = _earlySession;
-                            _earlySession = null;
-                            _earlyAudioFailed = false;
                         }
 
                         _sounds.StopRingback();
-
-                        // Ранний поток продолжается, а не пересоздаётся: на
-                        // границе «гудки → алло» не должно пропасть ни кадра.
-                        session = early is not null
-                            ? await ContinueEarlyMediaAsync(early, response, offer, call.CallId, number)
-                                .ConfigureAwait(false)
-                            : await OpenMediaAsync(response, offer, reservation, call.CallId, number)
-                                .ConfigureAwait(false);
-
-                        if (session is null)
-                        {
-                            // Ранний поток, который не удалось продолжить, всё
-                            // равно надо снять: `finally` смотрит на `session`.
-                            session = early;
-                            await _agent!.HangUpAsync(call.CallId).ConfigureAwait(false);
-                            break;
-                        }
-
-                        answered = true;
-                        await _ui.InvokeAsync(() =>
-                        {
-                            MarkAnsweredCore(call.CallId, confirmedBeforeMedia: true);
-
-                            // Ответили — вызов перестал быть ожидаемым и стал
-                            // линией; дальше состояние держит `SyncLines`.
-                            ClearPending(call.CallId);
-                            SyncLines();
-                        });
-
+                        mediaWork = CompleteOutgoingAudioAsync(call.CallId, response, offer, reservation, number, mediaWork);
                         break;
 
                     // «Звонит». Прежде это событие попадало в `default` и
@@ -1218,10 +1211,18 @@ public sealed class PhoneService : IDisposable
                     // «абонент недоступен». Поток поднимается сразу, с
                     // заглушённым микрофоном.
                     case SipCallEvent.EarlyMedia progress:
-                        session = await FollowEarlyMediaAsync(progress, offer, reservation, call.CallId, session)
-                            .ConfigureAwait(false);
-
-                        await _ui.InvokeAsync(UpdatePreAnswerAudio);
+                        mediaWork = CompleteEarlyAudioAsync(mediaWork, call.CallId, async lifetime =>
+                        {
+                            session = await FollowEarlyMediaAsync(progress, offer, reservation, call.CallId, session, lifetime)
+                                .ConfigureAwait(false);
+                            await _ui.InvokeAsync(() =>
+                            {
+                                if (!lifetime.IsCancellationRequested)
+                                {
+                                    UpdatePreAnswerAudio();
+                                }
+                            });
+                        });
                         break;
 
                     case SipCallEvent.Failed failure:
@@ -1254,14 +1255,9 @@ public sealed class PhoneService : IDisposable
 
             _sounds.StopRingback();
 
-            if (session is not null)
-            {
-                await CloseMediaAsync(call.CallId).ConfigureAwait(false);
-            }
-            else if (!answered)
-            {
-                reservation.Release();
-            }
+            CancelMediaStart(call.CallId);
+            await CloseMediaAsync(call.CallId).ConfigureAwait(false);
+            reservation.Release();
 
             // Звук отбоя — после снятия тракта, а не до: иначе он лёг бы
             // поверх последнего слова собеседника.
@@ -1269,6 +1265,82 @@ public sealed class PhoneService : IDisposable
 
             await _ui.InvokeAsync(SyncLines);
         }
+    }
+
+    private Task CompleteEarlyAudioAsync(Task previous, string callId, Func<CancellationToken, Task> start)
+    {
+        if (!_mediaStarts.TryGetValue(callId, out var work)) { return Task.CompletedTask; }
+        var lifetime = work.Token;
+        return Task.Run(async () =>
+        {
+            try
+            {
+                await previous.ConfigureAwait(false);
+                lifetime.ThrowIfCancellationRequested();
+                await start(lifetime).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+            {
+                await CloseMediaAsync(callId).ConfigureAwait(false);
+            }
+            catch (Exception failure) when (failure is VoiceAudioException or ObjectDisposedException or InvalidOperationException)
+            {
+                _log($"ранние медиа {callId}: запуск не завершён: {failure}");
+            }
+        });
+    }
+
+    private Task CompleteOutgoingAudioAsync(string callId, SipCallEvent.Answered response,
+        SessionDescription offer, RtpPortReservation reservation, string number, Task previous)
+    {
+        if (!_mediaStarts.TryGetValue(callId, out var work)) { return Task.CompletedTask; }
+        var lifetime = work.Token;
+        var agent = _agent;
+        return Task.Run(async () =>
+        {
+            try
+            {
+                await previous.ConfigureAwait(false);
+                lifetime.ThrowIfCancellationRequested();
+                MediaSession? early;
+                lock (_preAnswerGate)
+                {
+                    lifetime.ThrowIfCancellationRequested();
+                    early = _earlySession;
+                    _earlySession = null;
+                    _earlyAudioFailed = false;
+                }
+                var session = early is not null
+                    ? await ContinueEarlyMediaAsync(early, response, offer, callId, number, lifetime).ConfigureAwait(false)
+                    : await OpenMediaAsync(response, offer, reservation, callId, number).ConfigureAwait(false);
+                lifetime.ThrowIfCancellationRequested();
+                if (session is null)
+                {
+                    if (agent is not null) { await agent.HangUpAsync(callId).ConfigureAwait(false); }
+                    return;
+                }
+                await _ui.InvokeAsync(() =>
+                {
+                    if (lifetime.IsCancellationRequested) { return; }
+                    ClearPending(callId);
+                    SyncLines();
+                    MarkAnsweredCore(callId, confirmedBeforeMedia: true);
+                });
+            }
+            catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+            {
+                await CloseMediaAsync(callId).ConfigureAwait(false);
+            }
+            catch (Exception failure) when (failure is VoiceAudioException or ObjectDisposedException or InvalidOperationException)
+            {
+                _log($"исходящий {callId}: запуск медиа не завершён: {failure}");
+                if (!lifetime.IsCancellationRequested && agent is not null)
+                {
+                    await agent.HangUpAsync(callId).ConfigureAwait(false);
+                }
+                await CloseMediaAsync(callId).ConfigureAwait(false);
+            }
+        });
     }
 
     /// <summary>Поднимает медиа по ответу сервера и заводит линию.</summary>
@@ -1279,6 +1351,9 @@ public sealed class PhoneService : IDisposable
         string callId,
         string number)
     {
+        if (!_mediaStarts.TryGetValue(callId, out var work)) { return null; }
+        var lifetime = work.Token;
+        var lines = _lines!;
         try
         {
             var answer = SdpParser.Parse(response.Body.Span);
@@ -1286,15 +1361,22 @@ public sealed class PhoneService : IDisposable
 
             var session = OpenSession(callId, negotiated, reservation);
 
-            await session.StartAsync(CancellationToken.None).ConfigureAwait(false);
-            await _lines!.AttachAsync(callId, new MediaSessionLine(session, offer), number).ConfigureAwait(false);
+            await session.StartAsync(lifetime).ConfigureAwait(false);
+            lifetime.ThrowIfCancellationRequested();
+            await lines.AttachAsync(callId, new MediaSessionLine(session, offer), number).ConfigureAwait(false);
+            lifetime.ThrowIfCancellationRequested();
 
             // Станция может ответить сразу на удержании (a=sendonly): тогда
             // микрофон молчит, даже если кнопку никто не нажимал.
-            _lines.ApplyRemoteMedia(callId, negotiated);
+            lines.ApplyRemoteMedia(callId, negotiated);
 
             WatchMedia(callId, session);
             return session;
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+        {
+            await CloseMediaAsync(callId).ConfigureAwait(false);
+            return null;
         }
         catch (Exception failure) when (failure is SdpParseException or SdpNegotiationException)
         {
@@ -1334,8 +1416,10 @@ public sealed class PhoneService : IDisposable
         SessionDescription offer,
         RtpPortReservation reservation,
         string callId,
-        MediaSession? current)
+        MediaSession? current,
+        CancellationToken lifetime)
     {
+        lifetime.ThrowIfCancellationRequested();
         NegotiatedMedia negotiated;
         try
         {
@@ -1372,7 +1456,7 @@ public sealed class PhoneService : IDisposable
         var audioFailed = false;
         try
         {
-            await session.StartListeningAsync(claimAudio).ConfigureAwait(false);
+            await session.StartListeningAsync(claimAudio, lifetime).ConfigureAwait(false);
         }
         catch (VoiceAudioException failure)
         {
@@ -1386,6 +1470,7 @@ public sealed class PhoneService : IDisposable
 
         lock (_preAnswerGate)
         {
+            lifetime.ThrowIfCancellationRequested();
             _earlySession = session;
             _earlyAudioFailed = audioFailed;
         }
@@ -1414,10 +1499,14 @@ public sealed class PhoneService : IDisposable
         SipCallEvent.Answered response,
         SessionDescription offer,
         string callId,
-        string number)
+        string number,
+        CancellationToken lifetime)
     {
+        var lines = _lines;
+        if (lines is null) { return null; }
         try
         {
+            lifetime.ThrowIfCancellationRequested();
             var negotiated = early.Negotiated;
 
             if (!response.Body.IsEmpty)
@@ -1431,11 +1520,13 @@ public sealed class PhoneService : IDisposable
                 _log("ответ без SDP продолжает ранний поток как есть");
             }
 
-            await _lines!.AttachAsync(callId, new MediaSessionLine(early, offer), number).ConfigureAwait(false);
+            lifetime.ThrowIfCancellationRequested();
+            await lines.AttachAsync(callId, new MediaSessionLine(early, offer), number).ConfigureAwait(false);
+            lifetime.ThrowIfCancellationRequested();
 
             if (negotiated is not null)
             {
-                _lines.ApplyRemoteMedia(callId, negotiated);
+                lines.ApplyRemoteMedia(callId, negotiated);
             }
 
             WatchMedia(callId, early);
@@ -1491,7 +1582,8 @@ public sealed class PhoneService : IDisposable
             audioFailed = _earlyAudioFailed;
         }
 
-        var otherLineActive = _lines?.ActiveCallId is not null;
+        if (_lines is not null && !_lines.TrySnapshot(out _, out _)) { return; }
+        var otherLineActive = _lineSnapshot.Any(line => line.IsActive);
 
         if (early is not null || !ringback || otherLineActive || _incoming.IsVisible)
         {
@@ -1636,30 +1728,35 @@ public sealed class PhoneService : IDisposable
     /// Итог пишется до снятия линии: сняв её, сессия отпускает тракт, и уровни
     /// звука спросить уже не у кого.
     /// </remarks>
-    private async Task CloseMediaAsync(string callId)
+    private Task CloseMediaAsync(string callId)
     {
-        _sessions.TryRemove(callId, out var session);
-
-        if (session is not null)
+        var lines = _lines;
+        return Task.Run(async () =>
         {
-            _log($"медиа, итог разговора: {session.Summary()}");
-        }
+            _sessions.TryRemove(callId, out var session);
 
-        if (_lines is not null)
-        {
-            await _lines.DetachAsync(callId).ConfigureAwait(false);
-        }
+            if (session is not null)
+            {
+                _log($"медиа, итог разговора: {session.Summary()}");
+            }
 
-        if (session is not null)
-        {
-            await session.StopAsync().ConfigureAwait(false);
-            session.Dispose();
-        }
+            if (lines is not null)
+            {
+                await lines.DetachAsync(callId).ConfigureAwait(false);
+            }
+
+            if (session is not null)
+            {
+                await session.StopAsync().ConfigureAwait(false);
+                session.Dispose();
+            }
+        });
     }
 
     private Task Finish(string callId, string reason, CallOutcome? outcome)
         => _ui.InvokeAsync(() =>
         {
+            CancelMediaStart(callId);
             if (_records.Remove(callId, out var record))
             {
                 _history.Finish(record.Id, reason, outcome);
@@ -1701,6 +1798,7 @@ public sealed class PhoneService : IDisposable
             if (!_records.TryGetValue(callId, out var record)) { return; }
             record.AnsweredAt ??= DateTimeOffset.Now;
             _history.MarkAnswered(record.Id, record.AnsweredAt);
+            SyncLines();
         }).ConfigureAwait(false);
         await ConfirmHistoryAsync(callId).ConfigureAwait(false);
     }
@@ -1721,7 +1819,7 @@ public sealed class PhoneService : IDisposable
         // ответ, удержание и звонок, который успел завершиться, не сигналят.
         if (firstAnswer
             && _agent?.CallStateOf(callId) is SipCallState.Answered
-            && _lines?.ActiveCallId == callId)
+            && _lineSnapshot.Any(line => line.CallId == callId && line.IsActive))
         {
             _sounds.PlayConnected(_settings.Audio.OutputDeviceId);
         }
@@ -1857,20 +1955,26 @@ public sealed class PhoneService : IDisposable
     private void SyncLines()
     {
         _panel.Lines.Clear();
-
-        if (_lines is null)
+        var snapshotReady = _lines is null;
+        var muted = _settings.Audio.MicrophoneMuted;
+        if (_lines is null) { _lineSnapshot = Array.Empty<LineView>(); }
+        else if (_lines.TrySnapshot(out var snapshot, out muted))
         {
-            _panel.ActiveLine = null;
-            _panel.CanSendDtmf = false;
-            _panel.IsOnHold = false;
-            _panel.IsConferenceStarted = false;
-            _panel.ResyncToggles();
-            return;
+            _lineSnapshot = snapshot;
+            snapshotReady = true;
         }
+
+        var accepted = _records.Values.Where(record => record.AnsweredAt is not null).ToArray();
+        var pending = accepted.Where(record => !_lineSnapshot.Any(line => line.CallId == record.CallId)).ToArray();
+        var pendingActive = pending.LastOrDefault()?.CallId;
+        var visible = _lineSnapshot.Where(line => _records.ContainsKey(line.CallId))
+            .Select(line => pendingActive is null ? line : line with { IsActive = false })
+            .Concat(pending.Select(record => new LineView(record.CallId, record.Number,
+                record.CallId == pendingActive, false, false, ConferenceState.Idle)));
 
         CallLineViewModel? active = null;
         var conference = false;
-        foreach (var line in _lines.Lines)
+        foreach (var line in visible)
         {
             var record = _records.Values.FirstOrDefault(candidate => candidate.CallId == line.CallId);
 
@@ -1892,6 +1996,7 @@ public sealed class PhoneService : IDisposable
 
             var view = new CallLineViewModel
             {
+                CallId = line.CallId,
                 Title = subject?.Headline ?? line.Peer,
                 SecondaryNumber = subject is null ? line.Peer : subject.SecondaryNumber,
                 IsActive = line.IsActive,
@@ -1899,7 +2004,9 @@ public sealed class PhoneService : IDisposable
                 ConnectedAt = record?.AnsweredAt,
             };
 
-            view.Status = view.IsOnHold
+            view.Status = pending.Any(record => record.CallId == line.CallId)
+                ? Strings.Get("StatusAudioStarting")
+                : view.IsOnHold
                 ? Strings.Get("PanelResume")
                 : Strings.Get("CallStatusTalking");
 
@@ -1919,13 +2026,14 @@ public sealed class PhoneService : IDisposable
         _panel.IsConferenceStarted = conference;
         _panel.CallStatus = active?.Status ?? string.Empty;
         _panel.IsOnHold = active?.IsOnHold ?? false;
-        _panel.CanSendDtmf = active is not null;
-        _panel.IsMicrophoneMuted = _lines.IsMicrophoneMuted;
+        _panel.CanControlMedia = snapshotReady && pendingActive is null;
+        _panel.CanSendDtmf = active is not null && _panel.CanControlMedia;
+        _panel.IsMicrophoneMuted = snapshotReady ? muted : _settings.Audio.MicrophoneMuted;
         _panel.ResyncToggles();
 
         // Линии сменились — могла стать активной другая, пока исходящий ещё
         // звонит, или кончиться та, что забирала у него звук.
-        UpdatePreAnswerAudio();
+        if (snapshotReady) { UpdatePreAnswerAudio(); }
     }
 
     // --- Короткие статусы панели ------------------------------------------
@@ -2045,6 +2153,10 @@ public sealed class PhoneService : IDisposable
 
             case VoiceAudioEvent.Broken:
                 ShowStatus(StatusSlot.Audio, "StatusAudioLost", "speaker.slash", isWarning: true);
+                break;
+
+            case VoiceAudioEvent.InputUnavailable:
+                ShowStatus(StatusSlot.Microphone, "StatusMicUnavailable", "mic.slash.fill", isWarning: true);
                 break;
 
             case VoiceAudioEvent.InputSilent:
@@ -2169,6 +2281,7 @@ public sealed class PhoneService : IDisposable
 
     public void Dispose()
     {
+        foreach (var callId in _mediaStarts.Keys) { CancelMediaStart(callId); }
         if (_disposed) { return; }
         _disposed = true;
         Interlocked.Increment(ref _connectionRequest);

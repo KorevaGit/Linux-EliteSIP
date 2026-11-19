@@ -103,6 +103,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
     private PulseConnection? _connection;
     private PulseDuplex? _duplex;
     private PulseDevice? _input;
+    private int _renderedWithoutCapture;
     private PulseDevice? _output;
     private CancellationTokenSource? _stop;
     private Thread? _captureThread;
@@ -344,6 +345,8 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
                 }
                 _supervisor?.Notify("аудиопоток отказал во время запуска");
             }
+
+            ReportInputAvailability();
         }
     }
 
@@ -442,6 +445,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
                     policy.RecordSuccess();
                     Report(new VoiceAudioEvent.Restarted(reason));
+                    ReportInputAvailability();
                     return;
                 }
                 catch (Exception e) when (IsBuildFailure(e))
@@ -499,11 +503,34 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
         SilentInputs.Clear();
 
         var binding = Volatile.Read(ref _binding);
-        if (!DeviceChangeRelevance.AffectsRoute(change, binding)) { return; }
+        if (!NeedsRouteRebuild(change, binding)) { return; }
         var key = change.Kind == AudioDeviceChangeKind.DefaultChanged ? $"default:{change.Direction}" : null;
         _supervisor?.Notify(Describe(change),
             () => !Volatile.Read(ref _stopRequested)
-                && DeviceChangeRelevance.StillRequiresRebuild(change, binding, Volatile.Read(ref _binding)), key);
+                && StillNeedsRouteRebuild(change, binding, Volatile.Read(ref _binding)), key);
+    }
+
+    internal static bool NeedsRouteRebuild(AudioDeviceChange change, AudioRouteBinding binding) =>
+        DeviceChangeRelevance.AffectsRoute(change, binding) || IsCaptureReturn(change, binding);
+
+    private static bool StillNeedsRouteRebuild(
+        AudioDeviceChange change, AudioRouteBinding observed, AudioRouteBinding current) =>
+        DeviceChangeRelevance.StillRequiresRebuild(change, observed, current)
+        || IsCaptureReturn(change, current);
+
+    private static bool IsCaptureReturn(AudioDeviceChange change, AudioRouteBinding binding) =>
+        binding.ActiveOutputId is not null && binding.ActiveInputId is null
+        && change.Direction == AudioDeviceDirection.Capture
+        && (change.Kind == AudioDeviceChangeKind.DeviceAdded
+            || change.Kind == AudioDeviceChangeKind.DeviceStateChanged
+                && change.Availability == AudioDeviceAvailability.Active);
+
+    private void ReportInputAvailability()
+    {
+        if (_input is null)
+        {
+            Report(new VoiceAudioEvent.InputUnavailable());
+        }
     }
 
     private void RunSupervisedRestart(string reason) => AudioWorkerBoundary.Run(
@@ -670,24 +697,9 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
         _output = OpenDevice(_configuration.OutputDeviceId, AudioDeviceDirection.Render, snapshot);
         _input = OpenInput(snapshot);
 
-        if (_input is null || _output is null)
-        {
-            throw new VoiceAudioException(
-                _input is null && _output is null
-                    ? "в системе нет ни микрофона, ни выхода"
-                    : _input is null ? "нет микрофона" : "нет устройства воспроизведения");
-        }
-
-        PulseDevice input = _input;
-        PulseDevice output = _output;
-
-        Volatile.Write(
-            ref _binding,
-            new AudioRouteBinding(_configuration.InputDeviceId, _configuration.OutputDeviceId, input.Name, output.Name));
-
+        PulseDevice output = _output ?? throw new VoiceAudioException("нет устройства воспроизведения");
         _echoFree = PulseDeviceRules.IsEchoFree(output);
-        _inputIsHeadset = PulseDeviceRules.IsHeadsetPair(input, output);
-        _inputBoostDb = PulseDeviceRules.BoostAboveBaseDb(input.Volume, input.BaseVolume);
+        _renderedWithoutCapture = 0;
 
         int codecRate = (int)_configuration.Codec.SampleRate();
 
@@ -738,20 +750,43 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
 
         // Потоки сервера открываются последними: обратный вызов записи
         // приходит сразу, и всё, что он читает, уже должно стоять.
-        _duplex = PulseDuplex.Open(_connection, input, output, Render, reason => FailFromThread(reason));
+        // Привязка нужна обработчику отказа прежде, чем сервер начнёт слать события.
+        PublishBinding(_input, output);
+        try
+        {
+            _duplex = PulseDuplex.Open(_connection, _input, output, Render, reason => FailFromThread(reason));
+        }
+        catch (PulseFailure duplexFailure) when (_input is not null)
+        {
+            Diagnostic($"двусторонний тракт не поднялся ({duplexFailure.Message}), пробуем только вывод");
+            // Успешный вывод подтверждает, что проблема ограничена захватом.
+            _input = null;
+            PublishBinding(null, output);
+            _duplex = PulseDuplex.Open(_connection, null, output, Render, reason => FailFromThread(reason));
+        }
 
+        PulseDevice? input = _input;
+        _inputIsHeadset = input is not null && PulseDeviceRules.IsHeadsetPair(input, output);
+        _inputBoostDb = input is null ? 0 : PulseDeviceRules.BoostAboveBaseDb(input.Volume, input.BaseVolume);
         Interlocked.Increment(ref _workerGeneration);
-        _captureThread = StartThread("elitesip-capture", () => CaptureLoop(token));
+        if (input is not null)
+        {
+            _captureThread = StartThread("elitesip-capture", () => CaptureLoop(token));
+        }
         _feedThread = StartThread("elitesip-feed", () => FeedLoop(token));
 
         AcknowledgeRouteBuild();
 
-        Diagnostic(
-            $"тракт поднят: микрофон «{input.DisplayName}» ({InputOrigin(input)}), "
-            + $"наушники «{output.DisplayName}» ({OutputOrigin(output)})");
+        Diagnostic(input is null
+            ? $"тракт поднят без микрофона: наушники «{output.DisplayName}» ({OutputOrigin(output)})"
+            : $"тракт поднят: микрофон «{input.DisplayName}» ({InputOrigin(input)}), "
+                + $"наушники «{output.DisplayName}» ({OutputOrigin(output)})");
 
         Diagnostic(ProcessingSummary());
-        Diagnostic("микрофон: " + input.Summary);
+        if (input is not null)
+        {
+            Diagnostic("микрофон: " + input.Summary);
+        }
         Diagnostic("выход: " + output.Summary);
 
         if (_inputBoostDb > PulseDeviceRules.OverdrivenBoostDb)
@@ -764,7 +799,7 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
                 $"микрофон усилен на {_inputBoostDb:F0} дБ сверх базовой громкости — будет перегруз и щелчки; убавьте громкость микрофона в настройках звука до 30–50 %"));
         }
 
-        if (input.Transport == AudioTransport.Virtual)
+        if (input?.Transport == AudioTransport.Virtual)
         {
             // Шумодав или эхоподавитель сервера стоит перед нами: обработка
             // пойдёт дважды. Не запрещено — человек поставил его сам, — но
@@ -778,6 +813,10 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
                 + $"({_duplex.OutputChannels} кан., голос в передней паре); кодек {_configuration.Codec} {codecRate} Гц, "
                 + $"запас кольца {targetFill} отсчётов"));
     }
+
+    private void PublishBinding(PulseDevice? input, PulseDevice output) =>
+        Volatile.Write(ref _binding,
+            new AudioRouteBinding(_configuration.InputDeviceId, _configuration.OutputDeviceId, input?.Name, output.Name));
 
     private Thread StartThread(string name, Action body)
     {
@@ -1188,6 +1227,11 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
             taken = ring.Read(destination);
         }
 
+        if (_input is null)
+        {
+            Interlocked.Add(ref _renderedWithoutCapture, destination.Length);
+        }
+
         _feedWake.Set();
 
         int fadeLength = DeviceRate / 200;
@@ -1227,6 +1271,11 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
         if (played > _playedMeter)
         {
             _playedMeter = played;
+        }
+
+        if (_input is null)
+        {
+            return;
         }
 
         // Опорный — ровно то, что отдано серверу, после громкости: слышит
@@ -1269,6 +1318,10 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
         _receiveGain = null;
 
         int frameSamples = ring.TargetFill / Math.Max(_configuration.TargetPlaybackFrames, 1);
+        var silenceClock = _input is null
+            ? new ReceiveOnlyClock(DeviceRate, _configuration.PacketTimeMilliseconds)
+            : null;
+        short[]? silence = silenceClock is null ? null : new short[_configuration.SamplesPerFrame];
 
         while (!token.IsCancellationRequested)
         {
@@ -1283,9 +1336,20 @@ public sealed class PulseVoiceAudioEngine : IVoiceAudioEngine
             lastObserved = now;
             toRender.SetRateCorrection(controller.Correction);
 
-            SampleClocks(duplex, now);
+            if (silenceClock is not null)
+            {
+                int packets = silenceClock.Advance(Interlocked.Exchange(ref _renderedWithoutCapture, 0));
+                for (int i = 0; i < packets; i++)
+                {
+                    Handlers.EncodedFrame?.Invoke(_encoder!.Encode(silence));
+                }
+            }
+            else
+            {
+                SampleClocks(duplex, now);
+            }
 
-            if (!silenceChecked && now >= SilenceWindow.TotalSeconds)
+            if (silenceClock is null && !silenceChecked && now >= SilenceWindow.TotalSeconds)
             {
                 silenceChecked = true;
 

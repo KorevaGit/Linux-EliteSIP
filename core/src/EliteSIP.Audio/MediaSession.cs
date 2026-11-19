@@ -572,7 +572,9 @@ public sealed class MediaSession : IDisposable
     }
 
     /// <summary>Поднимает поток RTP и забирает аудиотракт.</summary>
-    public void Start()
+    public void Start() => Start(CancellationToken.None);
+
+    private void Start(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -581,7 +583,7 @@ public sealed class MediaSession : IDisposable
         StartTransport();
         try
         {
-            ClaimAudio();
+            ClaimAudio(cancellationToken);
         }
         catch
         {
@@ -606,7 +608,7 @@ public sealed class MediaSession : IDisposable
         await Lifecycle.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            await Task.Run(Start, cancellationToken).ConfigureAwait(false);
+            await Task.Run(() => Start(cancellationToken), cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -651,7 +653,7 @@ public sealed class MediaSession : IDisposable
 
                     if (claimAudio)
                     {
-                        ClaimAudio();
+                        ClaimAudio(cancellationToken);
                         _isAudioRunning = true;
                     }
                 },
@@ -1549,9 +1551,9 @@ public sealed class MediaSession : IDisposable
         },
     };
 
-    private void ClaimAudio()
+    private void ClaimAudio(CancellationToken cancellationToken = default)
     {
-        _bus.Claim(_token, _audioConfiguration, MakeHandlers());
+        _bus.Claim(_token, _audioConfiguration, MakeHandlers(), cancellationToken);
         _ownsAudio = true;
     }
 

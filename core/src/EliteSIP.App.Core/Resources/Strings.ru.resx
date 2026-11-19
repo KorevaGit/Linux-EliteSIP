@@ -50,6 +50,7 @@
   <data name="PanelWindowTitle" xml:space="preserve">
     <value>EliteSIP</value>
   </data>
+  <data name="StatusAudioStarting" xml:space="preserve"><value>Подключаем звук…</value></data>
   <data name="PanelSettings" xml:space="preserve">
     <value>Настройки</value>
   </data>
@@ -1274,6 +1275,7 @@
   <data name="StatusAudioLost" xml:space="preserve">
     <value>Звук пропал</value>
   </data>
+  <data name="StatusMicUnavailable" xml:space="preserve"><value>Микрофон недоступен. Собеседника по-прежнему слышно.</value></data>
   <data name="StatusMicSilent" xml:space="preserve">
     <value>Микрофон молчит</value>
   </data>

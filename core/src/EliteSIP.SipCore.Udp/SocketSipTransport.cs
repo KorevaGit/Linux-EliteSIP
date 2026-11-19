@@ -203,9 +203,20 @@ public sealed class SocketSipTransport : ISipTransportChannel, IDisposable
         }
         catch (SocketException error)
         {
-            throw new IOException(
-                SipTransportFailureText.Describe(error.SocketErrorCode, Remote, Transport),
-                error);
+            string reason = SipTransportFailureText.Describe(error.SocketErrorCode, Remote, Transport);
+            if (socket.SocketType == SocketType.Dgram
+                && error.SocketErrorCode is SocketError.InvalidArgument or SocketError.AddressNotAvailable)
+            {
+                lock (_gate)
+                {
+                    if (!_isStopped && ReferenceEquals(socket, _socket))
+                    {
+                        Close(reason);
+                    }
+                }
+            }
+
+            throw new IOException(reason, error);
         }
         catch (ObjectDisposedException error)
         {
@@ -482,6 +493,7 @@ public sealed class SocketSipTransport : ISipTransportChannel, IDisposable
         try
         {
             using var probe = new Socket(remote.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            SipSocketOptions.MarkSignaling(probe);
             probe.Connect(remote);
             return probe.LocalEndPoint is IPEndPoint selected && !selected.Address.Equals(current);
         }

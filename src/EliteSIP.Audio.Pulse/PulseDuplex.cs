@@ -72,6 +72,7 @@ internal sealed unsafe class PulseDuplex : IDisposable
     private nint _capture;
     private nint _playback;
     private bool _closing;
+    private bool _ready;
 
     // Очередь захвата: пишет поток цикла, забирает поток обработки.
     private readonly Lock _queueLock = new();
@@ -134,7 +135,7 @@ internal sealed unsafe class PulseDuplex : IDisposable
     /// </param>
     internal static PulseDuplex Open(
         PulseConnection connection,
-        PulseDevice input,
+        PulseDevice? input,
         PulseDevice output,
         MonoRender render,
         Action<string> failed)
@@ -145,7 +146,10 @@ internal sealed unsafe class PulseDuplex : IDisposable
         {
             using (connection.Lock())
             {
-                duplex._capture = duplex.Connect(input.Name, record: true, positions: []);
+                if (input is not null)
+                {
+                    duplex._capture = duplex.Connect(input.Name, record: true, positions: []);
+                }
                 duplex._playback = duplex.Connect(output.Name, record: false, output.ChannelPositions);
             }
 
@@ -154,7 +158,8 @@ internal sealed unsafe class PulseDuplex : IDisposable
             using (connection.Lock())
             {
                 const double bytesPerMs = Rate * sizeof(float) / 1000.0;
-                LibPulse.BufferAttr* captureAttr = LibPulse.StreamGetBufferAttr(duplex._capture);
+                LibPulse.BufferAttr* captureAttr = duplex._capture == 0
+                    ? null : LibPulse.StreamGetBufferAttr(duplex._capture);
                 LibPulse.BufferAttr* playbackAttr = LibPulse.StreamGetBufferAttr(duplex._playback);
                 duplex.CaptureFragmentMilliseconds = captureAttr is null ? 0 : captureAttr->FragSize / bytesPerMs;
                 duplex.PlaybackLengthMilliseconds = playbackAttr is null
@@ -268,13 +273,13 @@ internal sealed unsafe class PulseDuplex : IDisposable
             int playback;
             using (_connection.Lock())
             {
-                capture = LibPulse.StreamGetState(_capture);
+                capture = _capture == 0 ? LibPulse.StreamReady : LibPulse.StreamGetState(_capture);
                 playback = LibPulse.StreamGetState(_playback);
-            }
-
-            if (capture == LibPulse.StreamReady && playback == LibPulse.StreamReady)
-            {
-                return;
+                if (capture == LibPulse.StreamReady && playback == LibPulse.StreamReady)
+                {
+                    _ready = true;
+                    return;
+                }
             }
 
             if (capture is LibPulse.StreamFailed or LibPulse.StreamTerminated
@@ -334,7 +339,7 @@ internal sealed unsafe class PulseDuplex : IDisposable
     {
         using (_connection.Lock())
         {
-            if (_closing)
+            if (_closing || _capture == 0)
             {
                 return null;
             }
@@ -501,7 +506,7 @@ internal sealed unsafe class PulseDuplex : IDisposable
     {
         LibPulse.ThreadedMainloopSignal(_connection.Loop, 0);
 
-        if (_closing)
+        if (_closing || !_ready)
         {
             return;
         }

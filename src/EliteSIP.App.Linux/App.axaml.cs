@@ -575,22 +575,26 @@ public sealed partial class App : Application, IDisposable
 
     private void Reconnect(string reason)
     {
-        if (_phone is null || _panel is null)
+        if (_phone is null || _panel is null || _panel.IsOfflineByChoice)
         {
             return;
         }
 
-        ClientEventLog.Shared.NoteConnection($"Переподключение: {reason}{(_panel.IsInCall ? "; отложено до окончания разговора" : string.Empty)}");
-        if (_panel.IsInCall)
+        bool routeChanged = reason is "сеть сменилась" or "машина проснулась"
+            && _phone.HasLocalRouteChanged();
+        bool defer = _panel.IsInCall && !routeChanged && reason != "канал закрыт";
+        ClientEventLog.Shared.NoteConnection($"Переподключение: {reason}{(defer ? "; отложено до окончания разговора" : string.Empty)}");
+        if (defer)
         {
             _reconnectAfterCall = reason;
             Log($"{reason}: связь поднимется после разговора");
             return;
         }
 
-        if (_panel.IsOfflineByChoice)
+        _reconnectAfterCall = null;
+        if (routeChanged)
         {
-            return;
+            Log("Изменился локальный маршрут до АТС: пересоздаём SIP-транспорт");
         }
 
         Log($"{reason}: поднимаем регистрацию заново");

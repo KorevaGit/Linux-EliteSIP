@@ -62,6 +62,7 @@
     <value>EliteSIP</value>
     <comment>заголовок окна панели</comment>
   </data>
+  <data name="StatusAudioStarting" xml:space="preserve"><value>Connecting audio…</value></data>
   <data name="PanelSettings" xml:space="preserve">
     <value>Settings</value>
     <comment>шестерёнка в строке состояния</comment>
@@ -1296,6 +1297,7 @@
   <data name="StatusAudioLost" xml:space="preserve">
     <value>Audio lost</value>
   </data>
+  <data name="StatusMicUnavailable" xml:space="preserve"><value>Microphone unavailable. You can still hear the other party.</value></data>
   <data name="StatusMicSilent" xml:space="preserve">
     <value>Microphone is silent</value>
   </data>

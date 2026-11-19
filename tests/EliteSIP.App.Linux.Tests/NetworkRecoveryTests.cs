@@ -1,4 +1,5 @@
 using System.IO;
+using System.Reflection;
 using EliteSIP.Audio;
 using System.Net;
 using System.Net.Sockets;
@@ -18,9 +19,10 @@ namespace EliteSIP.App.Tests;
 public sealed class NetworkRecoveryTests
 {
     [AvaloniaTheory]
-    [InlineData(1)]
-    [InlineData(4)]
-    public async Task Закрытие_канала_переподключает_телефон_и_возвращает_исходящие(int queuedConnections)
+    [InlineData(1, false)]
+    [InlineData(4, false)]
+    [InlineData(1, true)]
+    public async Task Закрытие_канала_переподключает_телефон_и_возвращает_исходящие(int queuedConnections, bool busy)
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var token = deadline.Token;
@@ -42,9 +44,13 @@ public sealed class NetworkRecoveryTests
         {
             phone = new PhoneService(settings, panel, history,
                 new IncomingCallPresenter(_ => { }, () => null), new AvaloniaUiThread(), new TestAudioPlatform { EngineFactory = _ => new SilentEngine() }, _ => { });
-            phone.RecoverConnection = () => _ = phone.ConnectAsync();
-            var gate = (SemaphoreSlim)typeof(PhoneService).GetField("_connection",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.GetValue(phone)!;
+            var app = new App();
+            const BindingFlags instancePrivate = BindingFlags.Instance | BindingFlags.NonPublic;
+            typeof(App).GetField("_panel", instancePrivate)!.SetValue(app, panel);
+            typeof(App).GetField("_phone", instancePrivate)!.SetValue(app, phone);
+            var reconnect = typeof(App).GetMethod("Reconnect", instancePrivate)!.CreateDelegate<Action<string>>(app);
+            phone.RecoverConnection = () => reconnect("канал закрыт");
+            var gate = (SemaphoreSlim)typeof(PhoneService).GetField("_connection", instancePrivate)!.GetValue(phone)!;
             Assert.True(gate.Wait(0));
             try { startup = Task.WhenAll(Enumerable.Range(0, queuedConnections).Select(_ => phone.ConnectAsync())); }
             finally { gate.Release(); }
@@ -57,6 +63,15 @@ public sealed class NetworkRecoveryTests
             {
                 await RespondAsync(first.GetStream(), SipMethod.Register, 200, token);
                 await WaitForDialAsync(panel, token);
+                Run(() =>
+                {
+                    Assert.False(phone.HasLocalRouteChanged());
+                    if (busy)
+                    {
+                        panel.PendingNumber = "709";
+                        Assert.True(panel.IsInCall);
+                    }
+                });
             }
 
             using var second = await listener.AcceptTcpClientAsync(token);
