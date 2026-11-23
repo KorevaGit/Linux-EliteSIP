@@ -110,6 +110,12 @@
                     <TextBlock Text="{res:Loc SettingsStartup}" Margin="7,0,0,0" VerticalAlignment="Center"/>
                   </StackPanel>
                 </CheckBox>
+                <CheckBox Classes="switch" IsChecked="{Binding Settings.Appearance.AlwaysOnTop}">
+                  <StackPanel Orientation="Horizontal">
+                    <theme:Icon Glyph="settings.monitor" Size="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{res:Loc SettingsAlwaysOnTop}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </CheckBox>
                 <theme:SettingsRow Tag="Restore">
                   <theme:SettingsRow.Header>
                     <StackPanel Orientation="Horizontal">
@@ -223,6 +229,12 @@
                   </StackPanel>
                 </Border>
                 <theme:SettingsNote Text="{res:Loc AudioAggregateNote}" IsVisible="{Binding NeedsAggregate}"/>
+                <CheckBox Classes="switch" IsChecked="{Binding Settings.Audio.MutesSystemSounds}">
+                  <StackPanel Orientation="Horizontal">
+                    <theme:Icon Glyph="settings.volume-1" Size="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{res:Loc SettingsMuteSystemSounds}" Margin="7,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
               </theme:SettingsSection>
               <theme:SettingsSection Header="{res:Loc SettingsProcessing}" Tag="settings.sliders-horizontal">
                 <CheckBox Classes="switch" IsChecked="{Binding Settings.Audio.AutomaticGainControl}" Tag="ProcessorFirst">

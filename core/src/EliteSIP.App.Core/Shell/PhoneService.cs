@@ -893,7 +893,7 @@ public sealed class PhoneService : IDisposable
             var hadMedia = _sessions.ContainsKey(call.CallId);
             await CloseMediaAsync(call.CallId).ConfigureAwait(false);
 
-            if (hadMedia)
+            if (hadMedia && !_settings.Audio.MutesSystemSounds)
             {
                 _sounds.PlayHangUp(_settings.Audio.OutputDeviceId);
             }
@@ -1263,7 +1263,10 @@ public sealed class PhoneService : IDisposable
 
             // Звук отбоя — после снятия тракта, а не до: иначе он лёг бы
             // поверх последнего слова собеседника.
-            _sounds.PlayHangUp(_settings.Audio.OutputDeviceId);
+            if (!_settings.Audio.MutesSystemSounds)
+            {
+                _sounds.PlayHangUp(_settings.Audio.OutputDeviceId);
+            }
 
             await _ui.InvokeAsync(SyncLines);
         }
@@ -1821,6 +1824,7 @@ public sealed class PhoneService : IDisposable
         // ответ, удержание и звонок, который успел завершиться, не сигналят.
         if (firstAnswer
             && _agent?.CallStateOf(callId) is SipCallState.Answered
+            && !_settings.Audio.MutesSystemSounds
             && _lineSnapshot.Any(line => line.CallId == callId && line.IsActive))
         {
             _sounds.PlayConnected(_settings.Audio.OutputDeviceId);

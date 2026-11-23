@@ -223,6 +223,8 @@ public sealed partial class App : Application, IDisposable
             HistoryDemo.Seed(_history, _settings.Account.ProfileId);
         }
 
+        KeepWindowsOnTop(_settings);
+
         _panelWindow = new PanelWindow(_panel)
         {
             RestorePlacement = () => _settings.Placement is { Left: { } left, Top: { } top } ? (left, top) : null,
@@ -349,7 +351,13 @@ public sealed partial class App : Application, IDisposable
 
         panel.ToggleHold = new RelayCommand(async _ => await phone.ToggleHoldAsync());
         panel.ToggleMicrophone = new RelayCommand(_ => phone.ToggleMicrophone());
-        panel.KeyPressed = key => phone.Sounds.PlayKeyTone(key, settings.Audio.OutputDeviceId);
+        panel.KeyPressed = key =>
+        {
+            if (!settings.Audio.MutesSystemSounds)
+            {
+                phone.Sounds.PlayKeyTone(key, settings.Audio.OutputDeviceId);
+            }
+        };
         panel.StartConference = new RelayCommand(async _ => await phone.StartConferenceAsync());
         panel.Transfer = new RelayCommand(async _ => await phone.TransferAsync(panel.TransferNumber));
         panel.SendMacro = new RelayCommand(async parameter =>

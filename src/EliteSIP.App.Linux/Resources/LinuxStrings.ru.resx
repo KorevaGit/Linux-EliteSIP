@@ -28,6 +28,8 @@
   <data name="PanelWaylandNotice" xml:space="preserve">
     <value>Сеанс Wayland не поддерживается: защита приёма слабее. Войдите в сеанс X11</value>
   </data>
+<data name="SettingsAlwaysOnTop" xml:space="preserve"><value>Поверх всех окон</value></data>
+<data name="SettingsMuteSystemSounds" xml:space="preserve"><value>Отключить системные звуки (кроме рингтона)</value></data>
 <data name="SettingsStartup" xml:space="preserve"><value>Запускать при входе в систему</value></data>
 <data name="PanelYourNumber" xml:space="preserve"><value>ВАШ НОМЕР</value></data>
 <data name="HistorySnapshotFailed" xml:space="preserve"><value>Не удалось скопировать снимок истории. Попробуйте ещё раз.</value></data>

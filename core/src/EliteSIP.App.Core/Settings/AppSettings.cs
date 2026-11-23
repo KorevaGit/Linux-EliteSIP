@@ -61,6 +61,7 @@ public sealed class AudioSettings : Observable
     private bool _receiveGainControl;
     private bool _microphoneMuted;
     private bool _releasesDeviceWhenIdle = true;
+    private bool _mutesSystemSounds = true;
     private EliteSIP.Audio.WindowsCaptureProcessing _windowsProcessing = EliteSIP.Audio.WindowsCaptureProcessing.Auto;
 
     /// <summary>Постоянный идентификатор конечной точки. <c>null</c> — системное.</summary>
@@ -179,6 +180,13 @@ public sealed class AudioSettings : Observable
     {
         get => _backgroundVoiceSuppression;
         set => Set(ref _backgroundVoiceSuppression, value);
+    }
+
+    /// <summary>Молчать ли служебным звукам (клавиши, подключение, отбой). Рингтон играет всегда.</summary>
+    public bool MutesSystemSounds
+    {
+        get => _mutesSystemSounds;
+        set => Set(ref _mutesSystemSounds, value);
     }
 
     /// <summary>Отпускать ли устройство между звонками.</summary>
@@ -315,6 +323,10 @@ public sealed class AppearanceSettings : Observable
     private BackgroundTransparency _backgroundTransparency;
     private bool _themeChosenByUser;
     private bool _transparencyChosenByUser;
+    private bool _alwaysOnTop = true;
+
+    /// <summary>Окна программы поверх остальных окон.</summary>
+    public bool AlwaysOnTop { get => _alwaysOnTop; set => Set(ref _alwaysOnTop, value); }
     public bool ThemeChosenByUser { get => _themeChosenByUser; set => Set(ref _themeChosenByUser, value); }
     public bool TransparencyChosenByUser { get => _transparencyChosenByUser; set => Set(ref _transparencyChosenByUser, value); }
 

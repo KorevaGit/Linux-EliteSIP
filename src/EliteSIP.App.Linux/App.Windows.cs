@@ -28,6 +28,37 @@ public sealed partial class App
     private CallHistoryWindow? _historyWindow;
     private AdministrationWindow? _administrationWindow;
 
+    /// <summary>
+    /// «Поверх всех окон» — для всех окон программы сразу: иначе панель поверх
+    /// закрывала бы настройки. Окна, которые поверх всегда (входящий, меню
+    /// значка, заставка), правило не трогает.
+    /// </summary>
+    private void KeepWindowsOnTop(AppSettings settings)
+    {
+        static bool Governed(Window window) => window is not (IncomingCallWindow or TrayMenuWindow or StartupSplash);
+
+        Window.WindowOpenedEvent.AddClassHandler<Window>((window, _) =>
+        {
+            if (Governed(window))
+            {
+                window.Topmost = settings.Appearance.AlwaysOnTop;
+            }
+        });
+
+        settings.Appearance.PropertyChanged += (_, change) =>
+        {
+            if (change.PropertyName != nameof(AppearanceSettings.AlwaysOnTop) || _desktop is null)
+            {
+                return;
+            }
+
+            foreach (var window in _desktop.Windows.Where(Governed))
+            {
+                window.Topmost = settings.Appearance.AlwaysOnTop;
+            }
+        };
+    }
+
     private static void RestoreAndActivate(Window window)
     {
         if (window.WindowState == WindowState.Minimized)

@@ -43,6 +43,12 @@ public partial class PanelWindow : Window
 
     private bool _opened;
 
+    /// <summary>
+    /// Левая кромка, поставленная нами при первом показе (справа внизу), пока
+    /// оператор сам не передвинул окно. Такое место не запоминается.
+    /// </summary>
+    private int? _autoLeft;
+
     public PanelWindow()
         : this(new PanelViewModel())
     {
@@ -215,8 +221,9 @@ public partial class PanelWindow : Window
     /// <summary>Запомнить место — по движению окна, а не на выходе: выход бывает и аварийным.</summary>
     internal void SaveCurrentPlacement()
     {
-        if (WindowState is WindowState.Normal && _opened)
+        if (WindowState is WindowState.Normal && _opened && !IsAutoPlaced())
         {
+            _autoLeft = null;
             var scale = DesktopScaling;
             SavePlacement?.Invoke(Position.X / scale, Position.Y / scale);
         }
@@ -387,6 +394,7 @@ public partial class PanelWindow : Window
     {
         if (RestorePlacement?.Invoke() is not { } placement)
         {
+            PlaceBottomRight();
             return;
         }
 
@@ -406,6 +414,34 @@ public partial class PanelWindow : Window
 
         WindowStartupLocation = WindowStartupLocation.Manual;
         Position = wanted.Position;
+    }
+
+    /// <summary>Место по умолчанию — правый нижний угол рабочей области.</summary>
+    private void PlaceBottomRight()
+    {
+        if ((Screens.ScreenFromWindow(this) ?? Screens.Primary) is not { } screen)
+        {
+            return;
+        }
+
+        var work = screen.WorkingArea;
+        var width = (int)Math.Round((FrameSize?.Width ?? Width) * DesktopScaling);
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Position = new PixelPoint(work.Right - width, Math.Max(work.Y, work.Bottom - Math.Max(1, PixelHeight())));
+        _autoLeft = Position.X;
+    }
+
+    /// <summary>Стоит ли окно там, куда его поставили мы: по левой кромке и по низу экрана.</summary>
+    private bool IsAutoPlaced()
+    {
+        if (_autoLeft is not { } left || Position.X != left)
+        {
+            return false;
+        }
+
+        return Screens.ScreenFromWindow(this) is not { } screen
+            || Position.Y + PixelHeight() >= screen.WorkingArea.Bottom - 2
+            || Position.Y <= screen.WorkingArea.Y;
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)

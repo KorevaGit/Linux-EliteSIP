@@ -28,6 +28,8 @@
   <data name="PanelWaylandNotice" xml:space="preserve">
     <value>Wayland session is not supported: answer protection is weaker. Sign in to an X11 session</value>
   </data>
+<data name="SettingsAlwaysOnTop" xml:space="preserve"><value>Keep windows on top</value></data>
+<data name="SettingsMuteSystemSounds" xml:space="preserve"><value>Mute system sounds (except the ringtone)</value></data>
 <data name="SettingsStartup" xml:space="preserve"><value>Start at sign-in</value></data>
 <data name="PanelYourNumber" xml:space="preserve"><value>YOUR NUMBER</value></data>
 <data name="HistorySnapshotFailed" xml:space="preserve"><value>Could not copy the history snapshot. Please try again.</value></data>
