@@ -53,9 +53,10 @@ public sealed class PanelVolumeTests
             // Значок микрофона на ползунке — то же отключение, что клавиша «Микрофон».
             model.CanControlMedia = true;
             Dispatcher.UIThread.RunJobs();
-            panel.FindControl<Button>("MicrophoneVolumeIcon")!.Command!.Execute(null);
+            panel.FindControl<ToggleButton>("MicrophoneVolumeIcon")!.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             Dispatcher.UIThread.RunJobs();
             Assert.True(model.IsMicrophoneMuted);
+            Assert.Equal(0, settings.Audio.MicrophoneGain, 3);
 
             Snapshot.Save(panel.CaptureRenderedFrame()!, "panel-volume");
 
@@ -120,6 +121,10 @@ public sealed class PanelVolumeTests
             model.ShowsVolume = true;
             Dispatcher.UIThread.RunJobs();
             Assert.True(peerFrame.IsVisible);
+            // Вернули ползунки — окно выросло под них и ничего не наезжает.
+            Assert.True(panel.Height >= panel.MinHeight - 0.5, $"окно {panel.Height:0} при минимуме {panel.MinHeight:0}");
+            Assert.True(panel.FindControl<Grid>("KeysRow")!.TranslatePoint(default, panel)!.Value.Y
+                >= micFrame.TranslatePoint(new Point(0, micFrame.Bounds.Height), panel)!.Value.Y);
 
             // У панели и без того шумят привязки к пустым Trouble/Activity;
             // свои — громкость и меню «⋯» — обязаны быть чистыми.

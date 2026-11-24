@@ -278,6 +278,13 @@ public partial class PanelWindow : Window
         if (!_opened) { return; }
         UpdateRows();
         UpdateMinimumHeight();
+
+        // Вернули ползунки или макросы — окно вырастает под них, а не прячет
+        // клавиши под сеткой.
+        if (SizeToContent is SizeToContent.Manual && Height < MinHeight)
+        {
+            Height = MinHeight;
+        }
     }
 
     /// <summary>
@@ -569,13 +576,13 @@ public partial class PanelWindow : Window
         ConfirmAction.Content = action;
         _confirmed = confirmed;
         _asking = key;
-        key.Classes.Add("asking");
+        key.SetCurrentValue(ToggleButton.IsCheckedProperty, true);
         ConfirmPopup.IsOpen = true;
     }
 
     private void OnConfirmPopupClosed(object? sender, EventArgs e)
     {
-        _asking?.Classes.Remove("asking");
+        _asking?.SetCurrentValue(ToggleButton.IsCheckedProperty, ReferenceEquals(_asking, HoldKey) ? Model.IsOnHold : Model.IsConferenceStarted);
         _asking = null;
     }
 
@@ -588,6 +595,32 @@ public partial class PanelWindow : Window
     }
 
     private void OnConfirmCancelClick(object? sender, RoutedEventArgs e) => ConfirmPopup.IsOpen = false;
+
+    /// <summary>Громкость микрофона, к которой вернуться после выключения.</summary>
+    private double _gainBeforeMute = 1;
+
+    /// <summary>
+    /// «Микрофон»: выключить — и ползунок уходит в ноль, как у «Собеседника»;
+    /// включить — прежняя громкость. Раньше ползунок стоял на месте, и было
+    /// непонятно, выключен ли микрофон.
+    /// </summary>
+    private void OnMicrophoneClick(object? sender, RoutedEventArgs e)
+    {
+        var audio = Model.Audio;
+        if (!Model.IsMicrophoneMuted)
+        {
+            if (audio.MicrophoneGain > 0.001) { _gainBeforeMute = audio.MicrophoneGain; }
+            Model.ToggleMicrophone?.Execute(null);
+            if (Model.IsMicrophoneMuted) { audio.MicrophoneGain = 0; }
+        }
+        else
+        {
+            Model.ToggleMicrophone?.Execute(null);
+            if (!Model.IsMicrophoneMuted && audio.MicrophoneGain <= 0.001) { audio.MicrophoneGain = _gainBeforeMute > 0.001 ? _gainBeforeMute : 1; }
+        }
+
+        if (sender is ToggleButton key) { key.SetCurrentValue(ToggleButton.IsCheckedProperty, Model.IsMicrophoneMuted); }
+    }
 
     /// <summary>Удержание — с подтверждением; снять удержание — сразу.</summary>
     private void OnHoldClick(object? sender, RoutedEventArgs e)

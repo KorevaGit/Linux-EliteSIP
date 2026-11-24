@@ -131,14 +131,6 @@
             <Style Selector="ToggleButton.volume-head > StackPanel">
               <Setter Property="Margin" Value="10,0,12,0"/>
             </Style>
-            <!-- Клавиша, о которой спрашивает подтверждение. -->
-            <Style Selector="ToggleButton.key.asking /template/ Border#Surface">
-              <Setter Property="Background" Value="{DynamicResource StatusConnectingBrush}"/>
-              <Setter Property="BorderBrush" Value="Transparent"/>
-            </Style>
-            <Style Selector="ToggleButton.key.asking">
-              <Setter Property="Foreground" Value="White"/>
-            </Style>
             <Style Selector="Grid#KeysRow ToggleButton.key">
               <Setter Property="MinHeight" Value="0"/>
             </Style>
@@ -164,7 +156,7 @@
             <Grid RowDefinitions="Auto,Auto" VerticalAlignment="Center">
               <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,4">
                 <!-- Нажатие выключает микрофон и краснеет; повторное включает. -->
-                <ToggleButton Grid.Column="0" Grid.ColumnSpan="2" Name="MicrophoneVolumeIcon" Classes="key warning volume-head" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Command="{Binding ToggleMicrophone}" ToolTip.Tip="{res:Loc PanelMicrophone}">
+                <ToggleButton Grid.Column="0" Grid.ColumnSpan="2" Name="MicrophoneVolumeIcon" Classes="key warning volume-head" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Click="OnMicrophoneClick" ToolTip.Tip="{res:Loc PanelMicrophone}">
                   <StackPanel Orientation="Horizontal" Spacing="8">
                     <Panel VerticalAlignment="Center">
                       <theme:Icon Glyph="settings.mic" Size="16" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}"/>
@@ -223,7 +215,7 @@
               <theme:Icon Glyph="phone.arrow.right" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
             </ToggleButton>
             <!-- Без ползунков громкости микрофон отключается здесь. -->
-            <ToggleButton Grid.Column="6" Name="MicrophoneKey" Classes="key warning" IsVisible="{Binding !ShowsVolume}" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Command="{Binding ToggleMicrophone}" ToolTip.Tip="{res:Loc PanelMicrophone}" AutomationProperties.Name="{res:Loc PanelMicrophone}">
+            <ToggleButton Grid.Column="6" Name="MicrophoneKey" Classes="key warning" IsVisible="{Binding !ShowsVolume}" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Click="OnMicrophoneClick" ToolTip.Tip="{res:Loc PanelMicrophone}" AutomationProperties.Name="{res:Loc PanelMicrophone}">
               <Panel>
                 <theme:Icon Glyph="mic.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}"/>
                 <theme:Icon Glyph="mic.slash.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsMicrophoneMuted}"/>
