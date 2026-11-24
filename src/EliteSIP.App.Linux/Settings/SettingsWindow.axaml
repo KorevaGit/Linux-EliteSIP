@@ -141,57 +141,6 @@
                     <theme:SettingsRow Tag="Device">
                       <theme:SettingsRow.Header>
                         <StackPanel Orientation="Horizontal">
-                          <theme:Icon Glyph="settings.mic" Size="18" VerticalAlignment="Center"/>
-                          <TextBlock Text="{res:Loc SettingsMicrophone}" VerticalAlignment="Center" Margin="7,0,0,0"/>
-                        </StackPanel>
-                      </theme:SettingsRow.Header>
-                      <ComboBox Name="InputDevices" ItemsSource="{Binding Inputs}" SelectedValueBinding="{ReflectionBinding Id}" SelectedValue="{Binding Settings.Audio.InputDeviceId}">
-                        <ComboBox.ItemTemplate>
-                          <DataTemplate>
-                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                          </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                      </ComboBox>
-                    </theme:SettingsRow>
-                    <theme:SettingsRow Tag="Compact" Margin="0,9,0,0">
-                      <theme:SettingsRow.Header>
-                        <StackPanel Orientation="Horizontal">
-                          <theme:Icon Glyph="settings.mic" Size="18" VerticalAlignment="Center"/>
-                        </StackPanel>
-                      </theme:SettingsRow.Header>
-                      <Grid>
-                        <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="*"/>
-                          <ColumnDefinition Width="Auto"/>
-                          <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center" Value="{Binding Settings.Audio.MicrophoneGain}" IsEnabled="{Binding Settings.Audio.GainIsAdjustable}"/>
-                        <TextBlock Grid.Column="1" Margin="9,0,0,0" MinWidth="35" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12">
-
-                        </TextBlock>
-                        <Button Grid.Column="2" Classes="settings" Margin="9,0,0,0" Padding="0" Click="OnTestMicrophoneClick" IsEnabled="{Binding CanRunSelfTest}" ToolTip.Tip="{res:Loc AudioSelfTestNote}" Width="108" Name="MicrophoneTestButton">
-                          <StackPanel Orientation="Horizontal">
-                            <theme:Icon Glyph="settings.audio-lines" Size="14" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding MicrophoneTestText}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                          </StackPanel>
-                        </Button>
-                      </Grid>
-                    </theme:SettingsRow>
-                    <Grid Margin="29,7,0,0" Height="13">
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                      </Grid.ColumnDefinitions>
-                      <theme:LevelMeter Level="{Binding VoiceLevel}" Height="8" VerticalAlignment="Center"/>
-                      <TextBlock Grid.Column="1" Text="{res:Loc SettingsSignalLevel}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="7,0,0,0" VerticalAlignment="Center"/>
-                    </Grid>
-                  </StackPanel>
-                </Border>
-                <Border Padding="0,9,0,11" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="0,1,0,0">
-                  <StackPanel>
-                    <theme:SettingsRow Tag="Device">
-                      <theme:SettingsRow.Header>
-                        <StackPanel Orientation="Horizontal">
                           <theme:Icon Glyph="settings.headphones" Size="18" VerticalAlignment="Center"/>
                           <TextBlock Text="{res:Loc SettingsSpeakers}" VerticalAlignment="Center" Margin="7,0,0,0"/>
                         </StackPanel>
@@ -216,7 +165,7 @@
                           <ColumnDefinition Width="Auto"/>
                           <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center" Value="{Binding Settings.Audio.PlaybackVolume}"/>
+                        <Slider Grid.Column="0" Name="PlaybackVolumeSlider" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center" Value="{Binding Settings.Audio.PlaybackVolume}"/>
                         <TextBlock Grid.Column="1" Margin="9,0,0,0" MinWidth="35" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Settings.Audio.PlaybackVolume, Converter={x:Static theme:Converters.Percent}}" FontSize="12"/>
                         <Button Grid.Column="2" Classes="settings" Margin="9,0,0,0" Padding="0" Click="OnTestOutputClick" IsEnabled="{Binding !IsSelfTestBlockedByCall}" ToolTip.Tip="{res:Loc SettingsOutputTestNote}" Width="108">
                           <StackPanel Orientation="Horizontal">
@@ -228,13 +177,56 @@
                     </theme:SettingsRow>
                   </StackPanel>
                 </Border>
-                <theme:SettingsNote Text="{res:Loc AudioAggregateNote}" IsVisible="{Binding NeedsAggregate}"/>
-                <CheckBox Classes="switch" IsChecked="{Binding Settings.Audio.MutesSystemSounds}">
-                  <StackPanel Orientation="Horizontal">
-                    <theme:Icon Glyph="settings.volume-1" Size="18" VerticalAlignment="Center"/>
-                    <TextBlock Text="{res:Loc SettingsMuteSystemSounds}" Margin="7,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                <Border Padding="0,9,0,11" BorderBrush="{DynamicResource SeparatorBrush}" BorderThickness="0,1,0,0">
+                  <StackPanel>
+                    <theme:SettingsRow Tag="Device">
+                      <theme:SettingsRow.Header>
+                        <StackPanel Orientation="Horizontal">
+                          <theme:Icon Glyph="settings.mic" Size="18" VerticalAlignment="Center"/>
+                          <TextBlock Text="{res:Loc SettingsMicrophone}" VerticalAlignment="Center" Margin="7,0,0,0"/>
+                        </StackPanel>
+                      </theme:SettingsRow.Header>
+                      <ComboBox Name="InputDevices" ItemsSource="{Binding Inputs}" SelectedValueBinding="{ReflectionBinding Id}" SelectedValue="{Binding Settings.Audio.InputDeviceId}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                    </theme:SettingsRow>
+                    <theme:SettingsRow Tag="Compact" Margin="0,9,0,0">
+                      <theme:SettingsRow.Header>
+                        <StackPanel Orientation="Horizontal">
+                          <theme:Icon Glyph="settings.mic" Size="18" VerticalAlignment="Center"/>
+                        </StackPanel>
+                      </theme:SettingsRow.Header>
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*"/>
+                          <ColumnDefinition Width="Auto"/>
+                          <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider Grid.Column="0" Name="MicrophoneGainSlider" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" VerticalAlignment="Center" Value="{Binding Settings.Audio.MicrophoneGain}" IsEnabled="{Binding Settings.Audio.GainIsAdjustable}"/>
+                        <TextBlock Grid.Column="1" Margin="9,0,0,0" MinWidth="35" TextAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Settings.Audio.MicrophoneGain, Converter={x:Static theme:Converters.Percent}}" FontSize="12"/>
+                        <Button Grid.Column="2" Classes="settings" Margin="9,0,0,0" Padding="0" Click="OnTestMicrophoneClick" IsEnabled="{Binding CanRunSelfTest}" ToolTip.Tip="{res:Loc AudioSelfTestNote}" Width="108" Name="MicrophoneTestButton">
+                          <StackPanel Orientation="Horizontal">
+                            <theme:Icon Glyph="settings.audio-lines" Size="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MicrophoneTestText}" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                          </StackPanel>
+                        </Button>
+                      </Grid>
+                    </theme:SettingsRow>
+                    <Grid Margin="29,7,0,0" Height="13">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <theme:LevelMeter Level="{Binding VoiceLevel}" Height="8" VerticalAlignment="Center"/>
+                      <TextBlock Grid.Column="1" Text="{res:Loc SettingsSignalLevel}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                    </Grid>
                   </StackPanel>
-                </CheckBox>
+                </Border>
+                <theme:SettingsNote Text="{res:Loc AudioAggregateNote}" IsVisible="{Binding NeedsAggregate}"/>
               </theme:SettingsSection>
               <theme:SettingsSection Header="{res:Loc SettingsProcessing}" Tag="settings.sliders-horizontal">
                 <CheckBox Classes="switch" IsChecked="{Binding Settings.Audio.AutomaticGainControl}" Tag="ProcessorFirst">
@@ -399,17 +391,34 @@
                 </theme:SettingsRow>
                 <theme:SettingsNote x:Name="RingtoneProblem" IsAlarming="True" IsVisible="False"/>
               </theme:SettingsSection>
+              <!-- Своим разделом под мелодией, как на macOS: тот гаснет вместе с
+                   рингтоном, а тоны клавиш от рингтона не зависят. -->
+              <theme:SettingsSection Header="{res:Loc SettingsCallSounds}" Tag="settings.volume-1">
+                <CheckBox Classes="switch" IsChecked="{Binding Settings.Audio.MutesSystemSounds, Converter={x:Static theme:Converters.Not}}">
+                  <StackPanel Orientation="Horizontal">
+                    <theme:Icon Glyph="settings.volume-1" Size="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{res:Loc SettingsCallSoundsToggle}" Margin="7,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
+                <theme:SettingsNote Text="{res:Loc SettingsCallSoundsNote}"/>
+              </theme:SettingsSection>
             </StackPanel>
             <StackPanel IsVisible="{Binding ShowsAppearance}">
               <theme:SettingsSection Header="{res:Loc AppearanceTheme}" Tag="settings.panels-top-left">
                 <theme:SettingsRow Header="" Classes="wide">
-                  <UniformGrid Columns="4" Margin="0,12,-8,12">
+                  <UniformGrid Columns="4" Margin="-3,12">
                     <RadioButton Classes="tile" Tag="System" GroupName="Theme" Click="OnThemeChosen" Content="{res:Loc AppearanceSystem}" IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=System}"/>
                     <RadioButton Classes="tile" Tag="Light" GroupName="Theme" Click="OnThemeChosen" Content="{res:Loc AppearanceLight}" IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Light}"/>
                     <RadioButton Classes="tile" Tag="Dark" GroupName="Theme" Click="OnThemeChosen" Content="{res:Loc AppearanceDark}" IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Dark}"/>
                     <RadioButton Classes="tile" Tag="Wallpaper" GroupName="Theme" Click="OnThemeChosen" Content="{res:Loc AppearanceWallpaper}" IsEnabled="{Binding Settings.Appearance.HasBackgroundImage}" IsChecked="{Binding Settings.Appearance.Theme, Converter={x:Static theme:Converters.EnumToBool}, ConverterParameter=Wallpaper}"/>
                   </UniformGrid>
                 </theme:SettingsRow>
+                <CheckBox Classes="switch" IsChecked="{Binding Settings.Appearance.ShowsPanelVolume}">
+                  <StackPanel Orientation="Horizontal">
+                    <theme:Icon Glyph="settings.volume-2" Size="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{res:Loc SettingsPanelVolume}" Margin="7,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
                 <Grid MinHeight="55">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

@@ -166,6 +166,11 @@ public sealed class PhoneService : IDisposable
 
         _settings.Audio.PropertyChanged += OnAudioSettingsChanged;
 
+        // Подписи раздач: снимок правил обновляется вместе со списком — его
+        // меняет приехавший файл предустановок.
+        QueueTitles.Use(_settings.Queues.Queues);
+        _settings.Queues.Queues.CollectionChanged += (_, _) => QueueTitles.Use(_settings.Queues.Queues);
+
         // Такт статусов: раз в секунду, в потоке окна — статусы читают записи
         // звонков, а те живут там же. Работы на такте — сравнить пару
         // счётчиков, так что держать его включённым весь день дешевле, чем
@@ -670,8 +675,7 @@ public sealed class PhoneService : IDisposable
             call.CallerName,
             call.RequestsAutoAnswer,
             _settings.Account.Username,
-            _settings.IncomingCall.MasksMobileNumbers,
-            QueueTitle(call.CallerNumber));
+            _settings.IncomingCall.MasksMobileNumbers);
 
         var record = new CallRecord
         {
@@ -686,7 +690,7 @@ public sealed class PhoneService : IDisposable
 
         _history.Begin(record);
         _records[call.CallId] = record;
-        ClientEventLog.Shared.CallStarted(call.CallId, incoming: true, record.Number, record.DisplayName);
+        ClientEventLog.Shared.CallStarted(call.CallId, incoming: true, record.Number, record.DisplayName, record.WasDistribution);
 
         // Следим за завершением и при автоподъёме: его ветка ниже выходит
         // без окна. Иначе BYE/CANCEL закрывает SIP-диалог, но линия, звук
@@ -720,18 +724,6 @@ public sealed class PhoneService : IDisposable
             onAnswer: () => _ = AnswerAsync(call),
             onDecline: () => _ = DeclineAsync(call));
     }
-
-    /// <summary>Название очереди из словаря администратора, если номер там есть.</summary>
-    ///
-    /// <remarks>
-    /// Словарь остаётся уточнением поверх общего заголовка: на боевом диалплане
-    /// он не срабатывает вовсе (номер очереди в CallerID не приезжает), но
-    /// заказчик, поправивший диалплан, не должен из-за этого чинить ещё и клиент.
-    /// </remarks>
-    private string? QueueTitle(string callerNumber)
-        => _settings.Queues.Queues
-            .FirstOrDefault(queue => queue.Number.Length > 0 && queue.Number == callerNumber)?
-            .Title;
 
     /// <summary>Принимает вызов: 200 OK с нашим SDP и подъём медиа.</summary>
     ///
@@ -2023,8 +2015,7 @@ public sealed class PhoneService : IDisposable
                     record.DisplayName,
                     record.WasDistribution,
                     _settings.Account.Username,
-                    _settings.IncomingCall.MasksMobileNumbers,
-                    QueueTitle(record.Number))
+                    _settings.IncomingCall.MasksMobileNumbers)
                 : null;
 
             var existing = _panel.Lines.FirstOrDefault(view => view.CallId == line.CallId);
@@ -2039,7 +2030,8 @@ public sealed class PhoneService : IDisposable
                 ? Strings.Get("StatusAudioStarting")
                 : view.IsOnHold
                 ? Strings.Get("PanelResume")
-                : Strings.Get("CallStatusTalking");
+                // Идущий разговор не подписывается: о нём говорит время.
+                : string.Empty;
 
             if (existing is null)
             {

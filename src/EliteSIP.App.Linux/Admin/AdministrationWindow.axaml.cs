@@ -142,16 +142,6 @@ public partial class AdministrationWindow : Window
         }
     }
 
-    private void OnQueueAddClick(object? sender, RoutedEventArgs e) => Model?.AddQueue();
-
-    private void OnQueueRemoveClick(object? sender, RoutedEventArgs e)
-    {
-        if (Of<QueueSetting>(sender) is { } queue)
-        {
-            Model?.RemoveQueue(queue);
-        }
-    }
-
     private void OnKnockAddClick(object? sender, RoutedEventArgs e) => Model?.AddKnockStep();
 
     private void OnKnockRemoveClick(object? sender, RoutedEventArgs e)

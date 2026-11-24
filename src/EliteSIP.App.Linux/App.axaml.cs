@@ -193,6 +193,15 @@ public sealed partial class App : Application, IDisposable
             ShowSettings = new RelayCommand(_ => ShowSettings()),
             ShowHistory = new RelayCommand(_ => ShowHistory()),
             Quit = new RelayCommand(_ => Quit()),
+            Audio = _settings!.Audio,
+            ShowsVolume = _settings.Appearance.ShowsPanelVolume,
+        };
+        _settings.Appearance.PropertyChanged += (_, change) =>
+        {
+            if (change.PropertyName == nameof(AppearanceSettings.ShowsPanelVolume))
+            {
+                _panel.ShowsVolume = _settings.Appearance.ShowsPanelVolume;
+            }
         };
 
         var settings = _settings;
@@ -427,6 +436,7 @@ public sealed partial class App : Application, IDisposable
         {
             Reregister = Reconnect,
             AnnounceNumber = number => panel.Notice = Strings.Format("PanelNumberChanged", number),
+            BuildSupportArchive = BuildSupportArchive,
         };
 
         _panelLine.Start();

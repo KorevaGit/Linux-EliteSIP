@@ -286,23 +286,18 @@
                     <DataTemplate x:DataType="settings:QueueSetting">
                       <Grid Margin="0,3">
                         <Grid.ColumnDefinitions>
-                          <ColumnDefinition Width="110"/>
-                          <ColumnDefinition Width="6"/>
                           <ColumnDefinition Width="*"/>
-                          <ColumnDefinition Width="6"/>
-                          <ColumnDefinition Width="Auto"/>
+                          <ColumnDefinition Width="10"/>
+                          <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Height="33" FontFamily="Consolas" Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueNumber}"/>
-                        <TextBox Grid.Column="2" Height="33" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Tag="{res:Loc AdminQueueTitle}"/>
-                        <Button Grid.Column="4" Classes="settings" Padding="6,2" ToolTip.Tip="{res:Loc AdminMacroRemove}" Click="OnQueueRemoveClick">
-                          <theme:Icon Glyph="trash" Size="12"/>
-                        </Button>
+                        <TextBlock Grid.Column="0" FontFamily="Consolas" Text="{Binding Match}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Title}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                       </Grid>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <theme:SettingsIndented>
-                  <Button Classes="settings" HorizontalAlignment="Left" Content="{res:Loc AdminQueueAdd}" Click="OnQueueAddClick"/>
+                  <TextBlock Text="{res:Loc AdminQueuesNote}" TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
                 </theme:SettingsIndented>
               </theme:SettingsSection>
             </StackPanel>

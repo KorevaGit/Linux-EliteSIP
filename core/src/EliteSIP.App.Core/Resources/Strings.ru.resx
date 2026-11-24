@@ -688,16 +688,13 @@
     <value>Очереди</value>
   </data>
   <data name="AdminQueueNumber" xml:space="preserve">
-    <value>Номер</value>
+    <value>Что искать в имени</value>
   </data>
   <data name="AdminQueueTitle" xml:space="preserve">
-    <value>Название</value>
-  </data>
-  <data name="AdminQueueAdd" xml:space="preserve">
-    <value>Добавить очередь</value>
+    <value>Как показать</value>
   </data>
   <data name="AdminQueuesNote" xml:space="preserve">
-    <value>На раздаче из очереди номер оператору ничего не говорит. Названия отсюда показываются и в окне входящего, и в истории — вместо цифр.</value>
+    <value>Подписи раздач заводятся в Spark (EliteSIP → Очереди) и приезжают вместе с предустановками. Раздача, в имени которой есть текст слева, называется подписью справа; без правила показывается имя, как оно пришло.</value>
   </data>
   <data name="AdminMaintenanceTitle" xml:space="preserve">
     <value>Обслуживание</value>
@@ -851,7 +848,7 @@
     <value>Вызов по сделке</value>
   </data>
   <data name="IncomingDistribution" xml:space="preserve">
-    <value>🔥Горячая раздача🔥</value>
+    <value>Входящий из колл-центра</value>
   </data>
 
   <data name="AdminSectionIncoming" xml:space="preserve">

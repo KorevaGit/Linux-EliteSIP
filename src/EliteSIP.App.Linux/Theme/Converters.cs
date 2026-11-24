@@ -40,6 +40,9 @@ public static class Converters
     /// </summary>
     public static IValueConverter EnumToBool { get; } = new EnumToBoolConverter();
 
+    /// <summary>Громкость на нуле — звук выключен.</summary>
+    public static IValueConverter IsZero { get; } = new FuncValueConverter<double, bool>(value => value <= 0.001);
+
     /// <summary>Доля 0…1 → проценты целым числом.</summary>
     public static IValueConverter Percent { get; } = new FuncValueConverter<double, string>(
         value => Math.Round(value * 100).ToString(CultureInfo.CurrentCulture) + " %");

@@ -29,8 +29,18 @@
     <value>Wayland session is not supported: answer protection is weaker. Sign in to an X11 session</value>
   </data>
 <data name="SettingsAlwaysOnTop" xml:space="preserve"><value>Keep windows on top</value></data>
-<data name="SettingsMuteSystemSounds" xml:space="preserve"><value>Mute system sounds (except the ringtone)</value></data>
+<data name="SettingsCallSounds" xml:space="preserve"><value>Dialing and call sounds</value></data>
+<data name="SettingsCallSoundsToggle" xml:space="preserve"><value>Key tones and call signals</value></data>
+<data name="SettingsCallSoundsNote" xml:space="preserve"><value>A quiet tone for every digit in the number field, a short soft signal when a call starts and when it ends. They play through the call device.</value></data>
 <data name="SettingsStartup" xml:space="preserve"><value>Start at sign-in</value></data>
 <data name="PanelYourNumber" xml:space="preserve"><value>YOUR NUMBER</value></data>
 <data name="HistorySnapshotFailed" xml:space="preserve"><value>Could not copy the history snapshot. Please try again.</value></data>
+<data name="PanelPeerVolume" xml:space="preserve"><value>Other side</value></data>
+<data name="PanelMyVolume" xml:space="preserve"><value>Me</value></data>
+<data name="PanelMore" xml:space="preserve"><value>Transfer, conference</value></data>
+<data name="PanelConfirmHold" xml:space="preserve"><value>Put the call on hold?</value></data>
+<data name="PanelConfirmHoldAction" xml:space="preserve"><value>Hold</value></data>
+<data name="PanelConfirmConference" xml:space="preserve"><value>Start a conference?</value></data>
+<data name="PanelConfirmConferenceAction" xml:space="preserve"><value>Start</value></data>
+<data name="SettingsPanelVolume" xml:space="preserve"><value>Volume sliders in the main window</value></data>
 </root>

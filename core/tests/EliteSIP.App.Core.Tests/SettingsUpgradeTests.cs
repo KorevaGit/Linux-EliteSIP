@@ -48,6 +48,22 @@ public sealed class SettingsUpgradeTests : IDisposable
     }
 
     [Fact]
+    public void Ревизия_5_включает_тоны_клавиш_и_сигналы_разговора_один_раз()
+    {
+        var old = new AppSettings { Revision = 4 };
+        old.Audio.MutesSystemSounds = true;
+        old.Save(FilePath);
+
+        var loaded = AppSettings.Load(FilePath);
+        Assert.False(loaded.Audio.MutesSystemSounds);
+
+        // Выключенные после обновления остаются выключенными.
+        loaded.Audio.MutesSystemSounds = true;
+        loaded.Save(FilePath);
+        Assert.True(AppSettings.Load(FilePath).Audio.MutesSystemSounds);
+    }
+
+    [Fact]
     public void Устройства_громкость_и_усиление_не_трогаются()
     {
         Tinkered(1).Save(FilePath);

@@ -115,13 +115,14 @@ public sealed class LayoutTests
     }
 
     [AvaloniaFact]
-    public void Растянутое_окно_с_клавишами_растит_управление_до_112_остальное_клавишам()
+    public void Растянутое_окно_с_клавишами_отдаёт_место_клавишам_а_управление_не_растёт()
     {
         var natural = MeasurePanel(double.PositiveInfinity, withMacros: true);
         var tall = MeasurePanel(1000, withMacros: true);
 
-        Assert.Equal(96, natural.Controls, 0.5);
-        Assert.Equal(112, tall.Controls, 0.5);
+        // Громкость 72 + 8 + 72 + 8 + клавиши 40 — постоянно, с ноября 2026.
+        Assert.Equal(200, natural.Controls, 0.5);
+        Assert.Equal(200, tall.Controls, 0.5);
         Assert.True(tall.Key > natural.Key + 20, $"клавиша {natural.Key:0} → {tall.Key:0}");
         Assert.Equal(natural.Font, tall.Font, 0.5); // Windows: larger keys retain the 18pt label.
         Assert.Equal(natural.Bottom, tall.Bottom, 0.5);
@@ -132,15 +133,16 @@ public sealed class LayoutTests
     {
         var natural = Layout(Panel(macroHeight: 44, withMacros: true), 300, double.PositiveInfinity).DesiredSize.Height;
 
-        Assert.Equal(96, MeasurePanel(natural, withMacros: true).Controls, 0.5);
+        Assert.Equal(200, MeasurePanel(natural, withMacros: true).Controls, 0.5);
     }
 
     [AvaloniaFact]
-    public void Без_клавиш_растягивание_целиком_уходит_кнопкам_управления()
+    public void Без_клавиш_растягивание_уходит_кнопкам_управления_и_громкости()
     {
         var natural = MeasurePanel(double.PositiveInfinity, withMacros: false);
         var tall = MeasurePanel(700, withMacros: false);
 
+        Assert.Equal(200, natural.Controls, 0.5);
         Assert.True(tall.Controls > natural.Controls + 200, $"управление {natural.Controls:0} → {tall.Controls:0}");
         Assert.Equal(natural.Bottom, tall.Bottom, 0.5);
     }

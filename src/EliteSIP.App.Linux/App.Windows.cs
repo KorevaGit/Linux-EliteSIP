@@ -394,6 +394,34 @@ public sealed partial class App
     }
     private bool _collectingSupport;
 
+    /// <summary>
+    /// Архив журналов для техподдержки: по кнопке в настройках и молча — по
+    /// запросу из Spark (<see cref="PanelLineHost.BuildSupportArchive"/>).
+    /// </summary>
+    private async Task<string> BuildSupportArchive(string destination)
+    {
+        var version = SettingsViewModel.Version;
+        var installation = _settings?.Panel.InstallationID;
+        var number = _settings?.Account.Username;
+        var log = _logFile;
+        var history = _history;
+        var configuration = SupportFacts.Configuration(_settings);
+        var directory = Path.GetDirectoryName(AppSettings.DefaultPath)!;
+        return await Task.Run(async () =>
+        {
+            var summary = SupportFacts.Summary(version, installation, number, _audioPlatform, Environment.GetEnvironmentVariable);
+            var extras = new Dictionary<string, byte[]>
+            {
+                ["environment.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.EnvironmentSummary()),
+                ["configuration.txt"] = System.Text.Encoding.UTF8.GetBytes(configuration),
+                ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync().ConfigureAwait(false)),
+                ["linux-updater-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync(updater: true).ConfigureAwait(false)),
+                ["history-status.txt"] = System.Text.Encoding.UTF8.GetBytes(history?.DiagnosticSummary() ?? "история не открыта"),
+            };
+            return SupportArchive.MakeFromDirectory(directory, summary, destination, log, extras);
+        });
+    }
+
     private async void CollectSupportArchive(SettingsViewModel model)
     {
         if (_collectingSupport) { return; }
@@ -402,29 +430,9 @@ public sealed partial class App
         model.ReportSupport(Strings.Get("SupportLogsCollecting"), SupportArea.Logs);
         try
         {
-            var version = SettingsViewModel.Version;
-            var installation = _settings?.Panel.InstallationID;
-            var number = _settings?.Account.Username;
-            var log = _logFile;
-            var history = _history;
-            var configuration = SupportFacts.Configuration(_settings);
-            var directory = Path.GetDirectoryName(AppSettings.DefaultPath)!;
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             if (desktop.Length == 0 || !Directory.Exists(desktop)) { desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); }
-            var destination = Path.Combine(desktop, SupportArchive.SuggestedName());
-            var made = await Task.Run(async () =>
-            {
-                var summary = SupportFacts.Summary(version, installation, number, _audioPlatform, Environment.GetEnvironmentVariable);
-                var extras = new Dictionary<string, byte[]>
-                {
-                    ["environment.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.EnvironmentSummary()),
-                    ["configuration.txt"] = System.Text.Encoding.UTF8.GetBytes(configuration),
-                    ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync().ConfigureAwait(false)),
-                    ["linux-updater-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync(updater: true).ConfigureAwait(false)),
-                    ["history-status.txt"] = System.Text.Encoding.UTF8.GetBytes(history?.DiagnosticSummary() ?? "история не открыта"),
-                };
-                return SupportArchive.MakeFromDirectory(directory, summary, destination, log, extras);
-            });
+            var made = await BuildSupportArchive(Path.Combine(desktop, SupportArchive.SuggestedName()));
             model.ReportSupport(Strings.Format("SupportLogsCollected", Path.GetFileName(made)), SupportArea.Logs);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)

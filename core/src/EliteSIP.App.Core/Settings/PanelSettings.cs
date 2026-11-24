@@ -56,6 +56,8 @@ public sealed class PanelSettings : Observable
     private bool _wantsResync;
     private string? _protectedMachineKey;
     private int _appliedConfigRevision;
+    private int _appliedQueuesRevision;
+    private string _sentSupportRequest = string.Empty;
     private string _appliedConfigFingerprint = string.Empty;
     private bool _machineKeyRegistered;
     private Guid? _mainProfileId;
@@ -306,6 +308,27 @@ public sealed class PanelSettings : Observable
             Set(ref _protectedMachineKey, value);
             NotifyChanged(nameof(HasMachineKey));
         }
+    }
+
+    /// <summary>
+    /// На какой запрос Spark архив для техподдержки уже отправлен: тот же
+    /// запрос лежит на канале, пока Spark не заберёт архив, и без отметки
+    /// машина слала бы его каждые пятнадцать минут.
+    /// </summary>
+    public string SentSupportRequest
+    {
+        get => _sentSupportRequest;
+        set => Set(ref _sentSupportRequest, value);
+    }
+
+    /// <summary>
+    /// Ревизия применённых подписей раздач. Своя, отдельно от предустановки:
+    /// правка подписи предустановку не переприменяет. Ноль — не применялись.
+    /// </summary>
+    public int AppliedQueuesRevision
+    {
+        get => _appliedQueuesRevision;
+        set => Set(ref _appliedQueuesRevision, value);
     }
 
     /// <summary>Ревизия применённой конфигурации — заголовок <c>X-EliteSIP-Config</c>.</summary>

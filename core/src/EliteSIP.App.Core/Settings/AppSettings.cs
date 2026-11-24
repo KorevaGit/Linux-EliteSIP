@@ -61,7 +61,7 @@ public sealed class AudioSettings : Observable
     private bool _receiveGainControl;
     private bool _microphoneMuted;
     private bool _releasesDeviceWhenIdle = true;
-    private bool _mutesSystemSounds = true;
+    private bool _mutesSystemSounds;
     private EliteSIP.Audio.WindowsCaptureProcessing _windowsProcessing = EliteSIP.Audio.WindowsCaptureProcessing.Auto;
 
     /// <summary>Постоянный идентификатор конечной точки. <c>null</c> — системное.</summary>
@@ -182,7 +182,12 @@ public sealed class AudioSettings : Observable
         set => Set(ref _backgroundVoiceSuppression, value);
     }
 
-    /// <summary>Молчать ли служебным звукам (клавиши, подключение, отбой). Рингтон играет всегда.</summary>
+    /// <summary>
+    /// Молчать ли служебным звукам (клавиши, подключение, отбой). Рингтон играет всегда.
+    /// В настройках — выключатель «Тоны клавиш и сигналы разговора» под мелодией,
+    /// с обратным смыслом, как <c>callSoundsEnabled</c> на macOS; имя поля в
+    /// файле прежнее, чтобы выбор человека пережил обновление.
+    /// </summary>
     public bool MutesSystemSounds
     {
         get => _mutesSystemSounds;
@@ -324,9 +329,16 @@ public sealed class AppearanceSettings : Observable
     private bool _themeChosenByUser;
     private bool _transparencyChosenByUser;
     private bool _alwaysOnTop = true;
+    private bool _showsPanelVolume = true;
 
     /// <summary>Окна программы поверх остальных окон.</summary>
     public bool AlwaysOnTop { get => _alwaysOnTop; set => Set(ref _alwaysOnTop, value); }
+
+    /// <summary>
+    /// Показывать ли на панели ползунки громкости собеседника и микрофона.
+    /// Без них панель короче, а микрофон отключается клавишей в ряду клавиш.
+    /// </summary>
+    public bool ShowsPanelVolume { get => _showsPanelVolume; set => Set(ref _showsPanelVolume, value); }
     public bool ThemeChosenByUser { get => _themeChosenByUser; set => Set(ref _themeChosenByUser, value); }
     public bool TransparencyChosenByUser { get => _transparencyChosenByUser; set => Set(ref _transparencyChosenByUser, value); }
 
@@ -543,7 +555,7 @@ public sealed class AppSettings : Observable
     public int? Revision { get; set; }
 
     /// <summary>Текущая ревизия. См. <see cref="Upgrade"/>.</summary>
-    public const int CurrentRevision = 3;
+    public const int CurrentRevision = 5;
 
     /// <summary>Однократные правки старых файлов. Зовётся при чтении.</summary>
     ///
@@ -562,6 +574,16 @@ public sealed class AppSettings : Observable
     /// обработка: шумодав и голоса вокруг включены, АРУ и выравнивание приёма
     /// выключены, обработка Windows — «авто». Устройства, громкость и усиление
     /// остаются, как их выбрал человек: это его гарнитура и его уши.
+    ///
+    /// Ревизия 4 (ноябрь 2026): записи словаря «номер очереди → название»
+    /// убираются. Словарь не срабатывал ни разу (номер очереди в вызов не
+    /// попадает), а подписи раздач теперь приезжают из Spark правилами по
+    /// имени — старые записи остались бы в списке пустыми строками.
+    ///
+    /// Ревизия 5 (ноябрь 2026): тоны клавиш и сигналы разговора включаются, один
+    /// раз. До неё они были выключены по умолчанию, и «выключено» в старых
+    /// файлах — никем не выбранное умолчание, как АРУ в ревизии 1; теперь
+    /// умолчание то же, что на macOS. Выключить снова — в настройках под мелодией.
     /// </remarks>
     internal void Upgrade()
     {
@@ -583,6 +605,20 @@ public sealed class AppSettings : Observable
         {
             PortKnock.RepeatIntervalSeconds = 3600;
         }
+
+        if (Revision is null or < 4)
+        {
+            foreach (var stale in Queues.Queues.Where(queue => queue.Match.Length == 0).ToList())
+            {
+                Queues.Queues.Remove(stale);
+            }
+        }
+
+        if (Revision is null or < 5)
+        {
+            Audio.MutesSystemSounds = false;
+        }
+
         Revision = CurrentRevision;
     }
 

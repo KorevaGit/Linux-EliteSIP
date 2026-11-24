@@ -708,16 +708,13 @@
     <value>Queues</value>
   </data>
   <data name="AdminQueueNumber" xml:space="preserve">
-    <value>Number</value>
+    <value>Look for in the name</value>
   </data>
   <data name="AdminQueueTitle" xml:space="preserve">
-    <value>Title</value>
-  </data>
-  <data name="AdminQueueAdd" xml:space="preserve">
-    <value>Add a queue</value>
+    <value>Show as</value>
   </data>
   <data name="AdminQueuesNote" xml:space="preserve">
-    <value>On a queue distribution the number tells the operator nothing. The titles from here are shown both in the incoming call window and in the history, instead of the digits.</value>
+    <value>Distribution titles are set up in Spark (EliteSIP → Queues) and arrive together with the presets. A distribution whose caller name contains the text on the left is shown with the title on the right; without a rule the name is shown as received.</value>
   </data>
   <data name="AdminMaintenanceTitle" xml:space="preserve">
     <value>Maintenance</value>
@@ -872,7 +869,7 @@
     <value>Deal call</value>
   </data>
   <data name="IncomingDistribution" xml:space="preserve">
-    <value>🔥Hot lead🔥</value>
+    <value>Call centre call</value>
   </data>
 
   <!-- Раздел «Входящие» в «Управлении»: политика защиты. -->

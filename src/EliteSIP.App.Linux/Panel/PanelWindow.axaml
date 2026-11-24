@@ -10,7 +10,7 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:theme="using:EliteSIP.App.Theme" xmlns:panel="using:EliteSIP.App.Panel" xmlns:res="using:EliteSIP.App.Resources" x:Class="EliteSIP.App.Panel.PanelWindow" x:DataType="panel:PanelViewModel" Title="{res:Loc PanelWindowTitle}" Width="324" MinWidth="270" SizeToContent="Height" CanResize="True" WindowStartupLocation="CenterScreen" Icon="avares://EliteSIP.App.Linux/Assets/elitesip.png">
 
   <Border Name="Frame">
-    <Grid Name="Root" Margin="8" RowDefinitions="22,4,*,10,Auto">
+    <Grid Name="Root" Margin="8" RowDefinitions="22,8,*,8,Auto">
 
       <!-- MARK: Шапка: капсула профиля, состояние, настройки -->
       <Grid Grid.Row="0" Name="StatusRow" ColumnDefinitions="Auto,*,Auto">
@@ -24,7 +24,7 @@
               <MenuItem Name="QuitMenuItem" Header="{res:Loc TrayQuit}" Command="{Binding Quit}"><MenuItem.Icon><theme:Icon Glyph="settings.unplug" Size="16"/></MenuItem.Icon></MenuItem>
             </ContextMenu>
           </Button.ContextMenu>
-          <Grid><TextBlock Name="OfflineProfileLabel" Text="{res:Loc PanelOffline}" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsOfflineByChoice}"/><Grid Name="OnlineProfileIdentity" IsVisible="{Binding !IsOfflineByChoice}" VerticalAlignment="Center" ColumnDefinitions="16,Auto,Auto,Auto">
+          <Grid><TextBlock Name="OfflineProfileLabel" Text="{res:Loc PanelOffline}" FontSize="12" VerticalAlignment="Center" IsVisible="{Binding IsOfflineByChoice}"/><Grid Name="OnlineProfileIdentity" IsVisible="{Binding !IsOfflineByChoice}" VerticalAlignment="Center" ColumnDefinitions="16,Auto,*,Auto">
             <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" Classes.registering="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registering}" Classes.registered="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Registered}" Classes.failed="{Binding Registration, Converter={x:Static theme:Converters.Equal}, ConverterParameter=Failed}" Classes.offline="{Binding IsOfflineByChoice}"/>
             <TextBlock Grid.Column="1" Text="{Binding StatusTitle}" TextTrimming="CharacterEllipsis" Margin="4,0,0,0" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <TextBlock Grid.Column="2" theme:Emoji.Text="{Binding StatusLabel}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextTertiaryBrush}" IsVisible="{Binding StatusLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
@@ -56,7 +56,8 @@
       <!-- MARK: Середина: номер или разговор, клавиши, макросы, перевод -->
       <Grid Grid.Row="2" Name="Middle" RowDefinitions="Auto,Auto,*,Auto,Auto,Auto">
 
-        <Grid Grid.Row="0" Height="72">
+        <!-- Поле номера постоянной высоты, как в Windows-версии (72). -->
+        <Grid Grid.Row="0" Name="CallField" Height="72">
           <Border CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}" IsVisible="{Binding !HasSecondLine}">
             <Grid>
               <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !IsInCall}">
@@ -66,10 +67,18 @@
                 </Button>
               </Grid>
 
-              <Grid ColumnDefinitions="*,8,Auto" IsVisible="{Binding IsInCall}">
- <StackPanel VerticalAlignment="Center"><TextBlock theme:Emoji.Text="{Binding CallTitle}" FontSize="18" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding ActiveLine.SecondaryNumber}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" IsVisible="{Binding !IsOutgoingPending}"/></StackPanel>
- <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"><TextBlock Text="{Binding ActiveLine.Duration}" FontSize="18" FontWeight="SemiBold" IsVisible="{Binding !IsOutgoingPending}"/><TextBlock Text="{Binding CallStatus}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
-</Grid></Grid>
+              <!-- Звонок: имя сверху; под ним номер, а справа внизу — состояние и
+                   крупное время разговора, всегда на одном месте. Раньше время
+                   стояло рядом с именем и гуляло вместе с его длиной. -->
+              <Grid Name="CallCard" RowDefinitions="Auto,Auto" VerticalAlignment="Center" IsVisible="{Binding IsInCall}">
+                <TextBlock Grid.Row="0" theme:Emoji.Text="{Binding CallTitle}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,1,0,0">
+                  <TextBlock Grid.Column="0" Text="{Binding ActiveLine.SecondaryNumber}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextSecondaryBrush}" IsVisible="{Binding !IsOutgoingPending}"/>
+                  <TextBlock Grid.Column="1" Text="{Binding CallStatus}" FontSize="12" VerticalAlignment="Center" Margin="8,0,8,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                  <TextBlock Grid.Column="2" Name="CallDuration" Text="{Binding ActiveLine.Duration}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" IsVisible="{Binding !IsOutgoingPending}"/>
+                </Grid>
+              </Grid>
+</Grid>
           </Border>
 
           <!-- Две линии и больше — строкой на линию вместо поля. -->
@@ -88,59 +97,143 @@
           </ItemsControl>
         </Grid>
 
-        <Border Grid.Row="1" Height="4"/>
+        <Border Grid.Row="1" Height="8"/>
 
-        <!-- Клавиши управления 2 × 2. -->
-        <Grid Grid.Row="2" Name="ControlKeys" MinHeight="96" RowDefinitions="*,8,*" ColumnDefinitions="*,8,*">
+        <!-- Громкость и клавиши управления. Громкость собеседника и своего
+             микрофона КЦ подстраивает постоянно — она на панели, а не в
+             настройках, и это те же значения, что там: ползунки двигаются
+             вместе. «Перевести» и «Конференция» нужны редко — они в «⋯». -->
+        <!-- Номер, под ним громкость звука и громкость микрофона — широкие
+             фреймы высотой с поле номера (значок микрофона — его отключение),
+             дальше три маленькие клавиши-значка: удержать, конференция,
+             перевести. Растягивание — макросам, без них поровну фреймам. -->
+        <Grid Grid.Row="2" Name="ControlKeys">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="72"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*" MinHeight="72"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="40"/>
+          </Grid.RowDefinitions>
           <Grid.Styles>
-            <Style Selector="Grid#ControlKeys &gt; ToggleButton">
-              <Setter Property="MinHeight" Value="44"/>
+            <Style Selector="Border.volume-frame">
+              <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}"/>
+              <Setter Property="Padding" Value="10,8,12,8"/>
+              <Setter Property="Background" Value="{DynamicResource CallFieldBrush}"/>
+            </Style>
+            <Style Selector="ToggleButton.volume-head">
+              <Setter Property="MinHeight" Value="0"/>
+              <Setter Property="Height" Value="28"/>
+              <Setter Property="MinWidth" Value="132"/>
+              <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}"/>
+              <Setter Property="HorizontalAlignment" Value="Left"/>
+            </Style>
+            <Style Selector="ToggleButton.volume-head > StackPanel">
+              <Setter Property="Margin" Value="10,0,12,0"/>
+            </Style>
+            <!-- Клавиша, о которой спрашивает подтверждение. -->
+            <Style Selector="ToggleButton.key.asking /template/ Border#Surface">
+              <Setter Property="Background" Value="{DynamicResource StatusConnectingBrush}"/>
+              <Setter Property="BorderBrush" Value="Transparent"/>
+            </Style>
+            <Style Selector="ToggleButton.key.asking">
+              <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style Selector="Grid#KeysRow ToggleButton.key">
+              <Setter Property="MinHeight" Value="0"/>
             </Style>
           </Grid.Styles>
 
-          <ToggleButton Grid.Row="0" Grid.Column="0" Classes="key" IsChecked="{Binding IsOnHold, Mode=OneWay}" IsEnabled="{Binding CanHold}" Command="{Binding ToggleHold}">
-            <StackPanel Orientation="Horizontal">
-              <Panel VerticalAlignment="Center">
-                <theme:Icon Glyph="pause.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsOnHold}"/>
-                <theme:Icon Glyph="play.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsOnHold}"/>
-              </Panel>
-              <Panel Margin="4,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="{res:Loc PanelHold}" FontSize="12" IsVisible="{Binding !IsOnHold}"/>
-                <TextBlock Text="{res:Loc PanelResume}" FontSize="12" IsVisible="{Binding IsOnHold}"/>
-              </Panel>
-            </StackPanel>
-          </ToggleButton>
+          <Border Grid.Row="0" Name="PeerVolumeFrame" Classes="volume-frame" IsVisible="{Binding ShowsVolume}">
+            <Grid RowDefinitions="Auto,Auto" VerticalAlignment="Center">
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,4">
+                <!-- Нажатие уводит звук собеседника в ноль и краснеет; повторное
+                     возвращает прежнюю громкость. -->
+                <ToggleButton Grid.Column="0" Grid.ColumnSpan="2" Name="PeerMuteKey" Classes="key warning volume-head" IsChecked="{Binding Audio.PlaybackVolume, Mode=OneWay, Converter={x:Static theme:Converters.IsZero}}" Click="OnPeerMuteClick" ToolTip.Tip="{res:Loc PanelPeerVolume}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <theme:Icon Glyph="settings.headphones" Size="16" VerticalAlignment="Center" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
+                    <TextBlock Text="{res:Loc PanelPeerVolume}" FontSize="13" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </ToggleButton>
+                <TextBlock Grid.Column="2" Text="{Binding Audio.PlaybackVolume, Converter={x:Static theme:Converters.Percent}}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </Grid>
+              <Slider Grid.Row="1" Name="PeerVolume" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" Value="{Binding Audio.PlaybackVolume}" AutomationProperties.Name="{res:Loc PanelPeerVolume}"/>
+            </Grid>
+          </Border>
+          <Border Grid.Row="2" Name="MicrophoneVolumeFrame" Classes="volume-frame" IsVisible="{Binding ShowsVolume}">
+            <Grid RowDefinitions="Auto,Auto" VerticalAlignment="Center">
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,4">
+                <!-- Нажатие выключает микрофон и краснеет; повторное включает. -->
+                <ToggleButton Grid.Column="0" Grid.ColumnSpan="2" Name="MicrophoneVolumeIcon" Classes="key warning volume-head" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Command="{Binding ToggleMicrophone}" ToolTip.Tip="{res:Loc PanelMicrophone}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Panel VerticalAlignment="Center">
+                      <theme:Icon Glyph="settings.mic" Size="16" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}"/>
+                      <theme:Icon Glyph="mic.slash.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsMicrophoneMuted}"/>
+                    </Panel>
+                    <TextBlock Text="{res:Loc PanelMicrophone}" FontSize="13" VerticalAlignment="Center"/>
+                  </StackPanel>
+                </ToggleButton>
+                <TextBlock Grid.Column="2" Text="{Binding Audio.MicrophoneGain, Converter={x:Static theme:Converters.Percent}}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </Grid>
+              <Slider Grid.Row="1" Name="MicrophoneVolume" Minimum="0" Maximum="2" SmallChange="0.05" LargeChange="0.1" IsSnapToTickEnabled="True" TickFrequency="0.05" Value="{Binding Audio.MicrophoneGain}" IsEnabled="{Binding Audio.GainIsAdjustable}" AutomationProperties.Name="{res:Loc PanelMyVolume}"/>
+            </Grid>
+          </Border>
 
-          <ToggleButton Grid.Row="0" Grid.Column="2" Classes="key warning" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Command="{Binding ToggleMicrophone}">
-            <StackPanel Orientation="Horizontal">
-              <Panel VerticalAlignment="Center">
-                <theme:Icon Glyph="mic.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}"/>
-                <theme:Icon Glyph="mic.slash.fill" Size="10" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsMicrophoneMuted}"/>
-              </Panel>
-              <Panel Margin="4,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="{res:Loc PanelMicrophone}" FontSize="12" IsVisible="{Binding !IsMicrophoneMuted}"/>
-                <TextBlock Text="{res:Loc PanelMicrophoneOff}" FontSize="12" IsVisible="{Binding IsMicrophoneMuted}"/>
-              </Panel>
-            </StackPanel>
-          </ToggleButton>
+          <!-- Номер перевода — всплывающим окном над клавишами: раньше поле
+               вставало вместо макросов, и сетка клавиш пропадала. -->
+          <Popup Grid.Row="4" Name="TransferPopup" PlacementTarget="{Binding #KeysRow}" Placement="TopEdgeAlignedLeft" IsLightDismissEnabled="True" IsOpen="{Binding IsTransferEntryVisible, Mode=OneWay}" Closed="OnTransferPopupClosed">
+            <Border Width="{Binding #KeysRow.Bounds.Width}" Padding="8" Margin="0,0,0,6" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1">
+              <StackPanel Spacing="6">
+                <Border Height="38" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}">
+                  <TextBox Name="TransferField" Classes="panel" Text="{Binding TransferNumber}" PlaceholderText="{res:Loc PanelTransferNumber}" FontSize="18" IsEnabled="{Binding !IsTransferring}" KeyDown="OnTransferFieldKeyDown"/>
+                </Border>
+                <Grid ColumnDefinitions="*,6,*">
+                  <Button Grid.Column="0" Classes="surface" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="14" Click="OnCancelTransferClick"/>
+                  <Button Grid.Column="2" Classes="surface call" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelTransfer}" FontSize="14" IsEnabled="{Binding HasTransferNumber}" Command="{Binding Transfer}"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+          </Popup>
 
-          <ToggleButton Grid.Row="2" Grid.Column="0" Name="TransferKey" Classes="key" AutomationProperties.AutomationId="TransferKey" AutomationProperties.Name="Перевести" IsChecked="{Binding IsTransferEntryVisible, Mode=OneWay}" IsEnabled="{Binding CanTransfer}" Click="OnTransferClick">
-            <StackPanel Orientation="Horizontal">
-              <theme:Icon Glyph="phone.arrow.right" Size="10" VerticalAlignment="Center" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
-              <TextBlock Text="{res:Loc PanelTransfer}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center"/>
-            </StackPanel>
-          </ToggleButton>
+          <!-- Подтверждение удержания и конференции — от случайного щелчка:
+               клавиши маленькие и стоят рядом. -->
+          <Popup Grid.Row="4" Name="ConfirmPopup" PlacementTarget="{Binding #KeysRow}" Placement="TopEdgeAlignedLeft" IsLightDismissEnabled="True" Closed="OnConfirmPopupClosed">
+            <Border Width="{Binding #KeysRow.Bounds.Width}" Padding="10" Margin="0,0,0,6" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1">
+              <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                  <theme:Icon Name="ConfirmIcon" Size="14" VerticalAlignment="Center"/>
+                  <TextBlock Name="ConfirmText" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,6,*">
+                  <Button Grid.Column="0" Classes="surface" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="14" Click="OnConfirmCancelClick"/>
+                  <Button Grid.Column="2" Name="ConfirmAction" Classes="surface call" Height="32" HorizontalAlignment="Stretch" FontSize="14" Click="OnConfirmClick"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+          </Popup>
 
-          <ToggleButton Grid.Row="2" Grid.Column="2" Classes="key" IsChecked="{Binding IsConferenceStarted, Mode=OneWay}" IsEnabled="{Binding CanStartConference}" Command="{Binding StartConference}">
-            <StackPanel Orientation="Horizontal">
-              <theme:Icon Glyph="person.3.fill" Size="10" VerticalAlignment="Center" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
-              <TextBlock Text="{res:Loc PanelConference}" Margin="4,0,0,0" FontSize="12" VerticalAlignment="Center"/>
-            </StackPanel>
-          </ToggleButton>
+          <Grid Grid.Row="4" Name="KeysRow" ColumnDefinitions="*,8,*,8,*">
+            <ToggleButton Grid.Column="0" Classes="key" Name="HoldKey" IsChecked="{Binding IsOnHold, Mode=OneWay}" IsEnabled="{Binding CanHold}" Click="OnHoldClick" ToolTip.Tip="{res:Loc PanelHold}" AutomationProperties.Name="{res:Loc PanelHold}">
+              <theme:Icon Glyph="pause.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
+            </ToggleButton>
+            <ToggleButton Grid.Column="2" Classes="key" Name="ConferenceKey" IsChecked="{Binding IsConferenceStarted, Mode=OneWay}" IsEnabled="{Binding CanStartConference}" Click="OnConferenceClick" ToolTip.Tip="{res:Loc PanelConference}" AutomationProperties.Name="{res:Loc PanelConference}">
+              <theme:Icon Glyph="person.3.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
+            </ToggleButton>
+            <ToggleButton Grid.Column="4" Classes="key" Name="TransferKey" IsChecked="{Binding IsTransferEntryVisible, Mode=OneWay}" IsEnabled="{Binding CanTransfer}" Click="OnTransferClick" ToolTip.Tip="{res:Loc PanelTransfer}" AutomationProperties.Name="{res:Loc PanelTransfer}">
+              <theme:Icon Glyph="phone.arrow.right" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}"/>
+            </ToggleButton>
+            <!-- Без ползунков громкости микрофон отключается здесь. -->
+            <ToggleButton Grid.Column="6" Name="MicrophoneKey" Classes="key warning" IsVisible="{Binding !ShowsVolume}" IsChecked="{Binding IsMicrophoneMuted, Mode=OneWay}" IsEnabled="{Binding CanMuteMicrophone}" Command="{Binding ToggleMicrophone}" ToolTip.Tip="{res:Loc PanelMicrophone}" AutomationProperties.Name="{res:Loc PanelMicrophone}">
+              <Panel>
+                <theme:Icon Glyph="mic.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding !IsMicrophoneMuted}"/>
+                <theme:Icon Glyph="mic.slash.fill" Size="14" Foreground="{Binding $parent[ToggleButton].Foreground}" IsVisible="{Binding IsMicrophoneMuted}"/>
+              </Panel>
+            </ToggleButton>
+          </Grid>
         </Grid>
 
         <!-- Зазор под макросами или вводом перевода; без них его нет. -->
-        <Border Grid.Row="3" Name="MacroGap" Height="10"/>
+        <Border Grid.Row="3" Name="MacroGap" Height="8"/>
 
         <!-- Макросы DTMF: сетка по числу столбцов из настроек. -->
         <ItemsControl Grid.Row="4" Name="Macros" ItemsSource="{Binding Macros}">
@@ -160,20 +253,10 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- Ввод номера перевода. -->
-        <StackPanel Grid.Row="5" IsVisible="{Binding IsTransferEntryVisible}">
-          <Border Height="34" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}">
-            <TextBox Name="TransferField" Classes="panel" Text="{Binding TransferNumber}" PlaceholderText="{res:Loc PanelTransferNumber}" FontSize="18" IsEnabled="{Binding !IsTransferring}"/>
-          </Border>
-          <Grid Margin="0,4,0,0" ColumnDefinitions="*,4,*">
-            <Button Grid.Column="0" Classes="surface" Height="30" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="14" Click="OnCancelTransferClick"/>
-            <Button Grid.Column="2" Classes="surface call" Height="30" HorizontalAlignment="Stretch" Content="{res:Loc PanelTransfer}" FontSize="14" IsEnabled="{Binding HasTransferNumber}" Command="{Binding Transfer}"/>
-          </Grid>
-        </StackPanel>
       </Grid>
 
       <!-- MARK: Нижний ряд: позвонить или положить трубку, история -->
-      <Grid Grid.Row="4" MinHeight="62" ColumnDefinitions="*,8,72">
+      <Grid Grid.Row="4" Height="62" ColumnDefinitions="*,8,72">
         <Button Grid.Column="0" Classes="surface call" Classes.hangup="{Binding IsInCall}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding CallOrHangUp}" IsEnabled="{Binding IsCallButtonEnabled}">
           <StackPanel Orientation="Horizontal">
             <Panel VerticalAlignment="Center">
@@ -237,5 +320,6 @@
     <Style Selector="TextBlock.activity.warning">
       <Setter Property="Foreground" Value="{DynamicResource CautionBrush}"/>
     </Style>
-  <Style Selector="theme|BrandMark.none"><Setter Property="Foreground" Value="{DynamicResource StatusOfflineBrush}"/></Style><Style Selector="theme|BrandMark.registering"><Setter Property="Foreground" Value="{DynamicResource StatusConnectingBrush}"/></Style><Style Selector="theme|BrandMark.registered"><Setter Property="Foreground" Value="{DynamicResource StatusRegisteredBrush}"/></Style><Style Selector="theme|BrandMark.failed"><Setter Property="Foreground" Value="{DynamicResource StatusFailureBrush}"/></Style><Style Selector="theme|BrandMark.offline"><Setter Property="Foreground" Value="{DynamicResource StatusOfflineBrush}"/></Style></Window.Styles>
+  <Style Selector="theme|BrandMark.none"><Setter Property="Foreground" Value="{DynamicResource StatusOfflineBrush}"/></Style><Style Selector="theme|BrandMark.registering"><Setter Property="Foreground" Value="{DynamicResource StatusConnectingBrush}"/></Style><Style Selector="theme|BrandMark.registered"><Setter Property="Foreground" Value="{DynamicResource StatusRegisteredBrush}"/></Style><Style Selector="theme|BrandMark.failed"><Setter Property="Foreground" Value="{DynamicResource StatusFailureBrush}"/></Style><Style Selector="theme|BrandMark.offline"><Setter Property="Foreground" Value="{DynamicResource StatusOfflineBrush}"/></Style>
+</Window.Styles>
 </Window>

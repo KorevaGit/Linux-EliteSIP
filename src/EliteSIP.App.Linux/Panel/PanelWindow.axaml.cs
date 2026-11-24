@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using EliteSIP.App.Resources;
+using EliteSIP.App.Theme;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -68,6 +70,9 @@ public partial class PanelWindow : Window
 
         StatusRow.SizeChanged += (_, change) => ProfilePill.MaxWidth = Math.Max(120, change.NewSize.Width * 0.6);
         UpdateRows();
+
+        VolumeSlider.Attach(PeerVolume);
+        VolumeSlider.Attach(MicrophoneVolume);
     }
 
     public PanelViewModel Model { get; }
@@ -255,7 +260,7 @@ public partial class PanelWindow : Window
         { Dispatcher.UIThread.Post(() => DialedField.Focus(), DispatcherPriority.Loaded); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible)
             or nameof(PanelViewModel.HasMacros)
-            or nameof(PanelViewModel.ShowsMacros)
+            or nameof(PanelViewModel.ShowsVolume)
             or nameof(PanelViewModel.MacroColumns)
             or nameof(PanelViewModel.MacroHeight)
             or nameof(PanelViewModel.IsInCall)
@@ -281,22 +286,38 @@ public partial class PanelWindow : Window
     /// </summary>
     ///
     /// <remarks>
-    /// С макросами клавиши управления берут сотую долю и не больше 102 точек, а
-    /// остальное — сетке макросов; без макросов клавишам отдаётся всё.
+    /// Порядок растягивания с ноября 2026: макросы, затем клавиши управления.
+    /// Поле номера, громкость и «Позвонить» постоянной высоты.
     /// </remarks>
     private void UpdateRows()
     {
-        var macros = Model.HasMacros && Model.ShowsMacros;
+        var macros = Model.HasMacros;
         var keys = Middle.RowDefinitions[2];
         var grid = Middle.RowDefinitions[4];
 
-        keys.Height = macros ? new GridLength(100, GridUnitType.Star) : new GridLength(1, GridUnitType.Star);
-        keys.MaxHeight = macros ? 112 : double.PositiveInfinity;
+        // Растягивание по очереди: с макросами всё лишнее — им, клавиши и
+        // громкость своей высоты; без макросов — клавишам. Громкость не растёт.
+        keys.Height = macros ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
         grid.Height = macros ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         grid.MinHeight = macros ? Model.MacroGridMinHeight : 0;
 
+        // Ползунки громкости можно убрать в оформлении: их строки схлопываются,
+        // а в ряду клавиш появляется четвёртая — микрофон.
+        var volume = Model.ShowsVolume;
+        var rows = ControlKeys.RowDefinitions;
+        for (var index = 0; index < 4; index++)
+        {
+            var gap = index % 2 == 1;
+            rows[index].MinHeight = volume && !gap ? 72 : 0;
+            rows[index].Height = !volume ? new GridLength(0) : gap ? new GridLength(8) : new GridLength(1, GridUnitType.Star);
+        }
+
+        rows[4].Height = volume ? new GridLength(40) : new GridLength(1, GridUnitType.Star);
+        rows[4].MinHeight = 40;
+        KeysRow.ColumnDefinitions = new ColumnDefinitions(volume ? "*,8,*,8,*,0,0" : "*,8,*,8,*,8,*");
+
         Macros.IsVisible = macros;
-        MacroGap.IsVisible = Model.IsTransferEntryVisible || Model.HasMacros;
+        MacroGap.IsVisible = Model.HasMacros;
     }
 
     /// <summary>
@@ -332,7 +353,7 @@ public partial class PanelWindow : Window
 
     private int MacroRows()
     {
-        if (!Model.HasMacros || !Model.ShowsMacros)
+        if (!Model.HasMacros)
         {
             return 0;
         }
@@ -530,4 +551,88 @@ public partial class PanelWindow : Window
     }
 
     private void OnCancelTransferClick(object? sender, RoutedEventArgs e) => Model.CancelTransferEntry();
+
+    /// <summary>Что сделать по «Да» во всплывающем подтверждении.</summary>
+    private Action? _confirmed;
+
+    /// <summary>Клавиша, о которой спрашивают: подсвечена, пока окно открыто.</summary>
+    private ToggleButton? _asking;
+
+    /// <summary>
+    /// Спросить подтверждение над клавишами. Клавиша подсвечивается, а в окне
+    /// стоит её значок — иначе непонятно, к чему вопрос.
+    /// </summary>
+    private void Confirm(ToggleButton key, string glyph, string question, string action, Action confirmed)
+    {
+        ConfirmIcon.Glyph = glyph;
+        ConfirmText.Text = question;
+        ConfirmAction.Content = action;
+        _confirmed = confirmed;
+        _asking = key;
+        key.Classes.Add("asking");
+        ConfirmPopup.IsOpen = true;
+    }
+
+    private void OnConfirmPopupClosed(object? sender, EventArgs e)
+    {
+        _asking?.Classes.Remove("asking");
+        _asking = null;
+    }
+
+    private void OnConfirmClick(object? sender, RoutedEventArgs e)
+    {
+        ConfirmPopup.IsOpen = false;
+        var confirmed = _confirmed;
+        _confirmed = null;
+        confirmed?.Invoke();
+    }
+
+    private void OnConfirmCancelClick(object? sender, RoutedEventArgs e) => ConfirmPopup.IsOpen = false;
+
+    /// <summary>Удержание — с подтверждением; снять удержание — сразу.</summary>
+    private void OnHoldClick(object? sender, RoutedEventArgs e)
+    {
+        HoldKey.SetCurrentValue(ToggleButton.IsCheckedProperty, Model.IsOnHold);
+        if (Model.IsOnHold) { Model.ToggleHold?.Execute(null); return; }
+        Confirm(HoldKey, "pause.fill", LinuxStrings.Get("PanelConfirmHold"), LinuxStrings.Get("PanelConfirmHoldAction"), () => Model.ToggleHold?.Execute(null));
+    }
+
+    private void OnConferenceClick(object? sender, RoutedEventArgs e)
+    {
+        ConferenceKey.SetCurrentValue(ToggleButton.IsCheckedProperty, Model.IsConferenceStarted);
+        Confirm(ConferenceKey, "person.3.fill", LinuxStrings.Get("PanelConfirmConference"), LinuxStrings.Get("PanelConfirmConferenceAction"), () => Model.StartConference?.Execute(null));
+    }
+
+    /// <summary>Окно перевода закрыли щелчком мимо — перевод отменён.</summary>
+    private void OnTransferPopupClosed(object? sender, EventArgs e)
+    {
+        if (Model.IsTransferEntryVisible && !Model.IsTransferring)
+        {
+            Model.CancelTransferEntry();
+        }
+    }
+
+    private void OnTransferFieldKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape) { Model.CancelTransferEntry(); e.Handled = true; }
+        else if (e.Key == Key.Enter && Model.HasTransferNumber && Model.Transfer?.CanExecute(null) == true) { Model.Transfer.Execute(null); e.Handled = true; }
+    }
+
+    /// <summary>Громкость собеседника, к которой вернуть звук после выключения.</summary>
+    private double _peerVolumeBeforeMute = 1;
+
+    /// <summary>«Собеседник»: звук в ноль — и обратно к прежней громкости.</summary>
+    private void OnPeerMuteClick(object? sender, RoutedEventArgs e)
+    {
+        var audio = Model.Audio;
+        if (audio.PlaybackVolume > 0.001)
+        {
+            _peerVolumeBeforeMute = audio.PlaybackVolume;
+            audio.PlaybackVolume = 0;
+        }
+        else
+        {
+            audio.PlaybackVolume = _peerVolumeBeforeMute > 0.001 ? _peerVolumeBeforeMute : 1;
+        }
+    }
 }

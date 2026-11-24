@@ -29,8 +29,18 @@
     <value>Сеанс Wayland не поддерживается: защита приёма слабее. Войдите в сеанс X11</value>
   </data>
 <data name="SettingsAlwaysOnTop" xml:space="preserve"><value>Поверх всех окон</value></data>
-<data name="SettingsMuteSystemSounds" xml:space="preserve"><value>Отключить системные звуки (кроме рингтона)</value></data>
+<data name="SettingsCallSounds" xml:space="preserve"><value>Звуки набора и разговора</value></data>
+<data name="SettingsCallSoundsToggle" xml:space="preserve"><value>Тоны клавиш и сигналы разговора</value></data>
+<data name="SettingsCallSoundsNote" xml:space="preserve"><value>Тихий тон на каждую цифру в поле номера, короткий мягкий сигнал, когда разговор начался и когда закончился. Звучат в устройство разговора.</value></data>
 <data name="SettingsStartup" xml:space="preserve"><value>Запускать при входе в систему</value></data>
 <data name="PanelYourNumber" xml:space="preserve"><value>ВАШ НОМЕР</value></data>
 <data name="HistorySnapshotFailed" xml:space="preserve"><value>Не удалось скопировать снимок истории. Попробуйте ещё раз.</value></data>
+<data name="PanelPeerVolume" xml:space="preserve"><value>Собеседник</value></data>
+<data name="PanelMyVolume" xml:space="preserve"><value>Я</value></data>
+<data name="PanelMore" xml:space="preserve"><value>Перевести, конференция</value></data>
+<data name="PanelConfirmHold" xml:space="preserve"><value>Поставить на удержание?</value></data>
+<data name="PanelConfirmHoldAction" xml:space="preserve"><value>Поставить</value></data>
+<data name="PanelConfirmConference" xml:space="preserve"><value>Создать конференцию?</value></data>
+<data name="PanelConfirmConferenceAction" xml:space="preserve"><value>Создать</value></data>
+<data name="SettingsPanelVolume" xml:space="preserve"><value>Ползунки громкости на главном окне</value></data>
 </root>

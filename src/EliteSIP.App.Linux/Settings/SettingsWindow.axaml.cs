@@ -27,6 +27,8 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        VolumeSlider.Attach(PlaybackVolumeSlider);
+        VolumeSlider.Attach(MicrophoneGainSlider);
     }
 
     internal SettingsWindow(SettingsViewModel model, AppearanceService appearance, ISignalSounds sounds)
