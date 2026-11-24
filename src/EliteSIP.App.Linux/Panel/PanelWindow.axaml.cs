@@ -309,7 +309,8 @@ public partial class PanelWindow : Window
         grid.MinHeight = macros ? Model.MacroGridMinHeight : 0;
 
         // Ползунки громкости можно убрать в оформлении: их строки схлопываются,
-        // а в ряду клавиш появляется четвёртая — микрофон.
+        // а в ряду клавиш появляется четвёртая — микрофон; при макросах
+        // клавиши остаются своей высоты.
         var volume = Model.ShowsVolume;
         var rows = ControlKeys.RowDefinitions;
         for (var index = 0; index < 4; index++)
@@ -319,9 +320,11 @@ public partial class PanelWindow : Window
             rows[index].Height = !volume ? new GridLength(0) : gap ? new GridLength(8) : new GridLength(1, GridUnitType.Star);
         }
 
-        rows[4].Height = volume ? new GridLength(40) : new GridLength(1, GridUnitType.Star);
+        rows[4].Height = new GridLength(40);
         rows[4].MinHeight = 40;
         KeysRow.ColumnDefinitions = new ColumnDefinitions(volume ? "*,8,*,8,*,0,0" : "*,8,*,8,*,8,*");
+        ControlKeys.InvalidateMeasure();
+        Middle.InvalidateMeasure();
 
         Macros.IsVisible = macros;
         MacroGap.IsVisible = Model.HasMacros;

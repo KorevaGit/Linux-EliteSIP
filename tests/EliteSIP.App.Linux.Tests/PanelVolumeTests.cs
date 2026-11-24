@@ -29,6 +29,8 @@ public sealed class PanelVolumeTests
         var muted = false;
         PanelViewModel model = null!;
         model = new PanelViewModel { Audio = settings.Audio, ToggleMicrophone = new RelayCommand(_ => { muted = !muted; model.IsMicrophoneMuted = muted; }) };
+        model.Macros.Add(new MacroViewModel("Перевод", "*02"));
+        model.Macros.Add(new MacroViewModel("Конф", "*3"));
         var panel = new PanelWindow(model) { AllowsClosing = true };
         panel.Show();
         try
@@ -99,14 +101,14 @@ public sealed class PanelVolumeTests
             Assert.Equal(72, micFrame.Bounds.Height, 0.5);
             Assert.Equal(40, panel.FindControl<Grid>("KeysRow")!.Bounds.Height, 0.5);
 
-            // Растягивание без макросов — поровну фреймам громкости; поле номера,
+            // С макросами растягивание уходит им; поле номера, громкость,
             // клавиши и «Завершить» постоянной высоты.
             panel.Height += 200;
             Dispatcher.UIThread.RunJobs();
             Assert.Equal(72, field.Bounds.Height, 0.5);
             Assert.Equal(40, panel.FindControl<Grid>("KeysRow")!.Bounds.Height, 0.5);
-            Assert.True(peerFrame.Bounds.Height > 150, $"громкость {peerFrame.Bounds.Height:0}");
-            Assert.Equal(peerFrame.Bounds.Height, micFrame.Bounds.Height, 0.5);
+            Assert.Equal(72, peerFrame.Bounds.Height, 0.5);
+            Assert.Equal(72, micFrame.Bounds.Height, 0.5);
             Snapshot.Save(panel.CaptureRenderedFrame()!, "panel-volume-tall");
             // Ползунки можно убрать в оформлении: остаётся ряд клавиш с микрофоном.
             model.ShowsVolume = false;
@@ -122,6 +124,10 @@ public sealed class PanelVolumeTests
             Dispatcher.UIThread.RunJobs();
             Assert.True(peerFrame.IsVisible);
             // Вернули ползунки — окно выросло под них и ничего не наезжает.
+            var macrosTop = panel.FindControl<ItemsControl>("Macros")!.TranslatePoint(default, panel)!.Value.Y;
+            var keysBottom = panel.FindControl<Grid>("KeysRow")!.TranslatePoint(new Point(0, 40), panel)!.Value.Y;
+            Assert.True(macrosTop >= keysBottom - 0.5, $"макросы {macrosTop:0} над клавишами до {keysBottom:0}");
+            Assert.Equal(72, micFrame.Bounds.Height, 0.5);
             Assert.True(panel.Height >= panel.MinHeight - 0.5, $"окно {panel.Height:0} при минимуме {panel.MinHeight:0}");
             Assert.True(panel.FindControl<Grid>("KeysRow")!.TranslatePoint(default, panel)!.Value.Y
                 >= micFrame.TranslatePoint(new Point(0, micFrame.Bounds.Height), panel)!.Value.Y);
