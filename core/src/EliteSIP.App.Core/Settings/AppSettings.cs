@@ -327,6 +327,7 @@ public sealed class AppearanceSettings : Observable
     private int _backgroundBrightness = 100;
     private BackgroundTransparency _backgroundTransparency;
     private bool _themeChosenByUser;
+    private bool _hasImportedWallpaper;
     private bool _transparencyChosenByUser;
     private bool _alwaysOnTop = true;
     private bool _showsPanelVolume = true;
@@ -340,6 +341,7 @@ public sealed class AppearanceSettings : Observable
     /// </summary>
     public bool ShowsPanelVolume { get => _showsPanelVolume; set => Set(ref _showsPanelVolume, value); }
     public bool ThemeChosenByUser { get => _themeChosenByUser; set => Set(ref _themeChosenByUser, value); }
+    public bool HasImportedWallpaper { get => _hasImportedWallpaper; set => Set(ref _hasImportedWallpaper, value); }
     public bool TransparencyChosenByUser { get => _transparencyChosenByUser; set => Set(ref _transparencyChosenByUser, value); }
 
     public string BackgroundImagePath
@@ -369,16 +371,37 @@ public sealed class AppearanceSettings : Observable
         set { Set(ref _backgroundTransparency, value); NotifyChanged(nameof(BackgroundTranslucent)); }
     }
 
-    internal void ApplyWallpaperDefaults()
+    internal void ApplyImportedWallpaper(string path)
     {
-        if (!ThemeChosenByUser) { Theme = AppearanceMode.Wallpaper; }
-        if (!TransparencyChosenByUser) { BackgroundTransparency = BackgroundTransparency.Light; }
-    }
+        bool firstImport = !HasImportedWallpaper && !HasBackgroundImage;
+        bool replacesInPlace = string.Equals(BackgroundImagePath, path, StringComparison.Ordinal);
+        BackgroundImagePath = path;
+        if (replacesInPlace)
+        {
+            NotifyChanged(nameof(BackgroundImagePath));
+        }
 
-    internal void NotifyBackgroundChanged() => NotifyChanged(nameof(BackgroundImagePath));
+        HasImportedWallpaper = true;
+        if (firstImport)
+        {
+            ThemeChosenByUser = false;
+        }
+        if (!ThemeChosenByUser)
+        {
+            Theme = AppearanceMode.Wallpaper;
+        }
+        if (!TransparencyChosenByUser)
+        {
+            BackgroundTransparency = BackgroundTransparency.Light;
+        }
+    }
 
     internal void ResetBackground()
     {
+        if (HasBackgroundImage)
+        {
+            HasImportedWallpaper = true;
+        }
         BackgroundImagePath = string.Empty;
         BackgroundScale = 100;
         BackgroundBlur = 8;

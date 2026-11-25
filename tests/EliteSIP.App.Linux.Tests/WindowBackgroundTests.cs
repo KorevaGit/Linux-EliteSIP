@@ -220,15 +220,52 @@ public sealed class WindowBackgroundTests
         var dir=Directory.CreateTempSubdirectory("elitesip-wallpaper-prefs-");
         try
         {
-            var settings=new AppSettings();settings.Appearance.ApplyWallpaperDefaults();
-            Assert.Equal(Appearance.Wallpaper,settings.Appearance.Theme);Assert.Equal(BackgroundTransparency.Light,settings.Appearance.BackgroundTransparency);
-            settings.Appearance.Theme=Appearance.Dark;settings.Appearance.ThemeChosenByUser=true;
-            settings.Appearance.ApplyWallpaperDefaults();Assert.Equal(Appearance.Dark,settings.Appearance.Theme);
-            settings.Appearance.BackgroundTransparency=BackgroundTransparency.Off;settings.Appearance.TransparencyChosenByUser=true;
-            var file=Path.Combine(dir.FullName,"settings.json");settings.Save(file);var restored=AppSettings.Load(file);
-            restored.Appearance.ApplyWallpaperDefaults();Assert.Equal(Appearance.Dark,restored.Appearance.Theme);Assert.Equal(BackgroundTransparency.Off,restored.Appearance.BackgroundTransparency);
-            restored.Appearance.BackgroundImagePath="test.png";restored.Appearance.ResetBackground();Assert.False(restored.Appearance.HasBackgroundImage);
+            var settings = new AppSettings();
+            var appearance = settings.Appearance;
+            appearance.Theme = Appearance.Light;
+            appearance.ThemeChosenByUser = true;
+            appearance.ApplyImportedWallpaper("first.png");
+            Assert.Equal(Appearance.Wallpaper, appearance.Theme);
+            Assert.False(appearance.ThemeChosenByUser);
+            Assert.Equal(BackgroundTransparency.Light, appearance.BackgroundTransparency);
+
+            appearance.Theme = Appearance.Dark;
+            appearance.ThemeChosenByUser = true;
+            appearance.ApplyImportedWallpaper("replacement.png");
+            Assert.Equal(Appearance.Dark, appearance.Theme);
+            appearance.BackgroundTransparency = BackgroundTransparency.Off;
+            appearance.TransparencyChosenByUser = true;
+            appearance.ResetBackground();
+            var file = Path.Combine(dir.FullName, "settings.json");
+            settings.Save(file);
+
+            var restored = AppSettings.Load(file).Appearance;
+            Assert.False(restored.HasBackgroundImage);
+            restored.ApplyImportedWallpaper("after-restart.png");
+            Assert.Equal(Appearance.Dark, restored.Theme);
+            Assert.Equal(BackgroundTransparency.Off, restored.BackgroundTransparency);
         }
         finally { dir.Delete(true); }
+    }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Existing_wallpaper_keeps_an_explicit_theme_when_replaced(bool resetFirst)
+    {
+        var appearance = new AppearanceSettings
+        {
+            BackgroundImagePath = "existing.png",
+            Theme = Appearance.Light,
+            ThemeChosenByUser = true,
+        };
+
+        if (resetFirst)
+        {
+            appearance.ResetBackground();
+        }
+        appearance.ApplyImportedWallpaper("replacement.png");
+
+        Assert.Equal(Appearance.Light, appearance.Theme);
+        Assert.True(appearance.HasImportedWallpaper);
     }
 }

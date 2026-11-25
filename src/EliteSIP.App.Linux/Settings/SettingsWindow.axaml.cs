@@ -101,9 +101,7 @@ public partial class SettingsWindow : Window
         try
         {
             await Task.Run(() => BackgroundImages.Import(path, BackgroundImages.StoredPath));
-            Model.Settings.Appearance.BackgroundImagePath = BackgroundImages.StoredPath;
-            Model.Settings.Appearance.ApplyWallpaperDefaults();
-            Model.Settings.Appearance.NotifyBackgroundChanged();
+            Model.Settings.Appearance.ApplyImportedWallpaper(BackgroundImages.StoredPath);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
         { Dialog.Ask(this, Strings.Get("BackgroundTitle"), Strings.Get("BackgroundInvalid"), DialogButtons.ConfirmCancel); }
