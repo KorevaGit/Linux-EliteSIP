@@ -86,6 +86,9 @@ public sealed class PhoneService : IDisposable
     private bool _disposed;
     internal Action? RecoverConnection { get; set; }
 
+    /// <summary>Вызов принят — автоподъёмом или в окне входящего. Ставит приложение.</summary>
+    internal Action? Answered { get; set; }
+
     internal bool HasLocalRouteChanged() => _transport?.HasLocalRouteChanged() == true;
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _mediaStarts = new();
@@ -706,6 +709,9 @@ public sealed class PhoneService : IDisposable
         {
             _log($"входящий от {call.DisplayNumber}: автоподъём ({_settings.IncomingCall.AutoAnswer})");
             _sounds.StopRingback();
+            // Снятая без человека трубка обязана быть видна: панель выходит
+            // вперёд, иначе разговор шёл молча под CRM, и оператор о нём не знал.
+            Answered?.Invoke();
             _ = AnswerAsync(call);
             return;
         }
@@ -721,7 +727,13 @@ public sealed class PhoneService : IDisposable
         _incoming.Show(
             subject,
             _settings.IncomingCall.ToPolicy(),
-            onAnswer: () => _ = AnswerAsync(call),
+            onAnswer: () =>
+            {
+                // Принятый вызов — сразу главное окно: громкость, удержание и
+                // «Завершить» там, а панель могли закрыть или свернуть.
+                Answered?.Invoke();
+                _ = AnswerAsync(call);
+            },
             onDecline: () => _ = DeclineAsync(call));
     }
 
@@ -2030,8 +2042,7 @@ public sealed class PhoneService : IDisposable
                 ? Strings.Get("StatusAudioStarting")
                 : view.IsOnHold
                 ? Strings.Get("PanelResume")
-                // Идущий разговор не подписывается: о нём говорит время.
-                : string.Empty;
+                : Strings.Get("CallStatusTalking");
 
             if (existing is null)
             {

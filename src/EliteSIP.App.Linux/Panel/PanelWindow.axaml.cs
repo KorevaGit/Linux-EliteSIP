@@ -7,6 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace EliteSIP.App.Panel;
 
@@ -66,6 +67,10 @@ public partial class PanelWindow : Window
         _clock = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Normal, (_, _) => Model.Tick());
 
         Model.PropertyChanged += OnModelChanged;
+        // Ушли в другую программу или потащили панель — вопрос прячется: он
+        // поверх всего, закрывал бы CRM и за окном сам не едет.
+        Deactivated += (_, _) => CloseConfirm();
+        PositionChanged += (_, _) => CloseConfirm();
         Model.Macros.CollectionChanged += (_, _) => Dispatcher.UIThread.Post(Relayout, DispatcherPriority.Loaded);
 
         StatusRow.SizeChanged += (_, change) => ProfilePill.MaxWidth = Math.Max(120, change.NewSize.Width * 0.6);
@@ -254,7 +259,17 @@ public partial class PanelWindow : Window
 
     private void OnModelChanged(object? sender, PropertyChangedEventArgs change)
     {
-        if (change.PropertyName == nameof(PanelViewModel.IsInCall)) { UpdateClock(); }
+        if (change.PropertyName == nameof(PanelViewModel.IsInCall))
+        {
+            UpdateClock();
+            // Разговор кончился — его всплывающие окна закрываются вместе с ним.
+            if (!Model.IsInCall)
+            {
+                _confirmed = null;
+                CloseConfirm();
+                Model.CancelTransferEntry();
+            }
+        }
         if (change.PropertyName == nameof(PanelViewModel.StatusTitle)) { UpdateCaption(); }
         if (change.PropertyName is nameof(PanelViewModel.IsTransferEntryVisible) && !Model.IsTransferEntryVisible)
         { Dispatcher.UIThread.Post(() => DialedField.Focus(), DispatcherPriority.Loaded); }
@@ -577,27 +592,75 @@ public partial class PanelWindow : Window
         ConfirmIcon.Glyph = glyph;
         ConfirmText.Text = question;
         ConfirmAction.Content = action;
+        // Вопрос о другой клавише снимает подсветку с прежней.
+        CloseConfirm();
         _confirmed = confirmed;
         _asking = key;
         key.SetCurrentValue(ToggleButton.IsCheckedProperty, true);
+        ConfirmPopup.PlacementTarget = key;
         ConfirmPopup.IsOpen = true;
+        Dispatcher.UIThread.Post(() => ConfirmAction.Focus(), DispatcherPriority.Input);
     }
 
-    private void OnConfirmPopupClosed(object? sender, EventArgs e)
+    /// <summary>
+    /// Закрыть вопрос и снять подсветку с его клавиши — сразу, а не по
+    /// <c>Closed</c>: тот может прийти позже щелчка по соседней клавише и
+    /// гасил бы уже её, оставляя прежнюю подсвеченной.
+    /// </summary>
+    private void CloseConfirm()
     {
+        ConfirmPopup.IsOpen = false;
         _asking?.SetCurrentValue(ToggleButton.IsCheckedProperty, ReferenceEquals(_asking, HoldKey) ? Model.IsOnHold : Model.IsConferenceStarted);
         _asking = null;
     }
 
+    /// <summary>Закрыли щелчком мимо — подсветка уходит так же сразу.</summary>
+    private void OnConfirmPopupClosed(object? sender, EventArgs e) => CloseConfirm();
+
+    /// <summary>Enter — действие, Esc — отмена, как у вопросов macOS.</summary>
+    private void OnConfirmPopupKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape) { CloseConfirm(); e.Handled = true; }
+        else if (e.Key == Key.Enter) { OnConfirmClick(sender, e); e.Handled = true; }
+    }
+
     private void OnConfirmClick(object? sender, RoutedEventArgs e)
     {
-        ConfirmPopup.IsOpen = false;
         var confirmed = _confirmed;
         _confirmed = null;
+        CloseConfirm();
         confirmed?.Invoke();
     }
 
-    private void OnConfirmCancelClick(object? sender, RoutedEventArgs e) => ConfirmPopup.IsOpen = false;
+    private void OnConfirmCancelClick(object? sender, RoutedEventArgs e) => CloseConfirm();
+
+    /// <summary>
+    /// Стрелка — точно под значком своей клавиши, как у macOS, даже когда
+    /// окно сдвинуто от края экрана; встало над клавишей — стрелка снизу.
+    /// </summary>
+    private void OnBubbleOpened(object? sender, EventArgs e) => Dispatcher.UIThread.Post(() =>
+    {
+        if (sender is not Popup { Child: Control bubble, PlacementTarget: Control key } popup
+            || TopLevel.GetTopLevel(bubble) is null || TopLevel.GetTopLevel(key) is null)
+        {
+            return;
+        }
+
+        var (up, down) = ReferenceEquals(popup, TransferPopup) ? (TransferArrowUp, TransferArrowDown) : (ConfirmArrowUp, ConfirmArrowDown);
+        var mark = key.GetVisualDescendants().OfType<Icon>().FirstOrDefault(icon => icon.IsVisible && icon.Bounds.Width > 0) as Control ?? key;
+        var keyScaling = TopLevel.GetTopLevel(key)?.RenderScaling ?? 1;
+        var bubbleScaling = TopLevel.GetTopLevel(bubble)?.RenderScaling ?? 1;
+        var keyCenter = mark.PointToScreen(new Point(mark.Bounds.Width / 2, 0)).X / keyScaling;
+        var keyTop = key.PointToScreen(new Point(0, 0)).Y / keyScaling;
+        var origin = bubble.PointToScreen(new Point(0, 0));
+        var below = origin.Y / bubbleScaling >= keyTop;
+        up.IsVisible = below;
+        down.IsVisible = !below;
+        var left = Math.Clamp(keyCenter - origin.X / bubbleScaling - 8, 12, Math.Max(12, bubble.Bounds.Width - 28));
+        up.Margin = new Thickness(left, 0, 0, -1);
+        down.Margin = new Thickness(left, -1, 0, 0);
+    }, DispatcherPriority.Loaded);
+
 
     /// <summary>Громкость микрофона, к которой вернуться после выключения.</summary>
     private double _gainBeforeMute = 1;

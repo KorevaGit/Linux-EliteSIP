@@ -84,7 +84,7 @@
                    IsVisible="{Binding SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       </StackPanel>
 
-</Border>      <StackPanel Margin="0,8,0,0">
+</Border>      <StackPanel Margin="0,10,0,0">
         <TextBlock Text="{res:Loc IncomingDealPrompt}"
                    Margin="0,0,0,6"
                    FontSize="15"
@@ -113,7 +113,7 @@
               <DataTemplate x:DataType="x:String">
                 <incoming:GuardedButton Classes="surface"
                         Margin="3,0"
-                        Height="42"
+                        Height="50"
                         HorizontalAlignment="Stretch"
                         FontSize="20"
                         Content="{Binding}"
@@ -124,7 +124,7 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
           <Button Classes="surface"
-                  Height="42"
+                  Height="50"
                   HorizontalAlignment="Stretch"
                   Command="{Binding DeclineCommand}"
                   AutomationProperties.Name="{res:Loc IncomingDecline}">
@@ -141,10 +141,10 @@
         </StackPanel>
 
         <!-- Без выбора: «Ответить» и «Отклонить» рядом. -->
-        <Grid ColumnDefinitions="*,6,*" IsVisible="{Binding !HasChoice}">
+        <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding !HasChoice}">
           <incoming:GuardedButton Grid.Column="0"
                   Classes="surface call"
-                  Height="42"
+                  Height="50"
                   HorizontalAlignment="Stretch"
                   Command="{Binding AttemptCommand}"
                   CommandParameter="{Binding Answer}"
@@ -156,7 +156,7 @@
           </incoming:GuardedButton>
           <Button Grid.Column="2"
                   Classes="surface call hangup"
-                  Height="42"
+                  Height="50"
                   HorizontalAlignment="Stretch"
                   Command="{Binding DeclineCommand}"
                   AutomationProperties.Name="{res:Loc IncomingDecline}">

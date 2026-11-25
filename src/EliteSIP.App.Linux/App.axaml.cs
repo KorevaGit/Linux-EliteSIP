@@ -446,6 +446,7 @@ public sealed partial class App : Application, IDisposable
         ClientEventLog.Shared.BeginSession();
         ReportConfirmedUpdate(settings.Maintenance);
         _phone!.RecoverConnection = () => Reconnect("канал закрыт");
+        _phone.Answered = () => Dispatcher.UIThread.Post(ShowPanel);
 
         _updates = new UpdateService(
             isBusy: () => _phone!.BlocksUpdateOffer,

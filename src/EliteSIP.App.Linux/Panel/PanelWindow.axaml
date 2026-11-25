@@ -67,15 +67,20 @@
                 </Button>
               </Grid>
 
-              <!-- Звонок: имя сверху; под ним номер, а справа внизу — состояние и
-                   крупное время разговора, всегда на одном месте. Раньше время
-                   стояло рядом с именем и гуляло вместе с его длиной. -->
-              <Grid Name="CallCard" RowDefinitions="Auto,Auto" VerticalAlignment="Center" IsVisible="{Binding IsInCall}">
-                <TextBlock Grid.Row="0" theme:Emoji.Text="{Binding CallTitle}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,1,0,0">
-                  <TextBlock Grid.Column="0" Text="{Binding ActiveLine.SecondaryNumber}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextSecondaryBrush}" IsVisible="{Binding !IsOutgoingPending}"/>
-                  <TextBlock Grid.Column="1" Text="{Binding CallStatus}" FontSize="12" VerticalAlignment="Center" Margin="8,0,8,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                  <TextBlock Grid.Column="2" Name="CallDuration" Text="{Binding ActiveLine.Duration}" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" IsVisible="{Binding !IsOutgoingPending}"/>
+              <!-- Звонок: имя сверху; под ним одной строкой номер и состояние
+                   (нет номера — состояние у левого края), справа внизу время.
+                   Состояние всегда золотистым, как «Гудки…». Время ниже и шире
+                   (разрядка), как на macOS. Высота строки задана под время
+                   сразу: иначе в момент ответа имя подскакивало. -->
+              <Grid Name="CallCard" RowDefinitions="Auto,22" VerticalAlignment="Center" IsVisible="{Binding IsInCall}">
+                <TextBlock Grid.Row="0" Name="CallTitleLabel" theme:Emoji.Text="{Binding CallTitle}" FontSize="17" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Bottom">
+                  <StackPanel Grid.Column="0" Name="CallNumberPart" Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding ActiveLine.SecondaryNumber, Converter={x:Static StringConverters.IsNotNullOrEmpty}, FallbackValue=False}">
+                    <TextBlock Text="{Binding ActiveLine.SecondaryNumber}" FontSize="12" MaxWidth="130" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Text="·" FontSize="12" Margin="5,0" Foreground="{DynamicResource TextTertiaryBrush}"/>
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Name="CallStatusLabel" Text="{Binding CallStatus}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource StatusConnectingBrush}"/>
+                  <TextBlock Grid.Column="3" Name="CallDuration" Text="{Binding ActiveLine.Duration}" FontSize="19" FontWeight="Bold" LetterSpacing="1.5" VerticalAlignment="Bottom" IsVisible="{Binding !IsOutgoingPending}"/>
                 </Grid>
               </Grid>
 </Grid>
@@ -89,7 +94,7 @@
                   <Grid ColumnDefinitions="8,*,Auto">
                     <Ellipse Grid.Column="0" Width="6" Height="6" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="line" Classes.active="{Binding IsActive}"/>
                     <TextBlock Grid.Column="1" theme:Emoji.Text="{Binding Title}" Margin="6,0,4,0" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource StatusConnectingBrush}"/>
                   </Grid>
                 </Border>
               </DataTemplate>
@@ -171,37 +176,51 @@
             </Grid>
           </Border>
 
-          <!-- Номер перевода — всплывающим окном над клавишами: раньше поле
-               вставало вместо макросов, и сетка клавиш пропадала. -->
-          <Popup Grid.Row="4" Name="TransferPopup" PlacementTarget="{Binding #KeysRow}" Placement="TopEdgeAlignedLeft" IsLightDismissEnabled="True" IsOpen="{Binding IsTransferEntryVisible, Mode=OneWay}" Closed="OnTransferPopupClosed">
-            <Border Width="{Binding #KeysRow.Bounds.Width}" Padding="8" Margin="0,0,0,6" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1">
-              <StackPanel Spacing="6">
-                <Border Height="38" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}">
-                  <TextBox Name="TransferField" Classes="panel" Text="{Binding TransferNumber}" PlaceholderText="{res:Loc PanelTransferNumber}" FontSize="18" IsEnabled="{Binding !IsTransferring}" KeyDown="OnTransferFieldKeyDown"/>
-                </Border>
-                <Grid ColumnDefinitions="*,6,*">
-                  <Button Grid.Column="0" Classes="surface" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="14" Click="OnCancelTransferClick"/>
-                  <Button Grid.Column="2" Classes="surface call" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelTransfer}" FontSize="14" IsEnabled="{Binding HasTransferNumber}" Command="{Binding Transfer}"/>
-                </Grid>
-              </StackPanel>
-            </Border>
+          <!-- Всплывающие окна — как на macOS: под своей клавишей, по центру,
+               со стрелкой к ней; не влезают снизу — встают над ней. Щелчок
+               мимо закрывает окно и проходит дальше: «Завершить» и соседние
+               клавиши срабатывают с первого нажатия. Перевод: поле номера и
+               «Отмена» / «Перевести» (Enter — перевести, Esc — отмена). -->
+          <Popup Grid.Row="4" Name="TransferPopup" PlacementTarget="{Binding #TransferKey}" Placement="Bottom" IsLightDismissEnabled="True" OverlayDismissEventPassThrough="True" IsOpen="{Binding IsTransferEntryVisible, Mode=OneWay}" Opened="OnBubbleOpened" Closed="OnTransferPopupClosed">
+            <StackPanel Name="TransferBubble" Margin="10,0,10,12">
+              <Path Name="TransferArrowUp" Data="M0,8 L8,0 L16,8 Z" Width="16" Height="8" HorizontalAlignment="Left" Margin="0,0,0,-1" Fill="{DynamicResource SurfaceBrush}"/>
+              <Border Width="264" Padding="12" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="0,1,0,0" BoxShadow="0 3 9 0 #29000000">
+                <StackPanel Spacing="8">
+                  <Border Height="40" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,0" Background="{DynamicResource CallFieldBrush}">
+                    <TextBox Name="TransferField" Classes="panel" Text="{Binding TransferNumber}" PlaceholderText="{res:Loc PanelTransferNumber}" FontSize="16" VerticalAlignment="Center" IsEnabled="{Binding !IsTransferring}" KeyDown="OnTransferFieldKeyDown"/>
+                  </Border>
+                  <Grid ColumnDefinitions="*,8,*">
+                    <Button Grid.Column="0" Classes="surface" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="13" IsEnabled="{Binding !IsTransferring}" Click="OnCancelTransferClick"/>
+                    <Button Grid.Column="2" Classes="surface call" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelTransfer}" FontSize="13" IsEnabled="{Binding HasTransferNumber}" Command="{Binding Transfer}"/>
+                  </Grid>
+                </StackPanel>
+              </Border>
+              <Path Name="TransferArrowDown" Data="M0,0 L8,8 L16,0 Z" Width="16" Height="8" HorizontalAlignment="Left" Margin="0,-1,0,0" Fill="{DynamicResource SurfaceBrush}" IsVisible="False"/>
+            </StackPanel>
           </Popup>
 
           <!-- Подтверждение удержания и конференции — от случайного щелчка:
-               клавиши маленькие и стоят рядом. -->
-          <Popup Grid.Row="4" Name="ConfirmPopup" PlacementTarget="{Binding #KeysRow}" Placement="TopEdgeAlignedLeft" IsLightDismissEnabled="True" Closed="OnConfirmPopupClosed">
-            <Border Width="{Binding #KeysRow.Bounds.Width}" Padding="10" Margin="0,0,0,6" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="1">
-              <StackPanel Spacing="8">
-                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                  <theme:Icon Name="ConfirmIcon" Size="14" VerticalAlignment="Center"/>
-                  <TextBlock Name="ConfirmText" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+               клавиши маленькие и стоят рядом. Значок в кружке, вопрос, справа
+               «Отмена» и действие (Enter — действие, Esc — отмена). -->
+          <Popup Grid.Row="4" Name="ConfirmPopup" PlacementTarget="{Binding #HoldKey}" Placement="Bottom" IsLightDismissEnabled="True" OverlayDismissEventPassThrough="True" Opened="OnBubbleOpened" Closed="OnConfirmPopupClosed" KeyDown="OnConfirmPopupKeyDown">
+            <StackPanel Name="ConfirmBubble" Margin="10,0,10,12">
+              <Path Name="ConfirmArrowUp" Data="M0,8 L8,0 L16,8 Z" Width="16" Height="8" HorizontalAlignment="Left" Margin="0,0,0,-1" Fill="{DynamicResource SurfaceBrush}"/>
+              <Border Padding="14" CornerRadius="{StaticResource ControlCornerRadius}" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource ControlBorderBrush}" BorderThickness="0,1,0,0" BoxShadow="0 3 9 0 #29000000">
+                <StackPanel Spacing="12">
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border Width="28" Height="28" CornerRadius="14" Background="{DynamicResource ControlBackgroundBrush}">
+                      <theme:Icon Name="ConfirmIcon" Size="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Name="ConfirmText" FontSize="13" VerticalAlignment="Center"/>
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Classes="surface" Height="28" MinWidth="76" Padding="12,0" Content="{res:Loc PanelCancel}" FontSize="13" Click="OnConfirmCancelClick"/>
+                    <Button Name="ConfirmAction" Classes="surface call" Height="28" MinWidth="76" Padding="12,0" FontSize="13" Click="OnConfirmClick"/>
+                  </StackPanel>
                 </StackPanel>
-                <Grid ColumnDefinitions="*,6,*">
-                  <Button Grid.Column="0" Classes="surface" Height="32" HorizontalAlignment="Stretch" Content="{res:Loc PanelCancel}" FontSize="14" Click="OnConfirmCancelClick"/>
-                  <Button Grid.Column="2" Name="ConfirmAction" Classes="surface call" Height="32" HorizontalAlignment="Stretch" FontSize="14" Click="OnConfirmClick"/>
-                </Grid>
-              </StackPanel>
-            </Border>
+              </Border>
+              <Path Name="ConfirmArrowDown" Data="M0,0 L8,8 L16,0 Z" Width="16" Height="8" HorizontalAlignment="Left" Margin="0,-1,0,0" Fill="{DynamicResource SurfaceBrush}" IsVisible="False"/>
+            </StackPanel>
           </Popup>
 
           <Grid Grid.Row="4" Name="KeysRow" ColumnDefinitions="*,8,*,8,*">

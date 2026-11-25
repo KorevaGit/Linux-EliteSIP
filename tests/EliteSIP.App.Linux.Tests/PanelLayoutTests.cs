@@ -1,4 +1,5 @@
 using System.Reflection;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Avalonia.Headless;
@@ -91,5 +92,45 @@ public sealed class PanelLayoutTests
         Assert.Equal(Math.Max(560, window.MinHeight), window.Height);
 
         window.Close();
+    }
+
+    [AvaloniaFact]
+    public void Время_справа_внизу_а_номер_и_состояние_под_именем()
+    {
+        var model = new PanelViewModel { CallStatus = "Разговор" };
+        var line = new CallLineViewModel { CallId = "one", SecondaryNumber = "172", Title = "Очень длинное название собеседника", IsActive = true, ConnectedAt = DateTimeOffset.Now.AddSeconds(-34) };
+        model.Lines.Add(line);
+        model.ActiveLine = line;
+        var window = new PanelWindow(model) { AllowsClosing = true, Width = 324, Height = 700 };
+        window.Show();
+        try
+        {
+            model.Tick();
+            Dispatcher.UIThread.RunJobs();
+            Snapshot.Save(window.CaptureRenderedFrame()!, "panel-call-header");
+            Rect Box(string name)
+            {
+                var control = window.FindControl<Control>(name)!;
+                return new Rect(control.TranslatePoint(new Point(0, 0), window)!.Value, control.Bounds.Size);
+            }
+
+            var title = Box("CallTitleLabel");
+            var duration = Box("CallDuration");
+            Assert.True(duration.Top >= title.Bottom - 1);
+            Assert.True(duration.Height < 30);
+            Assert.True(Box("CallNumberPart").Width > 0);
+            Assert.InRange(Box("CallStatusLabel").Left - Box("CallNumberPart").Right, -1, 1);
+
+            // Без номера состояние встаёт на его место у левого края.
+            line.SecondaryNumber = string.Empty;
+            Dispatcher.UIThread.RunJobs();
+            window.UpdateLayout();
+            Assert.InRange(Box("CallStatusLabel").Left - title.Left, -1, 1);
+            Snapshot.Save(window.CaptureRenderedFrame()!, "panel-call-header-no-number");
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 }
