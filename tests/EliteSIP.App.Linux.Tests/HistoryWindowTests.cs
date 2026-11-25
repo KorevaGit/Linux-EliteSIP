@@ -13,6 +13,31 @@ namespace EliteSIP.App.Tests;
 /// <summary>История: показательные записи, фильтры и календарь без ошибок привязок.</summary>
 public sealed class HistoryWindowTests
 {
+    [AvaloniaTheory]
+    [InlineData(false, "#F1F1F1")]
+    [InlineData(true, "#191919")]
+    public void Completed_history_arrow_stays_opaque_when_wallpaper_replaces_window_brush(bool dark, string color)
+    {
+        var badge = new OutcomeBadge();
+        var window = new Window
+        {
+            RequestedThemeVariant = dark ? Avalonia.Styling.ThemeVariant.Dark : Avalonia.Styling.ThemeVariant.Light,
+            Content = badge,
+        };
+        window.Resources["WindowBackgroundBrush"] = new ImageBrush();
+        window.Show();
+        try
+        {
+            var arrow = Assert.IsAssignableFrom<ISolidColorBrush>(badge.CompletedArrowBrush);
+            Assert.Equal(Color.Parse(color), arrow.Color);
+            Assert.Equal(1, arrow.Opacity);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     [AvaloniaFact]
     public void Long_history_virtualizes_rows_and_still_reaches_the_last_record()
     {

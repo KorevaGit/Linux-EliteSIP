@@ -73,6 +73,8 @@ public sealed class OutcomeBadge : Control
         set => SetValue(ForegroundProperty, value);
     }
 
+    internal IBrush CompletedArrowBrush => Brush("OutcomeArrowBrush") ?? Brushes.White;
+
     protected override Size MeasureOverride(Size availableSize) => new(Size, Size);
 
     public override void Render(DrawingContext context)
@@ -90,7 +92,7 @@ public sealed class OutcomeBadge : Control
         if (IsCompleted)
         {
             context.DrawEllipse(color, null, new Point(10, 10), 10, 10);
-            context.DrawGeometry(null, Pen(Brush("WindowBackgroundBrush") ?? Brushes.White), arrow);
+            context.DrawGeometry(null, Pen(CompletedArrowBrush), arrow);
         }
         else
         {

@@ -9,6 +9,7 @@
       <SolidColorBrush x:Key="TextSecondaryBrush" Color="#686868" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FF6B7075" />
       <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#f1f1f1" />
+      <SolidColorBrush x:Key="OutcomeArrowBrush" Color="#f1f1f1" />
       <SolidColorBrush x:Key="SidebarBrush" Color="#00000000" />
       <SolidColorBrush x:Key="SeparatorBrush" Color="#26000000" />
       <SolidColorBrush x:Key="ControlBorderBrush" Color="#D0FFFFFF" />
@@ -73,6 +74,7 @@
       <SolidColorBrush x:Key="TextSecondaryBrush" Color="#BCBCBC" />
       <SolidColorBrush x:Key="TextTertiaryBrush" Color="#FFA3ABB4" />
       <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#191919" />
+      <SolidColorBrush x:Key="OutcomeArrowBrush" Color="#191919" />
       <SolidColorBrush x:Key="SidebarBrush" Color="#00000000" />
       <SolidColorBrush x:Key="SeparatorBrush" Color="#26FFFFFF" />
       <SolidColorBrush x:Key="ControlBorderBrush" Color="#20FFFFFF" />
