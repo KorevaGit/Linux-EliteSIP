@@ -39,6 +39,32 @@ internal static class WindowAttention
     /// <summary>Снять просьбу.</summary>
     internal static bool Cancel(nuint window) => Send(window, Remove);
 
+    /// <summary>Отобразить свёрнутое X11-окно по явной команде пользователя.</summary>
+    internal static void RestoreMinimized(nuint window)
+    {
+        if (window == 0)
+        {
+            return;
+        }
+
+        nint display = X11.XOpenDisplay(0);
+        if (display == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            // Снятие признака Minimized и активация могут опередить MapNotify.
+            _ = X11.XMapRaised(display, window);
+            _ = X11.XFlush(display);
+        }
+        finally
+        {
+            _ = X11.XCloseDisplay(display);
+        }
+    }
+
     private static unsafe bool Send(nuint window, int action)
     {
         if (window == 0)

@@ -62,9 +62,18 @@ public sealed partial class App
 
     private static void RestoreAndActivate(Window window)
     {
-        if (window.WindowState == WindowState.Minimized)
+        bool minimized = window.WindowState == WindowState.Minimized;
+        if (minimized)
         {
             window.WindowState = WindowState.Normal;
+        }
+        if (!window.IsVisible)
+        {
+            window.Show();
+        }
+        else if (minimized && window.TryGetPlatformHandle() is { HandleDescriptor: "XID" } handle)
+        {
+            WindowAttention.RestoreMinimized((nuint)handle.Handle);
         }
 
         window.Activate();
@@ -72,9 +81,9 @@ public sealed partial class App
 
     private void ShowSettings()
     {
-        if (_settingsWindow is { IsVisible: true })
+        if (_settingsWindow is { } existing)
         {
-            RestoreAndActivate(_settingsWindow);
+            RestoreAndActivate(existing);
             return;
         }
 
@@ -143,9 +152,9 @@ public sealed partial class App
 
     private void ShowAdministration()
     {
-        if (_administrationWindow is { IsVisible: true })
+        if (_administrationWindow is { } existing)
         {
-            RestoreAndActivate(_administrationWindow);
+            RestoreAndActivate(existing);
             return;
         }
 
@@ -233,9 +242,9 @@ public sealed partial class App
 
     private void ShowHistory()
     {
-        if (_historyWindow is { IsVisible: true })
+        if (_historyWindow is { } existing)
         {
-            RestoreAndActivate(_historyWindow);
+            RestoreAndActivate(existing);
             return;
         }
 

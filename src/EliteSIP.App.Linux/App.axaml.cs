@@ -699,17 +699,7 @@ public sealed partial class App : Application, IDisposable
             return;
         }
 
-        if (!_panelWindow.IsVisible)
-        {
-            _panelWindow.Show();
-        }
-
-        if (_panelWindow.WindowState is WindowState.Minimized)
-        {
-            _panelWindow.WindowState = WindowState.Normal;
-        }
-
-        _panelWindow.Activate();
+        RestoreAndActivate(_panelWindow);
         _tray?.Refresh();
     }
 
@@ -720,14 +710,13 @@ public sealed partial class App : Application, IDisposable
             return;
         }
 
-        if (_panelWindow.IsVisible)
+        if (_panelWindow.IsVisible && _panelWindow.WindowState != WindowState.Minimized)
         {
             _panelWindow.Hide();
         }
         else
         {
-            _panelWindow.Show();
-            _panelWindow.Activate();
+            RestoreAndActivate(_panelWindow);
         }
 
         _tray?.Refresh();

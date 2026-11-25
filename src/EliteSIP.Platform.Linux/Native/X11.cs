@@ -62,6 +62,9 @@ internal static unsafe partial class X11
     [LibraryImport(Library, EntryPoint = "XkbGetIndicatorState")]
     internal static partial int XkbGetIndicatorState(nint display, uint device, uint* state);
 
+    [LibraryImport(Library, EntryPoint = "XMapRaised")]
+    internal static partial int XMapRaised(nint display, nuint window);
+
     [LibraryImport(Library, EntryPoint = "XFlush")]
     internal static partial int XFlush(nint display);
 
