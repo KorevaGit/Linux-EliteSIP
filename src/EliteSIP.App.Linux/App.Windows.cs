@@ -25,6 +25,7 @@ namespace EliteSIP.App;
 public sealed partial class App
 {
     private SettingsWindow? _settingsWindow;
+    private UpdateOffer? _updateOffer;
     private CallHistoryWindow? _historyWindow;
     private AdministrationWindow? _administrationWindow;
 
@@ -274,9 +275,17 @@ public sealed partial class App
 
     private bool AskToInstallUpdate(Version version)
     {
-        ShowPanel();
-
-        return new UpdateOffer(EliteSIP.App.Platform.ProductVersion.Current, version, _updates?.ReadyNotes ?? string.Empty).Ask(_panelWindow);
+        var offer = new UpdateOffer(
+            EliteSIP.App.Platform.ProductVersion.Current, version, _updates?.ReadyNotes ?? string.Empty);
+        _updateOffer = offer;
+        try
+        {
+            return offer.Ask(_panelWindow);
+        }
+        finally
+        {
+            _updateOffer = null;
+        }
     }
 
     private long _selfTestGeneration;
@@ -392,6 +401,39 @@ public sealed partial class App
         { model.ReportSelfTest(Strings.Get("AudioReplayFailed")); }
         finally { if (ReferenceEquals(_recordingPreview, cancellation)) { _recordingPreview = null; } }
     }
+    private async Task ShowProfileRecoveryAsync()
+    {
+        string title = LinuxStrings.Get("ProfileRecoveryTitle");
+        try
+        {
+            if (Dialog.Ask(null, title, LinuxStrings.Get("ProfileRecoveryBody"),
+                confirmTitle: Strings.Get("SettingsSupportArchive")) == DialogAnswer.Confirm)
+            {
+                string archive = await BuildSupportArchive(SupportArchiveDestination());
+                Dialog.Ask(null, title, Strings.Format("SupportLogsCollected", archive));
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            Dialog.Ask(null, title, Strings.Format("SupportLogsFailed", error.Message));
+        }
+        finally
+        {
+            _desktop?.Shutdown(0);
+        }
+    }
+
+    private static string SupportArchiveDestination()
+    {
+        string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        if (desktop.Length == 0 || !Directory.Exists(desktop))
+        {
+            desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        }
+
+        return Path.Combine(desktop, SupportArchive.SuggestedName());
+    }
+
     private bool _collectingSupport;
 
     /// <summary>
@@ -406,16 +448,30 @@ public sealed partial class App
         var log = _logFile;
         var history = _history;
         var configuration = SupportFacts.Configuration(_settings);
+        var diagnostics = _runtimeDiagnostics;
         var directory = Path.GetDirectoryName(AppSettings.DefaultPath)!;
         return await Task.Run(async () =>
         {
-            var summary = SupportFacts.Summary(version, installation, number, _audioPlatform, Environment.GetEnvironmentVariable);
+            var summary = SupportFacts.Summary(version, installation, number, _audioPlatform, Environment.GetEnvironmentVariable,
+                diagnostics?.AudioStatus() ?? "Диагностика аудиоустройств ещё не запущена.");
+            var serviceJournal = UserServiceJournal.CollectAsync();
+            var updaterJournal = UserServiceJournal.CollectAsync(updater: true);
+            var networkJournal = UserServiceJournal.CollectNetworkAsync();
+            var audioJournal = UserServiceJournal.CollectAudioAsync();
+            await Task.WhenAll(serviceJournal, updaterJournal, networkJournal, audioJournal).ConfigureAwait(false);
+
             var extras = new Dictionary<string, byte[]>
             {
                 ["environment.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.EnvironmentSummary()),
                 ["configuration.txt"] = System.Text.Encoding.UTF8.GetBytes(configuration),
-                ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync().ConfigureAwait(false)),
-                ["linux-updater-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await UserServiceJournal.CollectAsync(updater: true).ConfigureAwait(false)),
+                ["profile-status.txt"] = System.Text.Encoding.UTF8.GetBytes(SupportFacts.ProfileStatus()),
+                ["linux-service-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await serviceJournal.ConfigureAwait(false)),
+                ["linux-updater-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await updaterJournal.ConfigureAwait(false)),
+                ["linux-network-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await networkJournal.ConfigureAwait(false)),
+                ["linux-audio-journal.txt"] = System.Text.Encoding.UTF8.GetBytes(await audioJournal.ConfigureAwait(false)),
+                ["runtime-events.txt"] = System.Text.Encoding.UTF8.GetBytes(diagnostics is null
+                    ? "Диагностика сеанса ещё не запущена."
+                    : diagnostics.FlushForSupport() + Environment.NewLine + diagnostics.History()),
                 ["history-status.txt"] = System.Text.Encoding.UTF8.GetBytes(history?.DiagnosticSummary() ?? "история не открыта"),
             };
             return SupportArchive.MakeFromDirectory(directory, summary, destination, log, extras);
@@ -430,9 +486,7 @@ public sealed partial class App
         model.ReportSupport(Strings.Get("SupportLogsCollecting"), SupportArea.Logs);
         try
         {
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            if (desktop.Length == 0 || !Directory.Exists(desktop)) { desktop = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile); }
-            var made = await BuildSupportArchive(Path.Combine(desktop, SupportArchive.SuggestedName()));
+            var made = await BuildSupportArchive(SupportArchiveDestination());
             model.ReportSupport(Strings.Format("SupportLogsCollected", Path.GetFileName(made)), SupportArea.Logs);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException)

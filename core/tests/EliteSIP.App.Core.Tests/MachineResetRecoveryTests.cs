@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json;
 using EliteSIP.App.PanelLine;
+using EliteSIP.App.Settings;
 using EliteSIP.CallHistory;
 
 namespace EliteSIP.App.Tests;
@@ -22,7 +23,19 @@ public sealed class MachineResetRecoveryTests
             File.WriteAllText(database + ".pending.tmp", "partial");
             var unrelated = Path.Combine(directory.FullName, "keep.txt");
             File.WriteAllText(unrelated, "keep");
+            var profile = Path.Combine(directory.FullName, Path.GetFileName(AppSettings.DefaultPath));
+            var settings = new AppSettings();
+            settings.Setup.IsCompleted = true;
+            settings.Save(profile);
+            File.WriteAllText(profile + AppSettings.UnreadableSuffix, "{");
+
+            settings.DisableWrites();
             Assert.Empty(MachineReset.Wipe(directory.FullName));
+            settings.Save(profile);
+            settings.SeedRecoveryCopy(profile);
+            Assert.False(File.Exists(profile));
+            Assert.False(File.Exists(profile + AppSettings.RecoverySuffix));
+            Assert.False(File.Exists(profile + AppSettings.UnreadableSuffix));
             Assert.False(Directory.Exists(recovery.FullName));
             Assert.False(File.Exists(database + ".pending"));
             Assert.False(File.Exists(database + ".pending.tmp"));

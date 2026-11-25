@@ -84,9 +84,13 @@ internal sealed class ClientEventLog : IDisposable
     };
 
     // Конструктор читает очередь с настройками Format.
-    internal static ClientEventLog Shared { get; } = new(DefaultPath);
+    internal static ClientEventLog Shared { get; } = new(DefaultPath, backgroundPersistence: true);
 
     private readonly Lock _gate = new();
+    private readonly Lock _diskGate = new();
+    private readonly bool _backgroundPersistence;
+    private Task? _writer;
+    private bool _writePending;
     private readonly string? _path;
     private readonly Func<DateTimeOffset> _now;
     private readonly List<Event> _pending = [];
@@ -119,19 +123,21 @@ internal sealed class ClientEventLog : IDisposable
     /// </summary>
     private string? _shutdownReason;
 
-    internal ClientEventLog(string? path, Func<DateTimeOffset>? now = null)
+    internal ClientEventLog(string? path, Func<DateTimeOffset>? now = null, bool backgroundPersistence = false)
     {
         _path = path;
+        _backgroundPersistence = backgroundPersistence;
         _now = now ?? (() => DateTimeOffset.UtcNow);
 
         if (path is not null)
         {
             try
             {
-                if (File.Exists(path)
-                    && JsonSerializer.Deserialize<List<Event>>(File.ReadAllText(path), Format) is { } saved)
+                using var stream = File.OpenRead(path);
+                if (stream.Length <= 4 * 1024 * 1024
+                    && JsonSerializer.Deserialize<List<Event>>(stream, Format) is { } saved)
                 {
-                    _pending.AddRange(saved);
+                    _pending.AddRange(saved.TakeLast(Capacity));
                 }
             }
             catch (Exception error) when (error is IOException or JsonException or UnauthorizedAccessException)
@@ -306,10 +312,13 @@ internal sealed class ClientEventLog : IDisposable
             _pending.Clear();
             _calls.Clear();
             _settings = null;
-            _forgotten = true;
+            Volatile.Write(ref _forgotten, true);
             try { if (_path is not null) { File.Delete(_path + ".session"); } }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }
         }
+
+        // Дождаться только уже начатой записи перед тем, как Wipe удалит файл.
+        lock (_diskGate) { }
     }
 
     // События
@@ -363,6 +372,12 @@ internal sealed class ClientEventLog : IDisposable
         using var deadline = new CancellationTokenSource(TimeSpan.FromMilliseconds(750));
         try { await SendAsync(deadline.Token).WaitAsync(deadline.Token).ConfigureAwait(false); }
         catch (Exception error) when (error is OperationCanceledException or HttpRequestException or IOException) { }
+        Task? writer;
+        lock (_gate) { writer = _writer; }
+        if (writer is not null)
+        {
+            await Task.WhenAny(writer, Task.Delay(TimeSpan.FromMilliseconds(300))).ConfigureAwait(false);
+        }
         Dispose();
     }
 
@@ -377,6 +392,9 @@ internal sealed class ClientEventLog : IDisposable
     }
 
     internal void NoteConnection(string reason) => Record(Kind.Connection, Level.Warning, reason);
+
+    internal void NoteAudio(string message, bool warning)
+        => Record(Kind.Config, warning ? Level.Warning : Level.Info, message);
 
     /// <summary>Почему регистрацию сейчас снимет само приложение. Первая причина главнее.</summary>
     internal void NoteShutdown(string reason)
@@ -809,18 +827,67 @@ internal sealed class ClientEventLog : IDisposable
             return;
         }
 
+        if (!_backgroundPersistence)
+        {
+            WriteSnapshot(_path, _pending);
+            return;
+        }
+
+        _writePending = true;
+        _writer ??= Task.Run(() => PersistPendingAsync(_path));
+    }
+
+    private async Task PersistPendingAsync(string path)
+    {
+        while (true)
+        {
+            await Task.Delay(150).ConfigureAwait(false);
+            Event[] snapshot;
+            lock (_gate)
+            {
+                if (_forgotten || !_writePending)
+                {
+                    _writer = null;
+                    return;
+                }
+
+                _writePending = false;
+                snapshot = [.. _pending];
+            }
+
+            lock (_diskGate)
+            {
+                if (!Volatile.Read(ref _forgotten))
+                {
+                    WriteSnapshot(path, snapshot);
+                }
+            }
+
+            lock (_gate)
+            {
+                if (!_writePending)
+                {
+                    _writer = null;
+                    return;
+                }
+            }
+        }
+    }
+
+    private static void WriteSnapshot(string path, IReadOnlyList<Event> entries)
+    {
         try
         {
-            var temporary = _path + ".tmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(_path))!);
+            var temporary = path + ".tmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
             var options = new FileStreamOptions { Mode = FileMode.Create, Access = FileAccess.Write, Share = FileShare.None };
             if (!OperatingSystem.IsWindows()) { options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite; }
             using (var stream = new FileStream(temporary, options))
             {
                 if (!OperatingSystem.IsWindows()) { File.SetUnixFileMode(temporary, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
-                JsonSerializer.Serialize(stream, _pending, Format);
+                JsonSerializer.Serialize(stream, entries, Format);
             }
-            File.Move(temporary, _path, overwrite: true);
+            File.Move(temporary, path, overwrite: true);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {

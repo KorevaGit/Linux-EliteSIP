@@ -665,10 +665,30 @@ internal static class MachineReset
     {
         directory ??= Path.GetDirectoryName(AppSettings.DefaultPath)!;
         var failures = new List<string>();
+        string marker = Path.Combine(directory, AppSettings.ResetMarkerName);
+        try
+        {
+            if (!Directory.Exists(directory))
+            {
+                return failures;
+            }
+
+            using var stream = File.Create(marker);
+            stream.Flush(flushToDisk: true);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            failures.Add(AppSettings.ResetMarkerName);
+            return failures;
+        }
 
         foreach (var name in new[]
         {
             Path.GetFileName(AppSettings.DefaultPath),
+            Path.GetFileName(AppSettings.DefaultPath) + ".tmp",
+            Path.GetFileName(AppSettings.DefaultPath) + AppSettings.RecoverySuffix,
+            Path.GetFileName(AppSettings.DefaultPath) + AppSettings.RecoverySuffix + ".tmp",
+            Path.GetFileName(AppSettings.DefaultPath) + AppSettings.UnreadableSuffix,
             PairingStore.FileName,
             "history.db",
             "history.db-wal",
@@ -695,24 +715,29 @@ internal static class MachineReset
             }
         }
 
-        // Ротированные файлы журнала: elitesip-<время>.log.
-        try
+        foreach (string logs in new[] { directory, Path.Combine(directory, "Logs") })
         {
-            foreach (var rotated in Directory.GetFiles(directory, "elitesip-*.log"))
+            try
             {
-                try
+                if (!Directory.Exists(logs))
                 {
-                    File.Delete(rotated);
+                    continue;
                 }
-                catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+
+                File.Delete(Path.Combine(logs, "elitesip.log"));
+                foreach (var rotated in Directory.GetFiles(logs, "elitesip-*.log"))
                 {
-                    failures.Add(Path.GetFileName(rotated));
+                    try { File.Delete(rotated); }
+                    catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+                    {
+                        failures.Add(Path.GetRelativePath(directory, rotated));
+                    }
                 }
             }
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            failures.Add("elitesip-*.log");
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                failures.Add(Path.GetRelativePath(directory, logs));
+            }
         }
 
         var recovery = Path.Combine(directory, "history.db.recovery");
@@ -733,6 +758,15 @@ internal static class MachineReset
             }
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException) { failures.Add("history.db.recovery"); }
+
+        if (failures.Count == 0)
+        {
+            try { File.Delete(marker); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                failures.Add(AppSettings.ResetMarkerName);
+            }
+        }
 
         return failures;
     }

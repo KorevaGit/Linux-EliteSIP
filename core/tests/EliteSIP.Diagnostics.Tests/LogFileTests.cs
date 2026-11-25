@@ -45,6 +45,32 @@ public sealed class LogFileTests : IDisposable
     }
 
     [Fact]
+    public void Sip_trace_owns_the_packet_copies_at_most_the_limit_and_redacts_before_disk()
+    {
+        using var log = new LogFile(new LogFile.Settings(_directory));
+        using var release = new ManualResetEventSlim();
+        Queue(log, () => release.Wait());
+        try
+        {
+            byte[] packet = System.Text.Encoding.UTF8.GetBytes(
+                "SIP/2.0 200 OK\r\nAuthorization: Digest response=secret-value\r\n" + new string('x', 20_000));
+            log.WriteSipTrace(false, packet);
+            Array.Clear(packet);
+        }
+        finally
+        {
+            release.Set();
+        }
+
+        Assert.True(log.Flush(TimeSpan.FromSeconds(3)));
+        string text = File.ReadAllText(log.CurrentFilePath);
+        Assert.Contains("<- SIP/2.0 200 OK", text, StringComparison.Ordinal);
+        Assert.Contains("SIP-трасса сокращена", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("secret-value", text, StringComparison.Ordinal);
+        Assert.True(text.Length < 17_000);
+    }
+
+    [Fact]
     public async Task Dispose_drains_pending_writes_and_releases_file()
     {
         using var log = new LogFile(new LogFile.Settings(_directory));
@@ -280,6 +306,55 @@ public sealed class LogFileTests : IDisposable
         IReadOnlyList<string> files = log.Files();
         Assert.True(files.Count > 1, "отложенных файлов не появилось — ротации не было");
         Assert.Equal(log.CurrentFilePath, files[0]);
+    }
+
+    [Fact]
+    [UnsupportedOSPlatform("windows")]
+    public void Failed_rotation_caps_file_size_and_reports_lost_lines()
+    {
+        if (OperatingSystem.IsWindows()) { return; }
+
+        using var log = new LogFile(new LogFile.Settings(_directory, maximumFileBytes: 512));
+        log.Write(new string('x', 350), "i");
+        Assert.True(log.Flush(TimeSpan.FromSeconds(3)));
+        var originalMode = File.GetUnixFileMode(_directory);
+        try
+        {
+            File.SetUnixFileMode(_directory, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+            for (int index = 0; index < 100; index++)
+            {
+                log.Write(new string('x', 350), "i");
+            }
+
+            Assert.True(log.Flush(TimeSpan.FromSeconds(3)));
+            Assert.True(new FileInfo(log.CurrentFilePath).Length <= 512);
+            Assert.Equal(100, log.DroppedLines);
+            Assert.True(log.WriteFailures >= 1);
+        }
+        finally
+        {
+            File.SetUnixFileMode(_directory, originalMode);
+        }
+    }
+
+    [Fact]
+    public void Archive_keeps_a_bounded_tail_and_omits_partial_record()
+    {
+        string log = Path.Combine(_directory, "elitesip.log");
+        using (var writer = File.CreateText(log))
+        {
+            writer.WriteLine("response=" + new string('z', 4 * 1024 * 1024));
+            writer.WriteLine("recent event password=secret-value");
+        }
+
+        using var archive = ZipFile.OpenRead(SupportArchive.Make([log], "summary", Path.Combine(_directory, "support.zip")));
+        using var entry = new StreamReader(archive.GetEntry("elitesip.log")!.Open());
+        string text = entry.ReadToEnd();
+        Assert.DoesNotContain("secret-value", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("zzz", text, StringComparison.Ordinal);
+        Assert.Contains("recent event", text, StringComparison.Ordinal);
+        using var collection = new StreamReader(archive.GetEntry("collection.txt")!.Open());
+        Assert.Contains("только конец файла", collection.ReadToEnd(), StringComparison.Ordinal);
     }
 
     [Fact]

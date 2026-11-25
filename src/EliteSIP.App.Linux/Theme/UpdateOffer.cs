@@ -32,7 +32,15 @@ internal sealed class UpdateOffer : Window
     {
         using var closed=new CancellationTokenSource();
         Closed+=(_,_)=>closed.Cancel();
-        if(owner is null) { Show(); } else { Show(owner); }
+        if (owner is { IsVisible: true })
+        {
+            Show(owner);
+        }
+        else
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            Show();
+        }
         Dispatcher.UIThread.MainLoop(closed.Token);
         return Accepted;
     }

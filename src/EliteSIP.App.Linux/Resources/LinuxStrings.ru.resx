@@ -43,4 +43,6 @@
 <data name="PanelConfirmConference" xml:space="preserve"><value>Создать конференцию?</value></data>
 <data name="PanelConfirmConferenceAction" xml:space="preserve"><value>Создать</value></data>
 <data name="SettingsPanelVolume" xml:space="preserve"><value>Ползунки громкости на главном окне</value></data>
+  <data name="ProfileRecoveryTitle" xml:space="preserve"><value>Восстановление профиля EliteSIP</value></data>
+  <data name="ProfileRecoveryBody" xml:space="preserve"><value>Локальный профиль не удалось прочитать. Обратитесь в техподдержку для восстановления рабочего места. Файлы профиля сохранены.</value></data>
 </root>

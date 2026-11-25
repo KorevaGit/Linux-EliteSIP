@@ -43,4 +43,6 @@
 <data name="PanelConfirmConference" xml:space="preserve"><value>Start a conference?</value></data>
 <data name="PanelConfirmConferenceAction" xml:space="preserve"><value>Start</value></data>
 <data name="SettingsPanelVolume" xml:space="preserve"><value>Volume sliders in the main window</value></data>
+  <data name="ProfileRecoveryTitle" xml:space="preserve"><value>EliteSIP profile recovery</value></data>
+  <data name="ProfileRecoveryBody" xml:space="preserve"><value>The local profile could not be read. Contact support to recover this workstation. The profile files have been kept.</value></data>
 </root>

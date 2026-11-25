@@ -53,6 +53,8 @@ public sealed partial class App : Application, IDisposable
     private readonly CrashGuard _crashGuard = new();
     private readonly AvaloniaUiThread _ui = new();
     private readonly PulseAudioPlatform _audioPlatform = new();
+    private RuntimeDiagnostics? _runtimeDiagnostics;
+    private bool _sessionEnding;
     private readonly XdgAutoStart _autoStart = new();
     private readonly UpdateExchange _updateHandoff = new();
 
@@ -143,8 +145,34 @@ public sealed partial class App : Application, IDisposable
         Instance?.Watch(() => Dispatcher.UIThread.Post(ShowPanel), Log);
         Mark("экземпляр");
 
-        _settings = AppSettings.Load();
-        _settings.AutoSave(scheduleVisualSave: _appearanceSave.Schedule);
+        try
+        {
+            _settings = AppSettings.LoadForStartup(AppSettings.DefaultPath, out bool recovered);
+            if (recovered)
+            {
+                Console.Error.WriteLine("профиль восстановлен из локальной резервной копии");
+            }
+        }
+        catch (InvalidDataException error)
+        {
+            Console.Error.WriteLine($"не удалось прочитать профиль: {error.InnerException?.GetType().Name}");
+            _startupSplash?.Close();
+            _ = ShowProfileRecoveryAsync();
+            return;
+        }
+
+        try
+        {
+            _settings.SeedRecoveryCopy(AppSettings.DefaultPath);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            Log($"не удалось сохранить резервную копию профиля: {error.GetType().Name}");
+        }
+
+        _settings.AutoSave(
+            onFailure: error => Log($"не удалось сохранить настройки: {error.GetType().Name}"),
+            scheduleVisualSave: _appearanceSave.Schedule);
         Strings.Apply(Chosen(_settings.Appearance.Language));
         _access = new AdminAccessState(_settings.Admin.ToCredential());
 
@@ -207,6 +235,7 @@ public sealed partial class App : Application, IDisposable
         var settings = _settings;
         _incoming = new IncomingCallPresenter(Log, () => _panelWindow)
         {
+            BeforeShow = () => _updateOffer?.Close(),
             RestorePlacement = () => settings.IncomingPlacement.Origin,
             SavePlacement = origin => settings.IncomingPlacement.Origin = origin,
         };
@@ -444,9 +473,14 @@ public sealed partial class App : Application, IDisposable
 
         ClientEventLog.Shared.Start(() => _settings!, Log);
         ClientEventLog.Shared.BeginSession();
+        _runtimeDiagnostics = new RuntimeDiagnostics(Log,
+            () => (settings.Audio.InputDeviceId, settings.Audio.OutputDeviceId));
         ReportConfirmedUpdate(settings.Maintenance);
         _phone!.RecoverConnection = () => Reconnect("канал закрыт");
         _phone.Answered = () => Dispatcher.UIThread.Post(ShowPanel);
+        _phone.RecordSupportDiagnostic = _runtimeDiagnostics.RecordLocal;
+        _phone.RecordSipTrace = (outgoing, data) => GetLogFile()?.WriteSipTrace(outgoing, data);
+        _runtimeDiagnostics.RecordLocal($"Запуск EliteSIP {SettingsViewModel.Version}; SIP-трасса={settings.Maintenance.LogsSipTrace}; файловый журнал={settings.Maintenance.LogToFile}");
 
         _updates = new UpdateService(
             isBusy: () => _phone!.BlocksUpdateOffer,
@@ -472,7 +506,11 @@ public sealed partial class App : Application, IDisposable
 
         panel.PropertyChanged += (_, change) =>
         {
-            if (change.PropertyName is nameof(PanelViewModel.IsInCall) && panel.IsInCall) { _recordingPreview?.Cancel(); }
+            if (change.PropertyName is nameof(PanelViewModel.IsInCall) && panel.IsInCall)
+            {
+                _updateOffer?.Close();
+                _recordingPreview?.Cancel();
+            }
             if (change.PropertyName is nameof(PanelViewModel.IsInCall) && !panel.IsInCall)
             {
                 _panelLine?.HostBecameIdle();
@@ -557,12 +595,17 @@ public sealed partial class App : Application, IDisposable
     {
         _session = new SessionLifetime(Log)
         {
+            ForceExit = () => Environment.Exit(0),
             // Снять регистрацию и выйти. Приходит не в потоке окна; замок
             // logind отпускается, когда задача кончится (не дольше 4 с).
             Ending = async reason =>
             {
                 ClientEventLog.Shared.NoteShutdown(reason);
-                await Dispatcher.UIThread.InvokeAsync(() => QuitAsync(TimeSpan.FromSeconds(3)));
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    _sessionEnding = true;
+                    return QuitAsync(TimeSpan.FromSeconds(2));
+                });
             },
         };
 
@@ -622,7 +665,9 @@ public sealed partial class App : Application, IDisposable
         bool routeChanged = reason is "сеть сменилась" or "машина проснулась"
             && _phone.HasLocalRouteChanged();
         bool defer = _panel.IsInCall && !routeChanged && reason != "канал закрыт";
-        ClientEventLog.Shared.NoteConnection($"Переподключение: {reason}{(defer ? "; отложено до окончания разговора" : string.Empty)}");
+        string diagnostic = $"Переподключение: {reason}{(defer ? "; отложено до окончания разговора" : string.Empty)}";
+        ClientEventLog.Shared.NoteConnection(diagnostic);
+        _runtimeDiagnostics?.RecordLocal($"{diagnostic}; локальный маршрут до АТС изменился={routeChanged}");
         if (defer)
         {
             _reconnectAfterCall = reason;
@@ -710,6 +755,7 @@ public sealed partial class App : Application, IDisposable
     private void ResetMachine()
     {
         ClientEventLog.Shared.NoteShutdown("сброс машины");
+        _settings?.DisableWrites();
         _updates?.Dispose();
         _updates = null;
         _panelLine?.Dispose();
@@ -720,6 +766,7 @@ public sealed partial class App : Application, IDisposable
         _history = null;
         _logFile?.Dispose();
         _logFile = null;
+        _runtimeDiagnostics?.Dispose();
         ClientEventLog.Shared.Forget();
 
         var failures = MachineReset.Wipe();
@@ -761,6 +808,7 @@ public sealed partial class App : Application, IDisposable
         }
 
         _quitting = true;
+        _updateOffer?.Close();
 
         if (_phone is not null)
         {
@@ -779,15 +827,21 @@ public sealed partial class App : Application, IDisposable
         // а файл пишется фоном. Последние из них («регистрация снята») и есть
         // то, ради чего журнал читают после выхода, — даём им дойти.
         await Dispatcher.UIThread.InvokeAsync(static () => { }, DispatcherPriority.Background);
-        _logFile?.Flush();
+        if (_logFile is { } log)
+        {
+            var budget = _sessionEnding ? TimeSpan.FromMilliseconds(250) : TimeSpan.FromSeconds(3);
+            await Task.Run(() => log.Flush(budget));
+        }
         _desktop?.Shutdown(exitCode);
     }
 
-    private void Log(string message)
+    private void Log(string message) => GetLogFile()?.Write(message, "i");
+
+    private LogFile? GetLogFile()
     {
         if (_settings?.Maintenance.LogToFile is not true)
         {
-            return;
+            return null;
         }
 
         if (Volatile.Read(ref _logFile) is not { } log)
@@ -796,11 +850,11 @@ public sealed partial class App : Application, IDisposable
             log = Interlocked.CompareExchange(ref _logFile, fresh, null) ?? fresh;
             if (!ReferenceEquals(log, fresh))
             {
-                fresh.Dispose();
+                fresh.DisposeWithoutWaiting();
             }
         }
 
-        log.Write(message, "i");
+        return log;
     }
 
     internal static void Record(Exception failure, bool? survived = null)
@@ -832,6 +886,7 @@ public sealed partial class App : Application, IDisposable
     {
         _appearanceSave.Dispose();
         if (_startupSplash?.IsVisible is true) { _startupSplash.Close(); }
+        _runtimeDiagnostics?.Dispose(waitForLog: !_sessionEnding);
         ClientEventLog.Shared.EndSession();
         ClientEventLog.Shared.Dispose();
         _recordingPreview?.Cancel();
@@ -856,7 +911,14 @@ public sealed partial class App : Application, IDisposable
         _history = null;
         Instance?.Dispose();
         Instance = null;
-        _logFile?.Dispose();
+        if (_sessionEnding)
+        {
+            _logFile?.DisposeWithoutWaiting();
+        }
+        else
+        {
+            _logFile?.Dispose();
+        }
         GC.SuppressFinalize(this);
     }
 }

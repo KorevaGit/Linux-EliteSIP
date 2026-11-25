@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="PulseProbe" />
+    <InternalsVisibleTo Include="EliteSIP.App.Linux" />
     <InternalsVisibleTo Include="EliteSIP.Audio.Pulse.Tests" />
   </ItemGroup>
 

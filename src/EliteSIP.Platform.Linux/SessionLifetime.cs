@@ -83,9 +83,6 @@ internal sealed class SessionLifetime : IDisposable
     /// <summary>Путь нашего клиента у менеджера сеанса; <see langword="null"/> — не зарегистрированы.</summary>
     private string? _sessionClient;
 
-    /// <summary>Менеджер сеанса прислал <c>EndSession</c> и ждёт ответа.</summary>
-    private bool _endSessionPending;
-
     internal SessionLifetime(Action<string> log)
     {
         _log = log;
@@ -106,6 +103,8 @@ internal sealed class SessionLifetime : IDisposable
     /// <see cref="EndingBudget"/>. Выход из процесса — дело обработчика.
     /// </remarks>
     internal Func<string, Task>? Ending { get; set; }
+
+    internal Action? ForceExit { get; init; }
 
     /// <summary>
     /// Подписывается на сигналы. Отсутствие logind — не ошибка: в контейнере
@@ -208,21 +207,28 @@ internal sealed class SessionLifetime : IDisposable
             _ended = true;
         }
 
+        Task deadline = Task.Delay(EndingBudget);
         _ = Task.Run(async () =>
         {
-            _log($"сеанс кончается ({reason}): снимается регистрация");
+            await deadline.ConfigureAwait(false);
+            ReleaseShutdownDelay();
+            ForceExit?.Invoke();
+        });
 
-            if (Ending is { } ending)
+        _ = Task.Run(async () =>
+        {
+            try
             {
-                var work = ending(reason);
-                if (await Task.WhenAny(work, Task.Delay(EndingBudget)).ConfigureAwait(false) != work)
+                _log($"сеанс кончается ({reason}): снимается регистрация");
+                if (Ending is { } ending)
                 {
-                    _log($"сеанс: регистрация не снялась за {EndingBudget.TotalSeconds:0} с — выход без неё");
+                    await ending(reason).ConfigureAwait(false);
                 }
             }
-
-            ReleaseShutdownDelay();
-            await AnswerEndSessionAsync().ConfigureAwait(false);
+            finally
+            {
+                ReleaseShutdownDelay();
+            }
         });
     }
 
@@ -264,7 +270,7 @@ internal sealed class SessionLifetime : IDisposable
                 ("QueryEndSession", () => _ = RespondAsync(true)),
                 ("EndSession", () =>
                 {
-                    _endSessionPending = true;
+                    _ = RespondAsync(true);
                     BeginEnding("выход из сеанса");
                 }),
                 ("Stop", () => BeginEnding("менеджер сеанса просит выйти")),
@@ -286,15 +292,6 @@ internal sealed class SessionLifetime : IDisposable
         catch (Exception error) when (error is DBusExceptionBase or IOException or System.Net.Sockets.SocketException)
         {
             _log($"сеанс: менеджера сеанса нет ({error.Message}) — выход из сеанса придёт сигналом");
-        }
-    }
-
-    private async Task AnswerEndSessionAsync()
-    {
-        if (_endSessionPending)
-        {
-            _endSessionPending = false;
-            await RespondAsync(true).ConfigureAwait(false);
         }
     }
 
@@ -357,8 +354,15 @@ internal sealed class SessionLifetime : IDisposable
 
             lock (_gate)
             {
-                _shutdownDelay?.Dispose();
-                _shutdownDelay = handle;
+                if (_ended)
+                {
+                    handle.Dispose();
+                }
+                else
+                {
+                    _shutdownDelay?.Dispose();
+                    _shutdownDelay = handle;
+                }
             }
         }
         catch (DBusExceptionBase error)

@@ -112,11 +112,14 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
     /// </summary>
     public CallGuardReport? LastReport { get; private set; }
 
+    internal Action? BeforeShow { get; init; }
+
     /// <summary>Показывает окно и берёт вызов под защиту.</summary>
     public void Show(IncomingCallSubject subject, CallGuardPolicy policy, Action onAnswer, Action onDecline)
     {
         ArgumentNullException.ThrowIfNull(policy);
 
+        BeforeShow?.Invoke();
         Hide();
 
         policy = policy.Normalized();

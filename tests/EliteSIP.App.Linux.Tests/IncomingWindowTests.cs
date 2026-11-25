@@ -6,6 +6,7 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using EliteSIP.App.Incoming;
+using EliteSIP.App.Theme;
 using EliteSIP.CallGuard;
 using EliteSIP.Platform.Linux;
 
@@ -19,6 +20,30 @@ namespace EliteSIP.App.Tests;
 public sealed class IncomingWindowTests
 {
     public static TheoryData<int> TargetCounts() => [1, 3];
+
+    [AvaloniaFact]
+    public void Incoming_call_dismisses_update_offer_with_hidden_panel()
+    {
+        var panel = new Window();
+        var offer = new UpdateOffer(new Version(1, 0, 6), new Version(1, 0, 7), "Update");
+        bool rang = false;
+        using var incoming = new IncomingCallPresenter(_ => { }, () => null)
+        {
+            BeforeShow = offer.Close,
+            StartRingtone = () => rang = true,
+        };
+        offer.Opened += (_, _) => Dispatcher.UIThread.Post(() =>
+        {
+            var subject = IncomingCallSubject.Classify(
+                "702", "Test", requestsAutoAnswer: false, ownNumber: "701", masksMobileNumbers: false);
+            incoming.Show(subject, new CallGuardPolicy(), () => { }, () => { });
+        });
+
+        Assert.False(offer.Ask(panel));
+
+        Assert.False(offer.IsVisible);
+        Assert.True(rang);
+    }
 
     [AvaloniaTheory]
     [MemberData(nameof(TargetCounts))]

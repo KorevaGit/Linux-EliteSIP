@@ -8,7 +8,20 @@ namespace EliteSIP.Platform.Linux;
 /// <summary>Ограниченный по времени и объёму журнал службы пользователя для архива поддержки.</summary>
 internal static class UserServiceJournal
 {
-    internal static async Task<string> CollectAsync(string executable = "journalctl", TimeSpan? timeout = null, bool updater = false)
+    internal static Task<string> CollectAsync(string executable = "journalctl", TimeSpan? timeout = null, bool updater = false)
+        => CollectAsync(updater
+            ? ["--system", "--unit=elitesip-updater.service", "--unit=elitesip-install.service"]
+            : ["--user", "--unit=elitesip.service"], "--since=-30days", executable, timeout);
+
+    internal static Task<string> CollectNetworkAsync()
+        => CollectAsync(["--system", "--unit=NetworkManager.service", "--unit=systemd-networkd.service"],
+            "--since=-2days");
+
+    internal static Task<string> CollectAudioAsync()
+        => CollectAsync(["--user", "--unit=pipewire.service", "--unit=pipewire-pulse.service",
+            "--unit=wireplumber.service", "--unit=pulseaudio.service"], "--since=-2days");
+
+    private static async Task<string> CollectAsync(string[] units, string since, string executable = "journalctl", TimeSpan? timeout = null)
     {
         using var deadline = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(3));
         using var process = new Process
@@ -21,10 +34,7 @@ internal static class UserServiceJournal
                 CreateNoWindow = true,
             },
         };
-        string[] units = updater
-            ? ["--system", "--unit=elitesip-updater.service", "--unit=elitesip-install.service"]
-            : ["--user", "--unit=elitesip.service"];
-        foreach (var argument in units.Concat(["--since=-30days", "--lines=500", "--no-pager", "--output=short-iso"]))
+        foreach (var argument in units.Concat([since, "--lines=500", "--no-pager", "--output=short-iso"]))
         {
             process.StartInfo.ArgumentList.Add(argument);
         }

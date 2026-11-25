@@ -45,6 +45,44 @@ public sealed class ClientEventLogTests : IDisposable
     }
 
     [Fact]
+    public async Task Background_persistence_keeps_only_the_latest_bounded_queue()
+    {
+        using var log = new ClientEventLog(FilePath, () => _now, backgroundPersistence: true);
+        for (int i = 0; i < ClientEventLog.Capacity + 10; i++)
+        {
+            log.NoteConnection($"event {i}");
+        }
+
+        await log.FinishSessionAsync();
+        using var recovered = Make();
+        Assert.Equal(ClientEventLog.Capacity, recovered.Pending.Count);
+        Assert.Equal("event 10", recovered.Pending[0].Message);
+        Assert.Equal($"event {ClientEventLog.Capacity + 9}", recovered.Pending[^1].Message);
+    }
+
+    [Fact]
+    public void Audio_models_and_local_ip_changes_survive_until_spark_upload()
+    {
+        using var log = Make();
+        log.NoteAudio("Звук, микрофон исчез: Jabra Evolve2 40 (USB)", warning: true);
+        log.NoteConnection("Сеть eth0: 192.0.2.2 → 192.0.2.3");
+
+        var pending = Make().Pending;
+        Assert.Collection(pending,
+            audio =>
+            {
+                Assert.Equal(ClientEventLog.Kind.Config, audio.Kind);
+                Assert.Equal(ClientEventLog.Level.Warning, audio.Level);
+                Assert.Contains("Jabra Evolve2 40", audio.Message, StringComparison.Ordinal);
+            },
+            network =>
+            {
+                Assert.Equal(ClientEventLog.Kind.Connection, network.Kind);
+                Assert.Contains("192.0.2.2 → 192.0.2.3", network.Message, StringComparison.Ordinal);
+            });
+    }
+
+    [Fact]
     public void AnsweredCallCarriesDurationAndOptionalPeer()
     {
         var log = Make();

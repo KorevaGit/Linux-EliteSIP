@@ -202,6 +202,9 @@ public sealed class PhoneService : IDisposable
 
     internal bool BlocksUpdateOffer => IsCallActive || _records.Count != 0;
 
+    internal Action<string>? RecordSupportDiagnostic { get; set; }
+    internal Action<bool, ReadOnlyMemory<byte>>? RecordSipTrace { get; set; }
+
     /// <summary>
     /// Уровни разговора для шкал. <c>null</c> — тракт свободен.
     /// </summary>
@@ -429,9 +432,14 @@ public sealed class PhoneService : IDisposable
         // регистрируется.
         if (_settings.Maintenance.LogsSipTrace)
         {
-            _transport.Trace = (outgoing, data) => _log(
-                (outgoing ? "-> " : "<- ")
-                + LogRedaction.Redact(System.Text.Encoding.UTF8.GetString(data.Span)));
+            const int traceBytes = 16 * 1024;
+            _transport.Trace = RecordSipTrace ?? ((outgoing, data) =>
+            {
+                string prefix = outgoing ? "-> " : "<- ";
+                string message = System.Text.Encoding.UTF8.GetString(data.Span[..Math.Min(data.Length, traceBytes)]);
+                _log(prefix + LogRedaction.Redact(message)
+                    + (data.Length > traceBytes ? " [SIP-трасса сокращена]" : string.Empty));
+            });
         }
 
         // Стук по портам (W11): открыть себе дорогу до АТС перед регистрацией.
@@ -1647,6 +1655,7 @@ public sealed class PhoneService : IDisposable
             OnTransportFailure = reason =>
             {
                 _log($"транспорт медиа: {reason}");
+                RecordSupportDiagnostic?.Invoke($"Транспорт медиа: {reason}");
                 ShowStatus(StatusSlot.MediaError, "StatusMediaNetworkError", "exclamationmark.triangle",
                     isWarning: true, lifetime: TimeSpan.FromSeconds(6));
             },
@@ -1660,6 +1669,7 @@ public sealed class PhoneService : IDisposable
             OnAudioEvent = value =>
             {
                 _log($"звук: {value}");
+                RecordSupportDiagnostic?.Invoke($"Аудиотракт: {value}");
                 ShowAudioStatus(value);
             },
         };
@@ -1858,10 +1868,12 @@ public sealed class PhoneService : IDisposable
         {
             case SipRegistrationState.Registered:
                 ClientEventLog.Shared.NoteRegistration(new ClientEventLog.RegistrationSummary.Registered());
+                RecordSupportDiagnostic?.Invoke("SIP: АТС подтвердила регистрацию");
                 break;
 
             case SipRegistrationState.Failed failed:
                 ClientEventLog.Shared.NoteRegistration(new ClientEventLog.RegistrationSummary.Failed(failed.Reason, null));
+                RecordSupportDiagnostic?.Invoke($"SIP: ошибка регистрации: {failed.Reason}");
                 break;
 
             case SipRegistrationState.Idle:
@@ -2114,6 +2126,8 @@ public sealed class PhoneService : IDisposable
     private DateTimeOffset? _registeringSince;
     private MediaSession? _watchedSession;
     private readonly InboundStreamWatch _inboundWatch = new();
+    private long _lastSupportSample;
+    private (InboundStreamKind Inbound, bool Poor)? _lastSupportMediaState;
     private readonly Queue<(int Concealed, int Received)> _qualityWindow = new();
 
     /// <summary>
@@ -2264,6 +2278,7 @@ public sealed class PhoneService : IDisposable
         if (!ReferenceEquals(session, _watchedSession))
         {
             _watchedSession = session;
+            _lastSupportMediaState = null;
             _inboundWatch.Reset();
             _qualityWindow.Clear();
         }
@@ -2308,6 +2323,17 @@ public sealed class PhoneService : IDisposable
             && remote.FractionLost >= PoorRemoteLoss)
         {
             poor = true;
+        }
+
+        var mediaState = (inbound.Kind, poor);
+        if (RecordSupportDiagnostic is { } diagnostic && (_lastSupportMediaState != mediaState
+            || System.Diagnostics.Stopwatch.GetElapsedTime(_lastSupportSample) >= TimeSpan.FromSeconds(10)))
+        {
+            _lastSupportMediaState = mediaState;
+            _lastSupportSample = System.Diagnostics.Stopwatch.GetTimestamp();
+            string rtcp = session.RemoteView?.Summary ?? "нет данных";
+            diagnostic($"RTP: вход={inbound.Kind}; принято={statistics.Received}; поздних={statistics.Late}; "
+                + $"скрыто={statistics.Concealed}; выброшено={statistics.Dropped}; RTCP: {rtcp}");
         }
 
         if (poor)

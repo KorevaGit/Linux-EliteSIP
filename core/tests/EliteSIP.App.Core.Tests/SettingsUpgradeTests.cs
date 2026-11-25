@@ -15,6 +15,86 @@ public sealed class SettingsUpgradeTests : IDisposable
 
     public void Dispose() => Directory.Delete(_directory, recursive: true);
 
+    [Theory]
+    [InlineData("{")]
+    [InlineData("{}")]
+    [InlineData("{\"Setup\":null}")]
+    [InlineData(null)]
+    public void Startup_recovers_configured_profile_when_primary_is_unusable(string? primary)
+    {
+        var settings = new AppSettings();
+        settings.Account.Username = "701";
+        settings.Setup.IsCompleted = true;
+        settings.Save(FilePath);
+        if (primary is null)
+        {
+            File.Delete(FilePath);
+        }
+        else
+        {
+            File.WriteAllText(FilePath, primary);
+        }
+
+        var restored = AppSettings.LoadForStartup(FilePath, out bool recovered);
+
+        Assert.True(recovered);
+        Assert.True(restored.Setup.IsCompleted);
+        Assert.Equal("701", AppSettings.Load(FilePath).Account.Username);
+        if (primary is not null)
+        {
+            Assert.Equal(primary, File.ReadAllText(FilePath + AppSettings.UnreadableSuffix));
+        }
+    }
+
+    [Fact]
+    public void Startup_preserves_unreadable_profile_without_a_recovery_copy()
+    {
+        File.WriteAllText(FilePath, "{");
+
+        Assert.Throws<InvalidDataException>(() => AppSettings.LoadForStartup(FilePath, out _));
+
+        Assert.Equal("{", File.ReadAllText(FilePath));
+    }
+
+    [Fact]
+    public void Startup_distinguishes_fresh_installation_from_missing_profile_with_history()
+    {
+        Assert.False(AppSettings.LoadForStartup(FilePath, out _).Setup.IsCompleted);
+
+        File.WriteAllText(Path.Combine(_directory, "history.db"), "");
+
+        Assert.Throws<InvalidDataException>(() => AppSettings.LoadForStartup(FilePath, out _));
+    }
+
+    [Fact]
+    public void Startup_finishes_an_interrupted_reset_without_restoring_old_profile()
+    {
+        var settings = new AppSettings();
+        settings.Setup.IsCompleted = true;
+        settings.Save(FilePath);
+        File.Delete(FilePath);
+        var marker = Path.Combine(_directory, AppSettings.ResetMarkerName);
+        File.WriteAllText(marker, "");
+
+        Assert.False(AppSettings.LoadForStartup(FilePath, out bool recovered).Setup.IsCompleted);
+
+        Assert.False(recovered);
+        Assert.False(File.Exists(FilePath + AppSettings.RecoverySuffix));
+        Assert.False(File.Exists(marker));
+    }
+
+    [Fact]
+    public void Sip_trace_is_on_by_default_and_preserves_an_explicit_opt_out()
+    {
+        var fresh = AppSettings.LoadForStartup(FilePath, out _);
+        Assert.True(fresh.Maintenance.LogToFile);
+        Assert.True(fresh.Maintenance.LogsSipTrace);
+        fresh.Maintenance.LogsSipTrace = false;
+        fresh.Save(FilePath);
+
+        Assert.False(AppSettings.LoadForStartup(FilePath, out _).Maintenance.LogsSipTrace);
+    }
+
     private static AppSettings Tinkered(int? revision)
     {
         var settings = new AppSettings { Revision = revision };

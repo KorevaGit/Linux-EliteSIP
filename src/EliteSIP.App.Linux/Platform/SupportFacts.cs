@@ -32,7 +32,8 @@ internal static class SupportFacts
         string? installation,
         string? number,
         IAudioPlatform audio,
-        Func<string, string?> environment)
+        Func<string, string?> environment,
+        string? audioStatus = null)
     {
         var lines = new List<string>
         {
@@ -44,7 +45,14 @@ internal static class SupportFacts
             $"сеанс: {GraphicsSession.Describe(environment)}",
         };
 
-        lines.AddRange(Sound(audio));
+        if (audioStatus is null)
+        {
+            lines.AddRange(Sound(audio));
+        }
+        else
+        {
+            lines.Add(audioStatus);
+        }
 
         return string.Join(Environment.NewLine, lines);
     }
@@ -62,6 +70,32 @@ internal static class SupportFacts
             $"рингтон: выход={settings.Ringtone.Output}; громкость={settings.Ringtone.Volume}",
             $"журнал: файл={settings.Maintenance.LogToFile}; SIP-трасса={settings.Maintenance.LogsSipTrace}",
             $"стук: интервал={settings.PortKnock.RepeatIntervalSeconds}; пауза={settings.PortKnock.SpacingSeconds}");
+    }
+
+    internal static string ProfileStatus()
+    {
+        string path = Settings.AppSettings.DefaultPath;
+        return string.Join(Environment.NewLine, new[]
+        {
+            path,
+            path + ".tmp",
+            path + Settings.AppSettings.RecoverySuffix,
+            path + Settings.AppSettings.RecoverySuffix + ".tmp",
+            path + Settings.AppSettings.UnreadableSuffix,
+            Path.Combine(Path.GetDirectoryName(path)!, Settings.AppSettings.ResetMarkerName),
+        }.Select(file =>
+        {
+            string name = Path.GetFileName(file);
+            try
+            {
+                var info = new FileInfo(file);
+                return $"{name}: {info.Length} байт; последнее изменение {info.LastWriteTimeUtc:O}";
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                return $"{name}: {error.GetType().Name}";
+            }
+        }));
     }
 
     internal static string EnvironmentSummary()

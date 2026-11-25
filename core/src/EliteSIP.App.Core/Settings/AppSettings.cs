@@ -474,11 +474,19 @@ public sealed class AccountSettings : Observable
 /// </remarks>
 public sealed class AppSettings : Observable
 {
+    internal const string RecoverySuffix = ".last-good";
+    internal const string ResetMarkerName = ".machine-reset";
+    internal const string UnreadableSuffix = ".unreadable";
+    private static readonly object SaveGate = new();
+    private bool _writesDisabled;
+
     private static readonly JsonSerializerOptions Format = new()
     {
         WriteIndented = true,
         Converters = { new JsonStringEnumConverter() },
     };
+
+    private static readonly JsonSerializerOptions ReadFormat = new(Format) { RespectNullableAnnotations = true };
 
     /// <summary>
     /// Куда лечь файлу: <c>LocalApplicationData</c>, а не роуминговый.
@@ -640,10 +648,7 @@ public sealed class AppSettings : Observable
                 return Fresh();
             }
 
-            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path), Format)
-                ?? Fresh();
-            settings.Upgrade();
-            return settings;
+            return ReadSettings(path);
         }
         catch (Exception exception) when (exception is IOException or JsonException or UnauthorizedAccessException)
         {
@@ -663,6 +668,105 @@ public sealed class AppSettings : Observable
     /// </remarks>
     private static AppSettings Fresh() => new() { Revision = CurrentRevision };
 
+    private static AppSettings ReadSettings(string path)
+    {
+        var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(path), ReadFormat)
+            ?? throw new JsonException("The settings file contains no profile.");
+        settings.Upgrade();
+        return settings;
+    }
+
+    internal static AppSettings LoadForStartup(string path, out bool recovered)
+    {
+        recovered = false;
+        string directory = Path.GetDirectoryName(Path.GetFullPath(path))!;
+        if (File.Exists(Path.Combine(directory, ResetMarkerName))
+            && PanelLine.MachineReset.Wipe(directory).Count != 0)
+        {
+            throw new InvalidDataException("The previous machine reset could not finish.");
+        }
+
+        AppSettings? primary = null;
+        Exception? failure = null;
+        try
+        {
+            primary = ReadSettings(path);
+            if (primary.Setup.IsCompleted)
+            {
+                return primary;
+            }
+        }
+        catch (Exception error) when (error is IOException or JsonException or UnauthorizedAccessException)
+        {
+            failure = error;
+        }
+
+        AppSettings backup;
+        try
+        {
+            backup = ReadSettings(path + RecoverySuffix);
+            if (!backup.Setup.IsCompleted)
+            {
+                throw new InvalidDataException("The recovery copy has no completed profile.");
+            }
+        }
+        catch (Exception error) when (error is IOException or JsonException or UnauthorizedAccessException)
+        {
+            bool backupMissing = error is FileNotFoundException or DirectoryNotFoundException;
+            bool hasCallHistory = File.Exists(Path.Combine(directory, "history.db"));
+            if (backupMissing && !hasCallHistory)
+            {
+                if (primary is not null)
+                {
+                    return primary;
+                }
+
+                if (failure is FileNotFoundException or DirectoryNotFoundException)
+                {
+                    return Fresh();
+                }
+            }
+
+            throw new InvalidDataException("Could not load the local profile or recover it from disk.", failure ?? error);
+        }
+
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Copy(path, path + UnreadableSuffix, overwrite: true);
+            }
+
+            backup.Save(path);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            throw new InvalidDataException("Could not restore the local profile from its recovery copy.", error);
+        }
+
+        recovered = true;
+        return backup;
+    }
+
+    internal void SeedRecoveryCopy(string path)
+    {
+        lock (SaveGate)
+        {
+            if (!_writesDisabled && Setup.IsCompleted && !File.Exists(path + RecoverySuffix))
+            {
+                WriteSettings(path + RecoverySuffix, JsonSerializer.SerializeToUtf8Bytes(this, Format));
+            }
+        }
+    }
+
+    internal void DisableWrites()
+    {
+        lock (SaveGate)
+        {
+            _writesDisabled = true;
+        }
+    }
+
     /// <summary>Кладёт настройки на диск. Зовётся на каждую правку.</summary>
     ///
     /// <remarks>
@@ -673,10 +777,32 @@ public sealed class AppSettings : Observable
     public void Save(string? path = null)
     {
         path ??= DefaultPath;
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        lock (SaveGate)
+        {
+            if (_writesDisabled)
+            {
+                return;
+            }
 
-        var temporary = path + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(this, Format));
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            byte[] json = JsonSerializer.SerializeToUtf8Bytes(this, Format);
+            WriteSettings(path, json);
+            if (Setup.IsCompleted)
+            {
+                WriteSettings(path + RecoverySuffix, json);
+            }
+        }
+    }
+
+    private static void WriteSettings(string path, ReadOnlySpan<byte> json)
+    {
+        string temporary = path + ".tmp";
+        using (var stream = File.Create(temporary))
+        {
+            stream.Write(json);
+            stream.Flush(flushToDisk: true);
+        }
+
         File.Move(temporary, path, overwrite: true);
     }
 
