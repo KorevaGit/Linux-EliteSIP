@@ -79,4 +79,5 @@
   <data name="UnknownNumber" xml:space="preserve">
     <value>неизвестный номер</value>
   </data>
+  <data name="OutcomeWithdrawn" xml:space="preserve"><value>Отменён или принят другим менеджером</value></data>
 </root>

@@ -95,7 +95,7 @@ public abstract record SipCallEvent
 
     public sealed record Failed(int Status, string Reason) : SipCallEvent;
 
-    public sealed record Ended(string Reason) : SipCallEvent;
+    public sealed record Ended(string Reason, bool WasWithdrawn = false) : SipCallEvent;
 }
 
 /// <summary>

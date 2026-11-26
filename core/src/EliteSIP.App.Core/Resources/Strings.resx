@@ -863,7 +863,7 @@
     <value>To answer, press</value>
   </data>
   <data name="IncomingDealPrompt" xml:space="preserve">
-    <value>This is your own deal call — answer it to start dialling the client.</value>
+    <value>Answer to start the call to the client.</value>
   </data>
   <data name="IncomingDeal" xml:space="preserve">
     <value>Deal call</value>
@@ -1336,7 +1336,7 @@
     <value>Switching between office and remote requires the administrator password.</value>
   </data>
 <data name="AdminUnlockWorkplaceWarning" xml:space="preserve">
-    <value>The work format was locked by EliteSupport. Switching between office and remote takes this machine offline: configuration updates, new keys and new PBX addresses stop arriving, and you take over managing the client. To go back, use “Return online” in Support — the panel will then replace local changes. While settings are open the switch is available; the machine goes offline only if you actually switch it.</value>
+    <value>The work format was locked by Spark. Switching between office and remote takes this machine offline: configuration updates, new keys and new PBX addresses stop arriving, and you take over managing the client. To go back, use “Return online” in Support — the panel will then replace local changes. While settings are open the switch is available; the machine goes offline only if you actually switch it.</value>
   </data>
 <data name="AdminUnlockWorkplaceEnter" xml:space="preserve">
     <value>Unlock</value>
@@ -1742,4 +1742,7 @@
 <data name="AudioReplayFailed" xml:space="preserve"><value>Unable to play recording</value></data>
 <data name="AdminAccountNumber" xml:space="preserve"><value>Extension</value></data>
 <data name="AudioConversation" xml:space="preserve"><value>Conversation</value></data>
+  <data name="IncomingWithdrawnCaption" xml:space="preserve"><value>Call withdrawn</value></data>
+  <data name="IncomingWithdrawnNotice" xml:space="preserve"><value>Cancelled or answered by another agent</value></data>
+  <data name="AdminGuardCheckWithdrawn" xml:space="preserve"><value>Show withdrawn call</value></data>
 </root>

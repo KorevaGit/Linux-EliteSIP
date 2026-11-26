@@ -83,4 +83,5 @@
   <data name="UnknownNumber" xml:space="preserve">
     <value>unknown number</value>
   </data>
+  <data name="OutcomeWithdrawn" xml:space="preserve"><value>Cancelled or answered by another agent</value></data>
 </root>

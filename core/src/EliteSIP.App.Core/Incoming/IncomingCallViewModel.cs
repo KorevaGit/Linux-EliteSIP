@@ -24,6 +24,7 @@ public sealed class IncomingCallViewModel : Observable
 {
     private string? _refusal;
     private bool _numberCopied;
+    private bool _isWithdrawn;
 
     public IncomingCallViewModel(
         IncomingCallSubject subject,
@@ -101,7 +102,17 @@ public sealed class IncomingCallViewModel : Observable
         }
     }
 
-    public string Caption => _refusal ?? Strings.Get(_numberCopied ? "IncomingNumberCopied" : "IncomingCaption");
+    public bool IsWithdrawn
+    {
+        get => _isWithdrawn;
+        set
+        {
+            Set(ref _isWithdrawn, value);
+            NotifyChanged(nameof(Caption));
+        }
+    }
+
+    public string Caption => IsWithdrawn ? Strings.Get("IncomingWithdrawnCaption") : _refusal ?? Strings.Get(_numberCopied ? "IncomingNumberCopied" : "IncomingCaption");
 
     /// <summary>Номер для копирования щелчком; <c>null</c> — скрыт или его нет.</summary>
     public string? CopyableNumber => Subject.CopyableNumber;

@@ -50,6 +50,7 @@ public sealed class PhoneService : IDisposable
     private readonly PanelViewModel _panel;
     private readonly CallHistoryStore _history;
     private readonly IIncomingCallView _incoming;
+    private string? _ringingWindowCallId;
     private readonly IUiThread _ui;
     private readonly IAudioPlatform _audio;
 
@@ -613,6 +614,7 @@ public sealed class PhoneService : IDisposable
         }
 
         // До всего, что может открыть устройство: гудков, ранних медиа, ответа.
+        _incoming.DismissNotice();
         AbortSelfTestForCall("исходящий звонок");
 
         // Адрес для SDP берётся у агента, а не у сокета: это тот же адрес, что
@@ -674,6 +676,7 @@ public sealed class PhoneService : IDisposable
     /// </remarks>
     private void Offer(SipIncomingCall call)
     {
+        _incoming.DismissNotice();
         if (_agent is null || _bus is null || _lines is null || _incoming.IsVisible)
         {
             _ = _agent?.RejectIncomingCallAsync(call.CallId);
@@ -732,6 +735,7 @@ public sealed class PhoneService : IDisposable
         // Рингтон открывает устройство следующей строкой — проверка уходит до него.
         AbortSelfTestForCall("входящий звонок");
 
+        _ringingWindowCallId = call.CallId;
         _incoming.Show(
             subject,
             _settings.IncomingCall.ToPolicy(),
@@ -739,10 +743,15 @@ public sealed class PhoneService : IDisposable
             {
                 // Принятый вызов — сразу главное окно: громкость, удержание и
                 // «Завершить» там, а панель могли закрыть или свернуть.
+                _ringingWindowCallId = null;
                 Answered?.Invoke();
                 _ = AnswerAsync(call);
             },
-            onDecline: () => _ = DeclineAsync(call));
+            onDecline: () =>
+            {
+                _ringingWindowCallId = null;
+                _ = DeclineAsync(call);
+            });
     }
 
     /// <summary>Принимает вызов: 200 OK с нашим SDP и подъём медиа.</summary>
@@ -889,7 +898,7 @@ public sealed class PhoneService : IDisposable
                         await CloseIncoming(
                             call.CallId,
                             ended.Reason,
-                            CallOutcome.Missed);
+                            CallOutcome.Missed, ended.WasWithdrawn);
                         break;
 
                     default:
@@ -915,16 +924,30 @@ public sealed class PhoneService : IDisposable
     }
 
     /// <summary>Убирает окно входящего и закрывает запись истории.</summary>
-    private Task CloseIncoming(string callId, string reason, CallOutcome? outcome)
+    private Task CloseIncoming(string callId, string reason, CallOutcome? outcome, bool wasWithdrawn = false)
         => _ui.InvokeAsync(() =>
         {
             CancelMediaStart(callId);
-            _incoming.Hide();
-
-            if (_records.Remove(callId, out var record))
+            _records.Remove(callId, out var record);
+            bool withdrawn = wasWithdrawn
+                && record is { WasDistribution: true, IsAnswered: false };
+            if (_ringingWindowCallId == callId)
             {
-                _history.Finish(record.Id, reason,
-                    outcome == CallOutcome.Missed && record.IsAnswered ? null : outcome);
+                _ringingWindowCallId = null;
+                if (withdrawn)
+                {
+                    _incoming.ShowWithdrawn();
+                }
+                else
+                {
+                    _incoming.Hide();
+                }
+            }
+
+            if (record is not null)
+            {
+                _history.Finish(record.Id, reason, withdrawn ? CallOutcome.Withdrawn
+                    : outcome == CallOutcome.Missed && record.IsAnswered ? null : outcome);
             }
 
             ClientEventLog.Shared.CallFinished(callId, reason, failed: outcome is CallOutcome.Failed);

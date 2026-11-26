@@ -58,21 +58,21 @@ public enum CallOutcome
 
     /// <summary>Всё остальное. Код ответа остаётся в <c>EndReason</c> и в журнале.</summary>
     Failed = 7,
+
+    Withdrawn = 8,
 }
 
 /// <summary>Словарь исходов: слово для строки и перевод кода ответа SIP.</summary>
 public static class CallOutcomes
 {
     /// <summary>
-    /// Слово в колонке длительности. Шесть слов на все неудачи, и это потолок:
-    /// седьмое означало бы, что оператору предлагают различать то, на что он всё
-    /// равно ответит одинаково.
-    ///
+    /// Слово в колонке длительности для завершённого вызова без ответа.
     /// <c>null</c> у состоявшегося разговора — там стоит длительность.
     /// </summary>
     public static string? Title(this CallOutcome outcome) => outcome switch
     {
         CallOutcome.Completed => null,
+        CallOutcome.Withdrawn => Resources.PackageStrings.Get("OutcomeWithdrawn"),
         CallOutcome.Missed => Resources.PackageStrings.Get("OutcomeMissed"),
         CallOutcome.Busy => Resources.PackageStrings.Get("OutcomeBusy"),
         CallOutcome.NoAnswer => Resources.PackageStrings.Get("OutcomeNoAnswer"),
@@ -249,18 +249,9 @@ public sealed record CallRecord
             : (Number.Length == 0 ? Resources.PackageStrings.Get("UnknownNumber") : Number);
 
     /// <summary>
-    /// Исход, как его показывает история.
-    ///
-    /// Записанный код — не единственный источник, и это сделано нарочно. Две
-    /// вещи выводятся однозначно и без сервера: состоявшийся разговор виден по
-    /// времени ответа, а пропущенный — по направлению вместе с его отсутствием.
-    /// Хранить их кодом значило бы завести второе место, где может лежать другая
-    /// правда, — а фильтр «Пропущенные» всё равно отбирает по <c>answered_at</c>,
-    /// и разойтись эти два ответа не имеют права.
-    ///
-    /// Порядок проверок поэтому такой: ответили — разговор; входящий без
-    /// ответа — пропущенный; дальше уже то, что сказал сервер; а если он не
-    /// сказал ничего (запись до миграции, обрыв без ответа) — «не ответил».
+    /// Исход, как его показывает история. Ответивший вызов определяется
+    /// по времени ответа. Снятая раздача хранит отдельный код, а старые
+    /// входящие записи без ответа по-прежнему отображаются как пропущенные.
     /// </summary>
     public CallOutcome Outcome
     {
@@ -273,7 +264,8 @@ public sealed record CallRecord
 
             if (Direction == CallDirection.Incoming)
             {
-                return CallOutcome.Missed;
+                return WasDistribution && OutcomeCode == CallOutcome.Withdrawn
+                    ? CallOutcome.Withdrawn : CallOutcome.Missed;
             }
 
             return OutcomeCode ?? CallOutcome.NoAnswer;

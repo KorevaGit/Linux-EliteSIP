@@ -842,7 +842,7 @@
     <value>Чтобы ответить, нажмите</value>
   </data>
   <data name="IncomingDealPrompt" xml:space="preserve">
-    <value>Вы звоните по сделке — примите звонок для начала вызова клиенту.</value>
+    <value>Примите — и начнётся звонок клиенту.</value>
   </data>
   <data name="IncomingDeal" xml:space="preserve">
     <value>Вызов по сделке</value>
@@ -1314,7 +1314,7 @@
     <value>Сменить офис или дом можно только с паролем администратора.</value>
   </data>
 <data name="AdminUnlockWorkplaceWarning" xml:space="preserve">
-    <value>Формат работы закрепил EliteSupport. Переключение офиса и дома переводит машину в оффлайн: обновления конфигураций, новые клавиши и новые адреса АТС перестают приходить, и управление клиентом переходит к вам. Вернуться можно кнопкой «Вернуться в онлайн» в «Техподдержке» — местные правки тогда заменит панель. Пока настройки открыты, переключатель доступен; машина уходит в оффлайн, только если его действительно переключить.</value>
+    <value>Формат работы закрепил Spark. Переключение офиса и дома переводит машину в оффлайн: обновления конфигураций, новые клавиши и новые адреса АТС перестают приходить, и управление клиентом переходит к вам. Вернуться можно кнопкой «Вернуться в онлайн» в «Техподдержке» — местные правки тогда заменит панель. Пока настройки открыты, переключатель доступен; машина уходит в оффлайн, только если его действительно переключить.</value>
   </data>
 <data name="AdminUnlockWorkplaceEnter" xml:space="preserve">
     <value>Снять закрепление</value>
@@ -1720,4 +1720,7 @@
 <data name="AudioReplayFailed" xml:space="preserve"><value>Не удалось воспроизвести запись</value></data>
 <data name="AdminAccountNumber" xml:space="preserve"><value>Номер</value></data>
 <data name="AudioConversation" xml:space="preserve"><value>Разговор</value></data>
+  <data name="IncomingWithdrawnCaption" xml:space="preserve"><value>Вызов снят</value></data>
+  <data name="IncomingWithdrawnNotice" xml:space="preserve"><value>Отменён или принят другим менеджером</value></data>
+  <data name="AdminGuardCheckWithdrawn" xml:space="preserve"><value>Показать снятую раздачу</value></data>
 </root>

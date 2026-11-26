@@ -65,6 +65,7 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
     private Action? _onDecline;
     private CallGuardPolicy? _policy;
     private double _scaling = 1;
+    private bool _isWithdrawalPreview;
     private int _nearMotions;
     private int _xtestMotions;
     private PixelPoint _requested;
@@ -85,7 +86,56 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
         _pathTimer.Tick += (_, _) => TakePath();
     }
 
-    public bool IsVisible => _window is not null;
+    public bool IsVisible => _window is not null && _model?.IsWithdrawn is false;
+
+    public void ShowWithdrawn()
+    {
+        if (_model is not { IsWithdrawn: false } model)
+        {
+            return;
+        }
+
+        StopRingtone?.Invoke();
+        _pathTimer.Stop();
+        _pointer?.Dispose();
+        _pointer = null;
+        _onAnswer = null;
+        _onDecline = null;
+        if (_panel() is { } panel)
+        {
+            WindowAttention.Cancel(Xid(panel));
+        }
+
+        model.IsWithdrawn = true;
+        DispatcherTimer.RunOnce(() =>
+        {
+            if (ReferenceEquals(_model, model))
+            {
+                Hide();
+            }
+        }, TimeSpan.FromSeconds(1.3));
+    }
+
+    public void DismissNotice()
+    {
+        if (_isWithdrawalPreview || _model?.IsWithdrawn is true)
+        {
+            Hide();
+        }
+    }
+
+    internal void SchedulePreviewWithdrawal()
+    {
+        _isWithdrawalPreview = true;
+        var model = _model;
+        DispatcherTimer.RunOnce(() =>
+        {
+            if (ReferenceEquals(_model, model))
+            {
+                ShowWithdrawn();
+            }
+        }, TimeSpan.FromSeconds(1.5));
+    }
 
     /// <summary>
     /// Место, выбранное оператором. Берётся, только когда случайная позиция
@@ -194,6 +244,7 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
     /// <summary>Убирает окно и закрывает отчёт.</summary>
     public void Hide()
     {
+        _isWithdrawalPreview = false;
         // Первым делом: `Hide` зовут и с начала `Show`, и по отбою, и по
         // ответу, и звонок обязан замолчать в тот же миг.
         StopRingtone?.Invoke();

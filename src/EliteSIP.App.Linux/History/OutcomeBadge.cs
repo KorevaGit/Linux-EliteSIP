@@ -105,6 +105,7 @@ public sealed class OutcomeBadge : Control
 
     private string ColorKey() => Outcome switch
     {
+        CallOutcome.Withdrawn => "OutcomeMissedBrush",
         CallOutcome.Missed => "OutcomeMissedBrush",
         CallOutcome.Busy or CallOutcome.NoAnswer or CallOutcome.UnknownNumber
             or CallOutcome.Declined or CallOutcome.Failed => "OutcomeUnreachableBrush",

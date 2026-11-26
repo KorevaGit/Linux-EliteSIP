@@ -21,6 +21,8 @@ public interface IIncomingCallView
         Action onAnswer,
         Action onDecline);
 
+    public void ShowWithdrawn();
+    public void DismissNotice();
     public void Hide();
 }
 

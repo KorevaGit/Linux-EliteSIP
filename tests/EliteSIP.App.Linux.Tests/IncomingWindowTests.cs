@@ -77,6 +77,28 @@ public sealed class IncomingWindowTests
         Assert.True(errors.Errors.Count == 0, string.Join(Environment.NewLine, errors.Errors.Distinct()));
     }
 
+    [AvaloniaFact]
+    public void Снятая_раздача_заменяет_кнопки_без_изменения_высоты()
+    {
+        using BindingErrors errors = new();
+        var window = Window(targets: 3);
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+        var height = window.ClientSize.Height;
+
+        var model = Assert.IsType<IncomingCallViewModel>(window.DataContext);
+        model.IsWithdrawn = true;
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.Equal(height, window.ClientSize.Height, 0.5);
+        Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(),
+            text => text.IsEffectivelyVisible && text.Text ==
+                EliteSIP.App.Resources.Strings.Get("IncomingWithdrawnNotice"));
+        Assert.All(window.GetVisualDescendants().OfType<Button>(), button => Assert.False(button.IsEffectivelyEnabled));
+        window.Close();
+        Assert.Empty(errors.Errors);
+    }
+
     /// <summary>
     /// Место считается до показа по замеренному размеру, и показ его не
     /// меняет: высота, которую поставили окну до отображения, — та же,

@@ -175,6 +175,7 @@ public sealed partial class AdministrationViewModel : Observable
 
     /// <summary>Показать окно входящего для проверки: раздача.</summary>
     public RelayCommand PreviewDistribution { get; }
+    public RelayCommand? PreviewWithdrawn { get; init; }
 
     /// <summary>То же для вызова по сделке. Отдельной кнопкой, а не переключателем.</summary>
     ///

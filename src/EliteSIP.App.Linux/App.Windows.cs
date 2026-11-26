@@ -7,6 +7,7 @@ using EliteSIP.App.Admin;
 using EliteSIP.App.FirstRun;
 using EliteSIP.App.History;
 using EliteSIP.App.Incoming;
+using EliteSIP.App.Panel;
 using EliteSIP.App.PanelLine;
 using EliteSIP.App.Platform;
 using EliteSIP.App.Resources;
@@ -182,6 +183,7 @@ public sealed partial class App
 
         var administration = new AdministrationViewModel(_settings!, _access, PreviewIncomingCall)
         {
+            PreviewWithdrawn = new RelayCommand(_ => PreviewIncomingCall(false, withdrawn: true)),
             Support = support,
             PostToUi = _ui.Post,
             Updates = _updates is null ? null : new UpdatesViewModel(_updates),
@@ -224,7 +226,9 @@ public sealed partial class App
     }
 
     /// <summary>«Показать окно входящего» из «Управления» — без звонка.</summary>
-    private void PreviewIncomingCall(bool asDealCall)
+    private void PreviewIncomingCall(bool asDealCall) => PreviewIncomingCall(asDealCall, withdrawn: false);
+
+    private void PreviewIncomingCall(bool asDealCall, bool withdrawn)
     {
         if (_incoming is null || _settings is null)
         {
@@ -237,7 +241,16 @@ public sealed partial class App
             ? IncomingCallSubject.Classify(own, callerName: null, requestsAutoAnswer: false, ownNumber: own, masksMobileNumbers: masks)
             : IncomingCallSubject.Classify("712", "Call_Center", requestsAutoAnswer: true, ownNumber: own, masksMobileNumbers: masks);
 
+        if (_incoming.IsVisible || _phone?.IsCallActive is true)
+        {
+            return;
+        }
+
         _incoming.Show(subject, _settings.IncomingCall.ToPolicy(), onAnswer: () => { }, onDecline: () => { });
+        if (withdrawn)
+        {
+            _incoming.SchedulePreviewWithdrawal();
+        }
     }
 
     private void ShowHistory()

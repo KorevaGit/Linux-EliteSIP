@@ -84,12 +84,14 @@ public sealed class CallHistoryStoreTests : IDisposable
     private CallRecord Record(
         CallDirection direction = CallDirection.Outgoing,
         string number = "601",
-        DateTimeOffset? startedAt = null)
+        DateTimeOffset? startedAt = null,
+        bool wasDistribution = false)
         => new()
         {
             CallId = Guid.NewGuid().ToString(),
             Direction = direction,
             Number = number,
+            WasDistribution = wasDistribution,
             SipLogin = "SIP/" + number,
             ProfileId = _profile,
             ProfileLabel = "Боевой",
@@ -643,6 +645,10 @@ public sealed class CallHistoryStoreTests : IDisposable
         store.Begin(missed);
         store.Finish(missed.Id, "отклонён", CallOutcome.Declined);
 
+        CallRecord withdrawn = Record(CallDirection.Incoming, "702", wasDistribution: true);
+        store.Begin(withdrawn);
+        store.Finish(withdrawn.Id, "отменён вызывающим", CallOutcome.Withdrawn);
+
         // Исходящий без ответа и без кода — «не ответил», а не пустота.
         CallRecord old = Record(number: "602");
         store.Begin(old);
@@ -654,11 +660,12 @@ public sealed class CallHistoryStoreTests : IDisposable
 
         Assert.Equal(CallOutcome.Completed, stored["601"]);
         Assert.Equal(CallOutcome.Missed, stored["701"]);
+        Assert.Equal(CallOutcome.Withdrawn, stored["702"]);
         Assert.Equal(CallOutcome.NoAnswer, stored["602"]);
     }
 
     [Fact]
-    public void Все_шесть_слов_исхода_различны_а_у_состоявшегося_слова_нет()
+    public void Все_семь_подписей_исхода_различны_а_у_состоявшегося_подписи_нет()
     {
         List<string> titles = Enum.GetValues<CallOutcome>()
             .Select(outcome => outcome.Title())
@@ -666,8 +673,8 @@ public sealed class CallHistoryStoreTests : IDisposable
             .ToList();
 
         Assert.Null(CallOutcome.Completed.Title());
-        Assert.Equal(6, titles.Count);
-        Assert.Equal(6, titles.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(7, titles.Count);
+        Assert.Equal(7, titles.Distinct(StringComparer.Ordinal).Count());
     }
 
     [Fact]

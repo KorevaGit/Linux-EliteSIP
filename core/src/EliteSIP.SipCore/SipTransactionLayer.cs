@@ -144,6 +144,16 @@ public sealed class SipTransactionLayer : IDisposable
     private readonly Dictionary<string, CachedResponse> _sentResponses = new(StringComparer.Ordinal);
 
     /// <summary>
+    /// Запросы, ушедшие наверх и ещё без ответа: ключ — branch и метод, значение — когда пришли.
+    ///
+    /// Ретрансмиссия, пришедшая раньше первого ответа, в <see cref="_sentResponses"/>
+    /// ещё не найдётся — и без этого списка ушла бы наверх вторым запросом. Живой
+    /// случай 26 ноября 2026 (macOS, машина 204): три копии INVITE за 106 мс
+    /// получили «занято» на собственную транзакцию, и Asterisk отдал лид другому агенту.
+    /// </summary>
+    private readonly Dictionary<string, long> _pendingInbound = new(StringComparer.Ordinal);
+
+    /// <summary>
     /// Ожидающие готовности канала — каждый со своим таймером.
     ///
     /// Словарь, а не список, потому что таймер у каждого свой. Общий таймер
@@ -541,6 +551,7 @@ public sealed class SipTransactionLayer : IDisposable
         {
             Remember(response, branch);
         }
+        ForgetPending(request);
         await _channel.SendAsync(response.Encoded()).ConfigureAwait(false);
     }
 
@@ -592,6 +603,7 @@ public sealed class SipTransactionLayer : IDisposable
         // Ретрансмиссия самого INVITE обязана получить последний наш ответ, а не
         // второй новый: иначе собеседник увидит два разных 1xx на один запрос.
         Remember(response, branch);
+        ForgetPending(request);
 
         await _channel.SendAsync(response.Encoded()).ConfigureAwait(false);
 
@@ -681,10 +693,9 @@ public sealed class SipTransactionLayer : IDisposable
 
         ForgetServerInviteByBranch(branch);
 
-        if (wasAccepted)
-        {
-            _serverInviteEvents.Writer.TryWrite(new SipServerInviteEvent.NotAcknowledged(callId));
-        }
+        _serverInviteEvents.Writer.TryWrite(wasAccepted
+            ? new SipServerInviteEvent.NotAcknowledged(callId)
+            : new SipServerInviteEvent.Rejected(callId));
     }
 
     /// <summary>
@@ -737,10 +748,9 @@ public sealed class SipTransactionLayer : IDisposable
             _sentResponses.Remove(branch);
         }
 
-        if (wasAccepted)
-        {
-            _serverInviteEvents.Writer.TryWrite(new SipServerInviteEvent.Acknowledged(callId));
-        }
+        _serverInviteEvents.Writer.TryWrite(wasAccepted
+            ? new SipServerInviteEvent.Acknowledged(callId)
+            : new SipServerInviteEvent.Rejected(callId));
         return true;
     }
 
@@ -787,6 +797,41 @@ public sealed class SipTransactionLayer : IDisposable
                 _sentResponses.Remove(branch);
             }
         }
+    }
+
+    private static string? PendingKey(SipRequest request) =>
+        request.TopVia?.Branch is string branch ? $"{branch}|{request.Method.Name()}" : null;
+
+    private void ForgetPending(SipRequest request)
+    {
+        if (PendingKey(request) is not string key)
+        {
+            return;
+        }
+        lock (_gate)
+        {
+            _pendingInbound.Remove(key);
+        }
+    }
+
+    /// <summary>
+    /// Отмечает запрос как ушедший наверх. <see langword="false"/> — это копия
+    /// запроса, на который мы ещё не ответили: ответ уйдёт на первый экземпляр,
+    /// а следующие копии получат его из кэша.
+    /// </summary>
+    // Вызывается под _gate вместе с проверкой кэша ответов.
+    private bool AdmitPending(string key)
+    {
+        long now = Environment.TickCount64;
+        long limit = (long)_timers.TransactionTimeout.TotalMilliseconds;
+        foreach (string expired in _pendingInbound
+            .Where(pair => now - pair.Value >= limit)
+            .Select(pair => pair.Key)
+            .ToList())
+        {
+            _pendingInbound.Remove(expired);
+        }
+        return _pendingInbound.TryAdd(key, now);
     }
 
     private void Remember(SipResponse response, string branch)
@@ -1078,6 +1123,7 @@ public sealed class SipTransactionLayer : IDisposable
         // запроса. Метод проверяем обязательно — CANCEL несёт branch отменяемого
         // INVITE, и без проверки получил бы в ответ его 180.
         SipResponse? cached = null;
+        bool admitted = true;
         if (request.TopVia?.Branch is string branch)
         {
             lock (_gate)
@@ -1086,6 +1132,10 @@ public sealed class SipTransactionLayer : IDisposable
                     && previous.Response.CSeq?.Method == request.Method)
                 {
                     cached = previous.Response;
+                }
+                else if (PendingKey(request) is { } key)
+                {
+                    admitted = AdmitPending(key);
                 }
             }
         }
@@ -1102,10 +1152,17 @@ public sealed class SipTransactionLayer : IDisposable
             return;
         }
 
+        if (!admitted)
+        {
+            OnDiscarded?.Invoke(SipLogLevel.Debug, $"копия {request.Method.Name()} до первого ответа — ждёт ответа на первый экземпляр");
+            return;
+        }
+
         // Never evict an already admitted BYE/CANCEL/INVITE. Reject new work
         // explicitly instead of blocking the transport reader or losing state.
         if (!_inbound.Writer.TryWrite(request))
         {
+            ForgetPending(request);
             OnDiscarded?.Invoke(
                 SipLogLevel.Warning,
                 $"очередь входящих полна ({InboundQueueCapacity.ToString(CultureInfo.InvariantCulture)}), "
