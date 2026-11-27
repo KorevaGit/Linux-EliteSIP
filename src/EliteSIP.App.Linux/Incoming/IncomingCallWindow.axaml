@@ -168,9 +168,9 @@
             </Button>
           </Grid>
         </StackPanel>
-        <Border Background="#29292E" CornerRadius="8" Padding="10"
+        <Border Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="8" Padding="10"
                 IsVisible="{Binding IsWithdrawn}">
-          <TextBlock Text="{res:Loc IncomingWithdrawnNotice}" Foreground="#FFD782"
+          <TextBlock Text="{res:Loc IncomingWithdrawnNotice}" Foreground="{DynamicResource TextPrimaryBrush}"
                      TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
         </Border>
       </Grid>

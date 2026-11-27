@@ -3,6 +3,8 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using EliteSIP.App.Incoming;
@@ -97,6 +99,35 @@ public sealed class IncomingWindowTests
         Assert.All(window.GetVisualDescendants().OfType<Button>(), button => Assert.False(button.IsEffectivelyEnabled));
         window.Close();
         Assert.Empty(errors.Errors);
+    }
+
+    [AvaloniaFact]
+    public void Снятая_раздача_меняет_цвета_при_смене_темы()
+    {
+        var window = Window(targets: 3);
+        window.RequestedThemeVariant = ThemeVariant.Light;
+        var model = Assert.IsType<IncomingCallViewModel>(window.DataContext);
+        model.IsWithdrawn = true;
+        window.Show();
+        try
+        {
+            Dispatcher.UIThread.RunJobs();
+            var message = Assert.Single(window.GetVisualDescendants().OfType<TextBlock>(),
+                text => text.Text == EliteSIP.App.Resources.Strings.Get("IncomingWithdrawnNotice"));
+            var banner = Assert.IsType<Border>(message.GetVisualParent());
+            var lightBackground = Assert.IsAssignableFrom<IGradientBrush>(banner.Background).GradientStops[0].Color;
+            var lightText = Assert.IsAssignableFrom<ISolidColorBrush>(message.Foreground).Color;
+
+            window.RequestedThemeVariant = ThemeVariant.Dark;
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.NotEqual(lightBackground, Assert.IsAssignableFrom<IGradientBrush>(banner.Background).GradientStops[0].Color);
+            Assert.NotEqual(lightText, Assert.IsAssignableFrom<ISolidColorBrush>(message.Foreground).Color);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     /// <summary>
