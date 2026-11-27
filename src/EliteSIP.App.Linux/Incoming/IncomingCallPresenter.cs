@@ -86,6 +86,8 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
         _pathTimer.Tick += (_, _) => TakePath();
     }
 
+    internal bool HasWindow => _window is not null;
+
     public bool IsVisible => _window is not null && _model?.IsWithdrawn is false;
 
     public void ShowWithdrawn()
@@ -163,6 +165,7 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
     public CallGuardReport? LastReport { get; private set; }
 
     internal Action? BeforeShow { get; init; }
+    internal Action? WindowPriorityChanged { get; init; }
 
     /// <summary>Показывает окно и берёт вызов под защиту.</summary>
     public void Show(IncomingCallSubject subject, CallGuardPolicy policy, Action onAnswer, Action onDecline)
@@ -220,13 +223,23 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
         IncomingWindowHints.BeforeShow(xid);
 
         window.Opened += OnOpened;
+        window.Closed += OnWindowClosed;
 
         // Последний рубеж: любое изменение размера после размещения
         // возвращает окно внутрь области. Окно, которое оператор не видит
         // целиком, — это не огрех оформления, а непринятый лид.
         window.SizeChanged += OnWindowSizeChanged;
         window.MovedByUser += OnWindowMovedByUser;
-        window.Show();
+        try
+        {
+            WindowPriorityChanged?.Invoke();
+            window.Show();
+        }
+        catch
+        {
+            Hide();
+            throw;
+        }
 
         _pointer?.WatchWindow(xid);
         _pathTimer.Start();
@@ -266,10 +279,12 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
         if (_window is not null)
         {
             _window.Opened -= OnOpened;
+            _window.Closed -= OnWindowClosed;
             _window.SizeChanged -= OnWindowSizeChanged;
             _window.MovedByUser -= OnWindowMovedByUser;
             _window.Close();
             _window = null;
+            WindowPriorityChanged?.Invoke();
         }
 
         _session = null;
@@ -279,6 +294,27 @@ public sealed class IncomingCallPresenter : IIncomingCallView, IDisposable
         _clock = null;
         _onAnswer = null;
         _onDecline = null;
+    }
+
+    private void OnWindowClosed(object? sender, EventArgs e)
+    {
+        if (sender is not IncomingCallWindow window || window != _window)
+        {
+            return;
+        }
+
+        window.Opened -= OnOpened;
+        window.Closed -= OnWindowClosed;
+        window.SizeChanged -= OnWindowSizeChanged;
+        window.MovedByUser -= OnWindowMovedByUser;
+        _window = null;
+        if (_panel() is { } panel)
+        {
+            WindowAttention.Cancel(Xid(panel));
+        }
+
+        Hide();
+        WindowPriorityChanged?.Invoke();
     }
 
     public void Dispose() => Hide();

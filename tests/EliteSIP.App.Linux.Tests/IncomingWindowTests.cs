@@ -47,6 +47,27 @@ public sealed class IncomingWindowTests
         Assert.True(rang);
     }
 
+    [AvaloniaFact]
+    public void Входящий_имеет_приоритет_над_окнами_приложения_до_закрытия()
+    {
+        var settings = new Window { Topmost = true };
+        IncomingCallPresenter? presenter = null;
+        using var incoming = new IncomingCallPresenter(_ => { }, () => null)
+        {
+            WindowPriorityChanged = () => App.ApplyWindowPriority(settings, alwaysOnTop: true, incomingVisible: presenter!.HasWindow),
+        };
+        presenter = incoming;
+        var subject = IncomingCallSubject.Classify(
+            "702", "Test", requestsAutoAnswer: false, ownNumber: "701", masksMobileNumbers: false);
+
+        incoming.Show(subject, new CallGuardPolicy(), () => { }, () => { });
+        Assert.False(settings.Topmost);
+        incoming.ShowWithdrawn();
+        Assert.False(settings.Topmost);
+        incoming.Hide();
+        Assert.True(settings.Topmost);
+    }
+
     [AvaloniaTheory]
     [MemberData(nameof(TargetCounts))]
     public void Цели_приёма_без_объекта_автоматизации_и_без_фокуса(int targets)

@@ -236,6 +236,7 @@ public sealed partial class App : Application, IDisposable
         _incoming = new IncomingCallPresenter(Log, () => _panelWindow)
         {
             BeforeShow = () => _updateOffer?.Close(),
+            WindowPriorityChanged = RefreshWindowPriority,
             RestorePlacement = () => settings.IncomingPlacement.Origin,
             SavePlacement = origin => settings.IncomingPlacement.Origin = origin,
         };

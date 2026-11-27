@@ -43,7 +43,7 @@ internal static unsafe class IncomingWindowHints
     private const int Add = 1;
     private const int HintsLength = 9;
 
-    private static readonly string[] States = ["_NET_WM_STATE_SKIP_PAGER", "_NET_WM_STATE_STICKY"];
+    private static readonly string[] States = ["_NET_WM_STATE_ABOVE", "_NET_WM_STATE_SKIP_PAGER", "_NET_WM_STATE_STICKY"];
 
     /// <summary>До показа: свойствами окна.</summary>
     internal static void BeforeShow(nuint window) => With(window, display =>

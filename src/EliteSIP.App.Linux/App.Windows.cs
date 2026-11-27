@@ -30,35 +30,41 @@ public sealed partial class App
     private CallHistoryWindow? _historyWindow;
     private AdministrationWindow? _administrationWindow;
 
-    /// <summary>
-    /// «Поверх всех окон» — для всех окон программы сразу: иначе панель поверх
-    /// закрывала бы настройки. Окна, которые поверх всегда (входящий, меню
-    /// значка, заставка), правило не трогает.
-    /// </summary>
     private void KeepWindowsOnTop(AppSettings settings)
     {
-        static bool Governed(Window window) => window is not (IncomingCallWindow or TrayMenuWindow or StartupSplash);
-
         Window.WindowOpenedEvent.AddClassHandler<Window>((window, _) =>
-        {
-            if (Governed(window))
-            {
-                window.Topmost = settings.Appearance.AlwaysOnTop;
-            }
-        });
+            ApplyWindowPriority(window, settings.Appearance.AlwaysOnTop, _incoming?.HasWindow is true));
 
         settings.Appearance.PropertyChanged += (_, change) =>
         {
-            if (change.PropertyName != nameof(AppearanceSettings.AlwaysOnTop) || _desktop is null)
+            if (change.PropertyName == nameof(AppearanceSettings.AlwaysOnTop))
             {
-                return;
-            }
-
-            foreach (var window in _desktop.Windows.Where(Governed))
-            {
-                window.Topmost = settings.Appearance.AlwaysOnTop;
+                RefreshWindowPriority();
             }
         };
+    }
+
+    private void RefreshWindowPriority()
+    {
+        if (_desktop is null || _settings is null)
+        {
+            return;
+        }
+
+        foreach (var window in _desktop.Windows)
+        {
+            ApplyWindowPriority(window, _settings.Appearance.AlwaysOnTop, _incoming?.HasWindow is true);
+        }
+    }
+
+    internal static void ApplyWindowPriority(Window window, bool alwaysOnTop, bool incomingVisible)
+    {
+        // Два окна Topmost делят один слой. Пока видна карточка, обычные окна
+        // приложения остаются ниже неё, даже если оператор откроет настройки.
+        if (window is not (IncomingCallWindow or StartupSplash))
+        {
+            window.Topmost = !incomingVisible && (alwaysOnTop || window is TrayMenuWindow);
+        }
     }
 
     private static void RestoreAndActivate(Window window)
